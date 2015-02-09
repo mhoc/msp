@@ -1,16 +1,15 @@
 %{
-#include<stdio.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include "my.h"
 %}
 
 %token 	SCRIPT_TAG_START SCRIPT_TAG_END 
-	VARDEF IDENTIFIER 
-	NEWLINE WHITESPACE SEMICOLON
+	VARDEF IDENTIFIER DOCUMENT_WRITE
+	NEWLINE WS OWS SEMICOLON EQUAL INTEGER PLUS MINUS MULT DIVIDE 
+	STRING LPAREN RPAREN COMMA
 
 %%
-goal:
-	file
-;
 
 file:
 	SCRIPT_TAG_START NEWLINE program SCRIPT_TAG_END
@@ -23,12 +22,57 @@ program:
 ;
 
 line:
-	definition
-	| definition SEMICOLON 
+	unterminated_line
+	| unterminated_line SEMICOLON
+	| unterminated_line SEMICOLON line
+;
+
+unterminated_line:
+	declaration
+	| assignment
+	| definition
+	| DOCUMENT_WRITE LPAREN parameter_list RPAREN
+;
+
+declaration:
+	VARDEF IDENTIFIER
+;
+
+assignment:
+	IDENTIFIER EQUAL expression
 ;
 
 definition:
-	VARDEF WHITESPACE IDENTIFIER
+	VARDEF IDENTIFIER EQUAL expression
+;
+
+parameter_list:
+	expression
+	| expression COMMA parameter_list 
+;
+
+expression:
+	value
+	| parenthesized_expression
+	| parenthesized_expression operator expression
+	| value operator expression
+;
+
+parenthesized_expression:
+	LPAREN expression RPAREN
+;
+
+operator:
+	PLUS
+	| MINUS
+	| MULT
+	| DIVIDE
+;
+
+value:
+	INTEGER
+	| IDENTIFIER
+	| STRING
 ;
 
 %%
@@ -45,12 +89,11 @@ yyerror(char *s)
 
 int main(int argc, char *argv[])
 {
-	if (my_debug) {
-		printf("Advanced custom debugging output is enabled.\n");
-	}
-
 	//yydebug = 1;
-	if (argc == 2) {
+	if (argc == 2 || argc == 3) {
+		if (argc == 3 && strcmp(argv[2], "--debug") == 0) {
+			my_debug = 1;
+		}
 		FILE *file;
 		file = fopen(argv[1], "r");
 		if (!file) {
@@ -60,7 +103,8 @@ int main(int argc, char *argv[])
             		//yyparse() will call yylex()
             		yyparse();
         	}
-    	} else {
+    	
+	} else {
         	fprintf(stderr, "format: ./yacc_example [filename]");
     	}
 

@@ -7,33 +7,78 @@
 %option yylineno
 
 %%
+\n+ {
+	/** This rule condenses any occurance of multiple newlines into a single newline */
+	debug("NEWLINE+\n");
+	return NEWLINE;
+}
 "<script type=\"text/JavaScript\">" {
-	if (my_debug) { printf("SCRIPT_TAG_START "); }
+	debug("SCRIPT_TAG_START ");
 	return SCRIPT_TAG_START;
 }
 "</script>" {
-	if (my_debug) { printf("SCRIPT_TAG_END "); }
+	debug("SCRIPT_TAG_END ");
 	return SCRIPT_TAG_END;
 }
-"var" {
-	if (my_debug) { printf("VARDEF "); }
+"document\.write" {
+	debug("DOCUMENT_WRITE ");
+	return DOCUMENT_WRITE;
+}
+\"[^\"]*\" {
+	debug("STRING ");
+	return STRING;
+}
+"var " {
+	/* the var keyword requires a space at the end. this is taken care of here */
+	debug("VARDEF ");
 	return VARDEF;
 }
+[ \t]+ {
+	/* We've already taken care of quoted strings so now remove all other whitespaces */
+}
+[0-9]+ {
+	debug("INTEGER ");
+	return INTEGER;
+}
 [A-Za-z]+ {
-	if (my_debug) { printf("IDENTIFIER "); }
+	debug("IDENTIFIER ");
 	return IDENTIFIER;
 }
-[ \t]+ {
-	if (my_debug) { printf("WHITESPACE "); }
-	return WHITESPACE;
+"," {
+	debug("COMMA, ");
+	return COMMA;
+}
+"=" {
+	debug("EQUAL ");
+	return EQUAL;
+}
+"+" {
+	debug("PLUS ");
+	return PLUS;
+}
+"-" {
+	debug("MINUS ");
+	return MINUS;
+}
+"*" {
+	debug("MULT ");
+	return MULT;
+}
+"/" {
+	debug("DIVIDE ");
+	return DIVIDE;
 }
 ";" {
-	if (my_debug) { printf("SEMICOLON "); }
+	debug("SEMICOLON ");
 	return SEMICOLON;
 }
-"\n" {
-	if (my_debug) { printf("NEWLINE\n"); }
-	return NEWLINE;
+"(" {
+	debug("LPAREN ");
+	return LPAREN;
+}
+")" {
+	debug("RPAREN ");
+	return RPAREN;
 }
 %%
 
