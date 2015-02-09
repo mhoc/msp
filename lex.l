@@ -1,21 +1,39 @@
 %{
 #include"y.tab.h"
+#include <stdio.h>
+#include "my.h"
 %}
 
 %option yylineno
 
-/* regular definitions */
-delim   [ \t]
-ws      {delim}+
-letter  [A-Za-z]
-digit   [0-9]
-id      {letter}({letter}|{digit})*
-num     {digit}+
-
 %%
-{id}                                    {return(ID);}
-{num}                                   {return(NUM);}
-"+"                                     {return(PLUS);}
-{ws}                                    {}
+"<script type=\"text/JavaScript\">" {
+	if (my_debug) { printf("SCRIPT_TAG_START "); }
+	return SCRIPT_TAG_START;
+}
+"</script>" {
+	if (my_debug) { printf("SCRIPT_TAG_END "); }
+	return SCRIPT_TAG_END;
+}
+"var" {
+	if (my_debug) { printf("VARDEF "); }
+	return VARDEF;
+}
+[A-Za-z]+ {
+	if (my_debug) { printf("IDENTIFIER "); }
+	return IDENTIFIER;
+}
+[ \t]+ {
+	if (my_debug) { printf("WHITESPACE "); }
+	return WHITESPACE;
+}
+";" {
+	if (my_debug) { printf("SEMICOLON "); }
+	return SEMICOLON;
+}
+"\n" {
+	if (my_debug) { printf("NEWLINE\n"); }
+	return NEWLINE;
+}
 %%
 

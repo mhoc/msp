@@ -8,9 +8,17 @@ y.tab.c: yacc.y
 lex.yy.c: lex.l
 	lex lex.l
 
-test: parser.out
-	./parser.out tests/1
+test: test1 test2 test3
 
 clean:
 	rm -f lex.yy.c y.tab.c y.tab.h y.dot y.output
+
+test1: parser.out
+	./parser.out tests/handout
+
+test2: parser.out
+	./parser.out tests/empty
+
+test3: parser.out
+	./parser.out tests/vardef
 
