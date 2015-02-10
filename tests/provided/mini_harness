@@ -1,0 +1,45 @@
+#!/usr/bin/perl -w
+
+use autodie;
+
+$tests = 4;
+@errors = (1, 2);
+
+`make`;
+
+$valid = 1;
+
+for(my $i = 1; $i <= $tests; $i++){
+	$testfile = "tests/test".$i;
+	$cmd = "./parser ".$testfile." 1>tmp.txt 2>&1";
+
+	#this code stinks, but I couldn't get stderr to redirect with backticks
+	system($cmd);
+	open FILE, '<', "tmp.txt";
+	$result = join("", <FILE>);
+
+	print "Test ".$i." ";
+
+	foreach (@errors){
+		if($i == $_){
+			if($result ne ""){
+				print "passed\n";
+			}
+			else{
+				print "failed\n";
+			}
+			$valid = 0;
+			last;
+		}
+	}
+	if($valid){
+		if($result eq ""){
+			print "passed\n";
+		}
+		else{
+			print "failed\n";
+		}
+	}
+	$valid = 1;
+	print "\n\n";
+}

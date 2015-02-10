@@ -80,7 +80,7 @@ value:
 FILE *yyin;
 int yylineno;
 
-int my_debug = 1;
+int my_debug = 0;
 
 yyerror(char *s)
 {
