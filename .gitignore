@@ -5,3 +5,4 @@ lex.yy.c
 *tab.h
 *.out
 *.output
+parser
