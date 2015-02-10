@@ -1,6 +1,7 @@
 
 # A replacement for stupid make files lol
 
+import math
 import os
 import subprocess
 import sys
@@ -74,7 +75,7 @@ def test():
             result = run_test(file, test_parameters["__pass_behavior"])
         if result:
             passed += 1
-    print "\nPassed " + str(passed) + " / " + str(total) + " tests (" + str(float(passed)/total) + ")."
+    print "\nPassed " + str(passed) + " / " + str(total) + " tests (" + str(math.ceil(100*float(passed)/total)) + ")."
 
 def run_test(file, expect):
     actual_name = test_parameters["__directory"] + file

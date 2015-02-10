@@ -1,0 +1,5 @@
+<script type="text/JavaScript">
+document.write("hello")
+document.write((what), 2);
+document.write(there, is, multiple, arguments)
+</script>

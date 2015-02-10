@@ -1,4 +1,27 @@
 
+default: parser.out
+	@echo ""
+	@echo -e "\033[1;37mThank you for using the 'Greatest Compiler in America'"
+	@echo -e "                               \033[1;36m~~ Bill Clinton\033[0;00m"
+	@echo -e ""
+	@echo -e "\033[0;31mAMERICA \033[1;37mAMERICA \033[0;34mAMERICA \033[0;00m"
+	@echo -e "\033[1;37m_____________--____----"
+	@echo -e "|\033[1;34m * * * *\033[1;37m |\033[1;37m__\--\__\--\033[1;37m|"
+	@echo -e "|\033[1;34m* * * * *\033[1;37m|\033[0;31m___\--\__\-\033[1;37m|"
+	@echo -e "|\033[1;34m_*_*_*_*_\033[1;37m|\033[1;37m\___\--\___\\033[1;37m|"
+	@echo -e "|\033[0;31m___________\___\--\__\033[1;37m|"
+	@echo -e "|\033[1;37m____________\___\--\_\033[1;37m|"
+	@echo -e "|\033[0;31m_____________\___\---\\033[1;37m|"
+	@echo -e "||"
+	@echo -e "||"
+	@echo -e "||"
+	@echo -e "||"
+	@echo -e "||"
+	@echo -e "||"
+	@echo -e "||"
+	@echo -e "||"
+	@echo -e ""
+
 parser.out: y.tab.c lex.yy.c
 	gcc y.tab.c lex.yy.c -o parser.out -lfl
 
@@ -10,61 +33,4 @@ lex.yy.c: lex.l
 
 clean:
 	rm -f lex.yy.c y.tab.c y.tab.h y.dot y.output
-
-test: test1 test2 test3 test31 test32 test4 test5 test6 testgh
-	@echo ""
-	@echo ""
-
-test1: parser.out
-	@echo ""
-	@echo "==> Testing empty file (empty1)"
-	./parser.out tests/empty1
-
-test2: parser.out
-	@echo ""
-	@echo ""
-	@echo "==> Testing empty file with multiple newlines (empty2)"
-	./parser.out tests/empty2
-
-test3: parser.out
-	@echo ""
-	@echo ""
-	@echo "==> Testing simple assignment (simple_assignment)"
-	./parser.out tests/simple_assignment
-
-test31: parser.out
-	@echo ""
-	@echo ""
-	@echo "==> Testing assignment with odd whitespaces (whitespace_assignment)"
-	./parser.out tests/whitespace_assignment
-
-test32: parser.out
-	@echo ""
-	@echo ""
-	@echo "==> Testing assignment with odd newlines (newline_assignment)"
-	./parser.out tests/newline_assignment
-
-test4: parser.out
-	@echo ""
-	@echo ""
-	@echo "==> Testing complex assignment (complex_assignment)"
-	./parser.out tests/complex_assignment
-
-test5: parser.out
-	@echo ""
-	@echo ""
-	@echo "==> Testing simple declaration (simple_declaration)"
-	./parser.out tests/simple_declaration
-
-test6: parser.out
-	@echo ""
-	@echo ""
-	@echo "==> Testing parenthesis with assignment (parens)"
-	./parser.out tests/parens
-
-testgh: parser.out
-	@echo ""
-	@echo ""
-	@echo "==> Testing handout code (handout)"
-	./parser.out tests/handout
 
