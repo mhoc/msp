@@ -25,7 +25,7 @@ build_graph = {
     }
 }
 
-clean_cmd = "rm -f lex.yy.c y.tab.c y.tab.h y.dot y.output"
+clean_cmd = "rm -f lex.yy.c y.tab.c y.tab.h y.dot y.output parser"
 
 test_parameters = {
     "directory": "test/",
