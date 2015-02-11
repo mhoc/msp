@@ -24,7 +24,7 @@
 	debug("DOCUMENT_WRITE ");
 	return DOCUMENT_WRITE;
 }
-\"[^\"]*\" {
+\"[^\"\n]*\" {
 	debug("STRING ");
 	return STRING;
 }

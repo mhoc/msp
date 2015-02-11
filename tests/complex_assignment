@@ -1,6 +1,0 @@
-<script type="text/JavaScript">
-a = 5 * 2
-b = a + 3 + 4 + 5
-cde = a / b;
-fff = 1 + 2 / b * 3;
-</script>

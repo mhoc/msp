@@ -1,8 +1,0 @@
-<script type="text/JavaScript">
-a = 1 + (2)
-a = 1 + (2 + 3)
-a = (1) + 2 + 3
-a = (1 + 2 + 3)
-a = a + (2 / 3) + 4
-a = (a * (b * (c * d) + 4) - 5) + 2
-</script>
