@@ -1,0 +1,11 @@
+<script type="text/JavaScript">
+var a = 1
+b = 2; c = 3;
+d = 4; e = "hello"
+f = a + b - c;
+g = 1 + ((f * 2) / 3)
+document.write(a, b, c);
+
+document.write(d, e, f, g); document.write(a, d, (c-d+e));
+
+</script>

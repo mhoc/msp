@@ -131,6 +131,15 @@ test_parameters = {
         },
         "031_java-code": {
             "expect_anything": True
+        },
+        "032_complex-1": {
+            "expect_nothing": True
+        },
+        "033_document-write-paren-expression": {
+            "expect_nothing": True
+        },
+        "034_odd-whitespace": {
+            "expect_nothing": True
         }
 
     }
