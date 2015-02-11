@@ -1,0 +1,5 @@
+<script type="text/JavaScript">
+var one = ((a) + (b + c) + (d));
+var five = (((a + b) + c) + d);
+var twenty = (a + (b + (c +d)));
+</script>

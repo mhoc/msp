@@ -1,0 +1,5 @@
+<script type="text/JavaScript">
+a = 1 + 2
+b = a * 4
+c = (a * b) + 3 / 4
+</script>

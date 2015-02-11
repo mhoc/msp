@@ -40,7 +40,7 @@
 	debug("INTEGER ");
 	return INTEGER;
 }
-[A-Za-z]+ {
+[A-Za-z][A-Za-z0-9]* {
 	debug("IDENTIFIER ");
 	return IDENTIFIER;
 }
@@ -81,4 +81,3 @@
 	return RPAREN;
 }
 %%
-

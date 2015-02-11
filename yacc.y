@@ -4,9 +4,9 @@
 #include "my.h"
 %}
 
-%token 	SCRIPT_TAG_START SCRIPT_TAG_END 
+%token 	SCRIPT_TAG_START SCRIPT_TAG_END
 	VARDEF IDENTIFIER DOCUMENT_WRITE
-	NEWLINE WS OWS SEMICOLON EQUAL INTEGER PLUS MINUS MULT DIVIDE 
+	NEWLINE WS OWS SEMICOLON EQUAL INTEGER PLUS MINUS MULT DIVIDE
 	STRING LPAREN RPAREN COMMA
 
 %%
@@ -14,6 +14,7 @@
 file:
 	SCRIPT_TAG_START NEWLINE program SCRIPT_TAG_END
 	| SCRIPT_TAG_START NEWLINE program SCRIPT_TAG_END NEWLINE
+	| NEWLINE SCRIPT_TAG_START NEWLINE program SCRIPT_TAG_END NEWLINE
 ;
 
 program:
@@ -48,7 +49,8 @@ definition:
 
 parameter_list:
 	expression
-	| expression COMMA parameter_list 
+	| expression COMMA parameter_list
+	|
 ;
 
 expression:
@@ -91,9 +93,6 @@ int main(int argc, char *argv[])
 {
 	//yydebug = 1;
 	if (argc == 2 || argc == 3) {
-		if (argc == 3 && strcmp(argv[2], "--debug") == 0) {
-			my_debug = 1;
-		}
 		FILE *file;
 		file = fopen(argv[1], "r");
 		if (!file) {
@@ -103,12 +102,10 @@ int main(int argc, char *argv[])
             		//yyparse() will call yylex()
             		yyparse();
         	}
-    	
+
 	} else {
         	fprintf(stderr, "format: ./yacc_example [filename]");
     	}
 
     	return 0;
 }
-
-
