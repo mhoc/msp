@@ -242,13 +242,45 @@ def print_flag():
     print "||"
     print ""
 
+def generate_makefile():
+    fp = open("Makefile", "w")
+    
+    # Create a list which will contain a list of the things we will print out later
+    list = []
+    make_build_recurse(build_graph["__start"], list)
+
+    # Print out to the makefile
+    for line in list:
+        fp.write(line)
+
+    # Write out the clean command
+    fp.write("clean:\n")
+    fp.write("\t" + clean_cmd + "\n\n")
+
+    fp.close()
+
+def make_build_recurse(key, list):
+    
+    # Add this level to the list because it comes first
+    title = key + ": "
+    for dependency in build_graph[key]["__depends"]:
+        title += dependency + " "
+    list.append(title + "\n\t")
+    list.append(build_graph[key]["__do"] + "\n\n")
+
+    # Recurse into the dependencies of this level
+    for dependency in build_graph[key]["__depends"]:
+        make_build_recurse(dependency, list)
+
 def print_usage():
     print "python maker.py [command]"
+    print "no command : does all three! build -> test -> clean!\n"
     print "commands:"
-    print "\tbuild : runs the build() process as defined in the build graph"
-    print "\tclean : runs the command supplied in the clean command"
-    print "\ttest  : runs the testing framework as provided"
-    print "no command : does all three! build -> test -> clean!"
+    print "\tbuild    : builds the project as defined in the build_graph"
+    print "\tclean    : cleans the folder as defined in clean_cmd"
+    print "\ttest     : tests the project as defined in testing_parameters and test/ folder"
+    print "\tmakefile : "
+    
 
 # Check arguments
 
@@ -271,3 +303,9 @@ elif sys.argv[1] == "test":
 
 elif sys.argv[1] == "clean":
     clean()
+
+elif sys.argv[1] == "help" or sys.argv[1] == "--help":
+    print_usage()
+
+elif sys.argv[1] == "makefile":
+    generate_makefile()
