@@ -2,6 +2,7 @@
 # Handles building, cleaning, and testing the project
 # in one fell swoop
 
+import codecs
 import os
 import subprocess
 import sys
@@ -249,6 +250,10 @@ def print_usage():
     print "\tclean : runs the command supplied in the clean command"
     print "\ttest  : runs the testing framework as provided"
     print "no command : does all three! build -> test -> clean!"
+
+# Enable UTF8
+UTF8Writer = codecs.getwriter('utf8')
+sys.stdout = UTF8Writer(sys.stdout)
 
 # Check arguments
 
