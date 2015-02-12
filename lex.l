@@ -40,7 +40,7 @@
 	debug("INTEGER ");
 	return INTEGER;
 }
-[A-Za-z][A-Za-z0-9]* {
+[A-Za-z][A-Za-z0-9_]* {
 	debug("IDENTIFIER ");
 	return IDENTIFIER;
 }

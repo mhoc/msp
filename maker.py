@@ -143,6 +143,9 @@ test_parameters = {
         },
         "035_document-write-no-param-list": {
             "expect_anything": True
+        },
+        "036_underscores-in-variables": {
+            "expect_nothing": True
         }
 
     }
