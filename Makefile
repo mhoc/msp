@@ -10,7 +10,7 @@ lex.yy.c:
 clean:
 	rm -f lex.yy.c y.tab.c y.tab.h y.dot y.output parser y.vcg
 
-test: parser
+testgh: parser
 	wget https://raw.githubusercontent.com/mhoc/cs352-test-cases/master/run.sh
 	chmod +x run.sh
 	./run.sh
