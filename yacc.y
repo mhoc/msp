@@ -49,7 +49,7 @@ definition:
 
 parameter_list:
 	expression
-	| expression COMMA parameter_list
+	| parameter_list COMMA expression
 	|
 ;
 

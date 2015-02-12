@@ -132,6 +132,21 @@ test_parameters = {
         },
         "031_java-code": {
             "expect_anything": True
+        },
+        "032_complex-1": {
+            "expect_nothing": True
+        },
+        "033_document-write-paren-expression": {
+            "expect_nothing": True
+        },
+        "034_odd-whitespace": {
+            "expect_nothing": True
+        },
+        "035_document-write-no-param-list": {
+            "expect_anything": True
+        },
+        "036_underscores-in-variables": {
+            "expect_nothing": True
         }
 
     }
@@ -226,13 +241,13 @@ def print_flag():
     print "                               \033[1;36m~~ Bill Clinton\033[0;00m"
     print ""
     print "\033[0;31mAMERICA \033[1;37mAMERICA \033[0;34mAMERICA \033[0;00m"
-    print "\033[1;37m_____________--____----"
-    print "|\033[1;34m * * * *\033[1;37m |\033[1;37m__\--\__\--\033[1;37m|"
-    print "|\033[1;34m* * * * *\033[1;37m|\033[0;31m___\--\__\-\033[1;37m|"
-    print "|\033[1;34m_*_*_*_*_\033[1;37m|\033[1;37m\___\--\___\033[1;37m|"
-    print "|\033[0;31m___________\___\--\__\033[1;37m|"
-    print "|\033[1;37m____________\___\--\_\033[1;37m|"
-    print "|\033[0;31m_____________\___\---\033[1;37m|"
+    print "\033[1;37m__________--___---____"
+    print "|\033[1;34m * * * *\033[1;37m |\033[1;37m--\__\--\__\033[1;37m|"
+    print "|\033[1;34m* * * * *\033[1;37m|\033[0;31m---\__\--\_\033[1;37m|"
+    print "|\033[1;34m_*_*_*_*_\033[1;37m|\033[1;37m\---\__\---\033[1;37m|"
+    print "|\033[0;31m___________\---\__\--\033[1;37m|"
+    print "|\033[1;37m____________\---\__\-\033[1;37m|"
+    print "|\033[0;31m_____________\---\___\033[1;37m|"
     print "||"
     print "||"
     print "||"
@@ -243,13 +258,45 @@ def print_flag():
     print "||"
     print ""
 
+def generate_makefile():
+    fp = open("Makefile", "w")
+    
+    # Create a list which will contain a list of the things we will print out later
+    list = []
+    make_build_recurse(build_graph["__start"], list)
+
+    # Print out to the makefile
+    for line in list:
+        fp.write(line)
+
+    # Write out the clean command
+    fp.write("clean:\n")
+    fp.write("\t" + clean_cmd + "\n\n")
+
+    fp.close()
+
+def make_build_recurse(key, list):
+    
+    # Add this level to the list because it comes first
+    title = key + ": "
+    for dependency in build_graph[key]["__depends"]:
+        title += dependency + " "
+    list.append(title + "\n\t")
+    list.append(build_graph[key]["__do"] + "\n\n")
+
+    # Recurse into the dependencies of this level
+    for dependency in build_graph[key]["__depends"]:
+        make_build_recurse(dependency, list)
+
 def print_usage():
     print "python maker.py [command]"
+    print "no command : does all three! build -> test -> clean!\n"
     print "commands:"
-    print "\tbuild : runs the build() process as defined in the build graph"
-    print "\tclean : runs the command supplied in the clean command"
-    print "\ttest  : runs the testing framework as provided"
-    print "no command : does all three! build -> test -> clean!"
+    print "\tbuild    : builds the project as defined in the build_graph"
+    print "\tclean    : cleans the folder as defined in clean_cmd"
+    print "\ttest     : tests the project as defined in testing_parameters and test/ folder"
+    print "\tmakefile : "
+    
 
 # Enable UTF8
 UTF8Writer = codecs.getwriter('utf8')
@@ -276,3 +323,9 @@ elif sys.argv[1] == "test":
 
 elif sys.argv[1] == "clean":
     clean()
+
+elif sys.argv[1] == "help" or sys.argv[1] == "--help":
+    print_usage()
+
+elif sys.argv[1] == "makefile":
+    generate_makefile()
