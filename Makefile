@@ -11,5 +11,6 @@ clean:
 	rm -f lex.yy.c y.tab.c y.tab.h y.dot y.output parser
 
 test:
-	python maker.py test
-
+	wget https://raw.githubusercontent.com/mhoc/cs352-test-cases/master/run.sh
+	chmod +x run.sh
+	./run.sh
