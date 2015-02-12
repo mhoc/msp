@@ -140,6 +140,9 @@ test_parameters = {
         },
         "034_odd-whitespace": {
             "expect_nothing": True
+        },
+        "035_document-write-no-param-list": {
+            "expect_anything": True
         }
 
     }
