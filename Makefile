@@ -18,7 +18,8 @@ test: parser
 
 testlocal: parser
 	cp ~/src/cs352-test-cases/maker.py .
-	cp ~/src/cs352-test-cases/test .
+	mkdir test
+	cp  ~/src/cs352-test-cases/test/* test/
 	python maker.py
 	rm maker.py
 	rm -r test
