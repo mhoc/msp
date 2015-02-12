@@ -8,9 +8,11 @@ lex.yy.c:
 	lex lex.l
 
 clean:
-	rm -f lex.yy.c y.tab.c y.tab.h y.dot y.output parser
+	rm -f lex.yy.c y.tab.c y.tab.h y.dot y.output parser y.vcg
 
-test:
+test: parser
 	wget https://raw.githubusercontent.com/mhoc/cs352-test-cases/master/run.sh
 	chmod +x run.sh
 	./run.sh
+	rm -f lex.yy.c y.tab.c y.tab.h y.dot y.output parser y.vcg
+
