@@ -1,3 +1,0 @@
-<script type="text/JavaScript">
-document.write("hello", "there", "what", "so", "many","vars")
-</script>

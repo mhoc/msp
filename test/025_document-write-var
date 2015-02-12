@@ -1,4 +1,0 @@
-<script type="text/JavaScript">
-a = "hello"
-document.write(a)
-</script>

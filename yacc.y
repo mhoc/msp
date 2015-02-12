@@ -87,6 +87,7 @@ int my_debug = 0;
 yyerror(char *s)
 {
     fprintf(stderr, "error: %s, line: %d\n", s, yylineno);
+    return 1;
 }
 
 int main(int argc, char *argv[])
