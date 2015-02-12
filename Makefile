@@ -16,3 +16,9 @@ test: parser
 	./run.sh
 	rm -f lex.yy.c y.tab.c y.tab.h y.dot y.output parser y.vcg
 
+testlocal: parser
+	cp ~/src/cs352-test-cases/maker.py .
+	cp ~/src/cs352-test-cases/test .
+	python maker.py
+	rm maker.py
+	rm -r test
