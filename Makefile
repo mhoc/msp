@@ -8,7 +8,8 @@ lex.yy.c:
 	lex lex.l
 
 clean:
-	rm -f lex.yy.c y.tab.c y.tab.h y.dot y.output parser y.vcg
+	rm -f lex.yy.c y.tab.c y.tab.h y.dot y.output parser y.vcg maker.py tester.py
+	rm -rf tests
 
 testgh: parser
 	wget https://raw.githubusercontent.com/mhoc/cs352-test-cases/master/run.sh
@@ -18,8 +19,10 @@ testgh: parser
 
 testlocal: parser
 	cp ~/src/cs352-test-cases/maker.py .
-	mkdir test
-	cp  ~/src/cs352-test-cases/test/* test/
+	mkdir tests
+	mkdir tests/pass
+	cp ~/src/cs352-test-cases/tests/pass/* tests/pass
+	mkdir tests/fail
+	cp ~/src/cs352-test-cases/tests/fail/* tests/fail
 	python maker.py
-	rm maker.py
-	rm -r test
+	$(MAKE) clean
