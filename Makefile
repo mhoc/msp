@@ -12,10 +12,10 @@ clean:
 	rm -rf tests
 
 testgh: parser
-	wget https://raw.githubusercontent.com/mhoc/cs352-test-cases/master/run.sh
-	chmod +x run.sh
-	./run.sh
-	@$(MAKE) clean
+	@wget https://raw.githubusercontent.com/mhoc/cs352-test-cases/master/run.sh &> /dev/null 
+	@chmod +x run.sh
+	@./run.sh
+	@$(MAKE) clean > /dev/null
 
 testlocal: parser
 	@cp ~/src/cs352-test-cases/test.py .
