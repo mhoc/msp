@@ -18,11 +18,7 @@ testgh: parser
 	@$(MAKE) clean
 
 testlocal: parser
-	cp ~/src/cs352-test-cases/test.py .
-	mkdir tests
-	mkdir tests/pass
-	cp ~/src/cs352-test-cases/tests/pass/* tests/pass
-	mkdir tests/fail
-	cp ~/src/cs352-test-cases/tests/fail/* tests/fail
+	@cp ~/src/cs352-test-cases/test.py .
+	@cp -R ~/src/cs352-test-cases/tests/ tests/
 	python test.py
 	@$(MAKE) clean
