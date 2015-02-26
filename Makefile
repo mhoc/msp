@@ -1,10 +1,10 @@
-parser: y.tab.c lex.yy.c 
+parser: y.tab.c lex.yy.c helper.c my.h
 	gcc y.tab.c lex.yy.c -o parser -lfl -w
 
-y.tab.c: 
+y.tab.c: yacc.y
 	bison -y -d -g -t --verbose yacc.y
 
-lex.yy.c: 
+lex.yy.c: lex.l
 	lex lex.l
 
 clean:
@@ -21,4 +21,8 @@ testlocal: parser
 	@cp ~/src/cs352-test-cases/test.py .
 	@cp -R ~/src/cs352-test-cases/tests/ tests/
 	python test.py
+	@$(MAKE) clean
+
+runone: parser
+	./parser ~/src/cs352-test-cases/tests/$(filter-out $@,$(MAKECMDG iOALS))*
 	@$(MAKE) clean
