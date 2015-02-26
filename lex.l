@@ -5,7 +5,7 @@
 
 #define val_rune				yylval.value.rune = yytext[0]; yylval.type = TYPE_RUNE;
 #define val_int					yylval.value.number = atoi(yytext); yylval.type = TYPE_INTEGER;
-#define val_id					yylval.value.string = strdup(yytext); yylval.type = TYPE_IDENTIFIER;
+#define val_id					yylval.value.string = strdup(yytext); yylval.type = TYPE_STRING;
 #define val_res(x)			yylval.value.reserved = x; yylval.type = TYPE_RESERVED;
 
 %}
@@ -73,15 +73,15 @@
 }
 
 "{" {
-	debug("OPENBRACE ")
+	debug("LBRACE ")
 	val_rune
-	return OPENBRACE;
+	return LBRACE;
 }
 
 "}" {
-	debug("CLOSEBRACE ")
+	debug("RBRACE ")
 	val_rune
-	return CLOSEBRACE;
+	return RBRACE;
 }
 
 "," {

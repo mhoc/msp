@@ -26,49 +26,62 @@ FILE *yyin;
 	LPAREN
 	RPAREN
 	COMMA
-	OPENBRACE
-	CLOSEBRACE
+	LBRACE
+	RBRACE
 	COLON
 
 %%
 
+/** A file is the entire thing we are parsing.
+		It takes care of the script tags at the start and end. */
 file:
 	SCRIPT_TAG_START NEWLINE program SCRIPT_TAG_END
 	| SCRIPT_TAG_START NEWLINE program SCRIPT_TAG_END NEWLINE
 	| NEWLINE SCRIPT_TAG_START NEWLINE program SCRIPT_TAG_END NEWLINE
 ;
 
+/** A program is a series of lines, each followed by a newline. */
 program:
 	program line NEWLINE
 	| /* Empty */
 ;
 
+/** Each line is a statement terminated by an optional semicolon.
+  	This rule takes care of the possibility that a line could contain multiple statements.
+		If it does, each one in the center must have a semicolon. The last one is optional. */
 line:
-	unterminated_line
-	| unterminated_line SEMICOLON
-	| unterminated_line SEMICOLON line
+	statement
+	| statement SEMICOLON
+	| statement SEMICOLON line
 ;
 
-unterminated_line:
+/** A statement is any single operation. This includes declarations (var a), assignments (a = 1),
+  	definitions (var a = 1), and function calls (document.write(a)). */
+statement:
 	declaration
 	| assignment
 	| definition
 	| DOCUMENT_WRITE LPAREN parameter_list RPAREN
 ;
 
+/** var a
+		In a declaration, all we do is add the symbol as undefined in our symbol table. */
 declaration:
 	VARDEF IDENTIFIER {
 		declare_symbol($2.value.string);
 	}
 ;
 
+/** a = 1
+		A corresponding update_value function is called.
+		update_value will print an error if the value was not previously declared. */
 assignment:
-	IDENTIFIER EQUAL expression {
+	IDENTIFIER EQUAL value {
 		if ($3.type == TYPE_INTEGER) {
-			update_value_i($1.value.string, $3.value.number);
+			update_symbol_i($1.value.string, $3.value.number);
 		}
 		else if ($3.type == TYPE_STRING) {
-			update_value_s($1.value.string, $3.value.string);
+			update_symbol_s($1.value.string, $3.value.string);
 		}
 		else if ($3.type == TYPE_OBJECT) {
 
@@ -76,13 +89,18 @@ assignment:
 	}
 ;
 
+/** var a = 1
+		A combination declaration and assignment
+		insert_symbol is called based upon the type of the value passed in.
+		this function will redefine the type of the variable if it was already declared. */
 definition:
-	VARDEF IDENTIFIER EQUAL expression {
+	VARDEF IDENTIFIER EQUAL value {
+		declare_symbol($2.value.string);
 		if ($4.type == TYPE_INTEGER) {
-			insert_symbol_i($2.value.string, $4.value.number);
+			update_symbol_i($2.value.string, $4.value.number);
 		}
 		else if ($4.type == TYPE_STRING) {
-			insert_symbol_s($2.value.string, $4.value.string);
+			update_symbol_s($2.value.string, $4.value.string);
 		}
 		else if ($4.type == TYPE_OBJECT) {
 
@@ -90,6 +108,8 @@ definition:
 	}
 ;
 
+/** A list of comma-separated values
+		Right now this is hard-coded to only work with document.write() */
 parameter_list:
 	expression {
 		if ($1.type == TYPE_STRING) {
@@ -101,6 +121,8 @@ parameter_list:
 		}
 		else if ($1.type == TYPE_INTEGER) {
 			printf("%i", $1.value.number);
+		} else {
+			printf("Error (line %d): Attempting to print a non-integer or string value\n");
 		}
 	}
 	| parameter_list COMMA expression {
@@ -113,78 +135,119 @@ parameter_list:
 		}
 		else if ($3.type == TYPE_INTEGER) {
 			printf("%i", $3.value.number);
+		} else {
+			printf("Error (line %d): Attempting to print a non-integer or string value\n");
 		}
 	}
 	| /* empty */
 ;
 
-expression:
-	constant
-	| variable
-	| parenthesized_expression
-	| parenthesized_expression operator expression
-	| constant operator expression {
-		if ($1.type == TYPE_INTEGER && $3.type == TYPE_INTEGER) {
-			if ($2.value.rune == '+') {
-				$1.value.number += $3.value.number;
-				$$ = $1;
-			}
+/** A value is any entity which can be assigned to a variable.
+		expressions, in particular, are the only ones that can be recursed into
+		sub-expressions AND are the only ones that can be printed. */
+value:
+	expression
+	| object_definition
+
+/** Any reference to a variable which has been previously declared and defined.
+    If it has not been declared or defined, a type error is printed */
+variable_reference:
+	IDENTIFIER {
+		debugf1("(%s) ", $1.value.string)
+
+		struct entity* e = get_symbol($1.value.string);
+
+		if (e == NULL) {
+			printf("Variable Access Error (line %d): Use of undeclared variable %s\n", yylineno, $1.value.string);
+			$$.type = TYPE_UNDEFINED;
 		}
+		else if (e->type == TYPE_INTEGER) {
+			$$.name = e->name;
+			$$.type = e->type;
+			$$.value.number = e->value.number;
+
+		} else if (e->type == TYPE_STRING) {
+			$$.name = e->name;
+			$$.type = e->type;
+			$$.value.string = e->value.string;
+		}
+
 	}
-	| variable operator expression
-	| OPENBRACE field_list CLOSEBRACE
-	| OPENBRACE NEWLINE field_list CLOSEBRACE
 ;
 
-parenthesized_expression:
-	LPAREN expression RPAREN {
+/** An expression is a combination of multiple subexpressions or values to
+		produce a single expression_value. */
+expression:
+	additive_expression
+;
+
+/** These sub-expression rules define an order of operations such that
+			1) "a", 1, a, (exp)
+			2) exp * exp, exp / exp
+			3) exp + exp, exp - exp */
+additive_expression:
+	multiplicative_expression
+	| additive_expression PLUS multiplicative_expression {
+		if ($1.type == TYPE_INTEGER && $3.type == TYPE_INTEGER) {
+			$1.value.number += $3.value.number;
+			$$ = $1;
+		}
+		else if ($1.type == TYPE_STRING && $3.type == TYPE_STRING) {
+			char* newstr = malloc(strlen($1.value.string) + strlen($3.value.string));
+			strcpy(newstr, $1.value.string);
+			strcat(newstr, $3.value.string);
+			$1.value.string = newstr;
+			$$ = $1;
+		} else {
+			printf("Type Violation Error (line %d): Attempting to apply addition to unsupported types\n", yylineno);
+		}
+	}
+	| additive_expression MINUS multiplicative_expression {
+		if ($1.type == TYPE_INTEGER && $3.type == TYPE_INTEGER) {
+			$1.value.number -= $3.value.number;
+			$$ = $1;
+		}
+		else {
+			printf("Type Violation Error (line %d): Attempting to apply subtraction to unsupported types\n", yylineno);
+		}
+	}
+;
+
+multiplicative_expression:
+	primary_expression
+	| multiplicative_expression MULT primary_expression {
+		if ($1.type == TYPE_INTEGER && $3.type == TYPE_INTEGER) {
+			$1.value.number *= $3.value.number;
+			$$ = $1;
+		}
+		else {
+			printf("Type Violation (line %d): Attempting to apply multiplication to unsupported types\n", yylineno);
+		}
+	}
+	| multiplicative_expression DIVIDE primary_expression {
+		if ($1.type == TYPE_INTEGER && $3.type == TYPE_INTEGER) {
+			$1.value.number /= $3.value.number;
+			$$ = $1;
+		}
+		else {
+			printf("Type Violation (line %d): Attempting to apply division to unsupported types\n", yylineno);
+		}
+	}
+;
+
+primary_expression:
+	INTEGER
+	| STRING
+	| variable_reference
+	| LPAREN expression RPAREN {
 		$$ = $2;
 	}
 ;
 
-operator:
-	PLUS {
-		debugf1("(%c) ", $1.value.rune)
-	}
-	| MINUS {
-		debugf1("(%c) ", $1.value.rune)
-	}
-	| MULT {
-		debugf1("(%c) ", $1.value.rune)
-	}
-	| DIVIDE {
-		debugf1("(%c) ", $1.value.rune)
-	}
-;
-
-constant:
-	INTEGER {
-		debugf1("(%i) ", $1.value.number)
-	}
-	| STRING {
-		debugf1("(%s) ", $1.value.string)
-	}
-;
-
-variable:
-	IDENTIFIER {
-		debugf1("(%s) ", $1.value.string)
-
-		struct symbol* s = get_symbol($1.value.string);
-
-		if (s == NULL) {
-			printf("Error line %d: Use of undeclared variable %s\n", yylineno, $1.value.string);
-		}
-		else if (s->type == TYPE_INTEGER) {
-			$$.type = TYPE_INTEGER;
-			$$.value.number = s->value.number;
-
-		} else if (s->type == TYPE_STRING) {
-			$$.type = TYPE_STRING;
-			$$.value.string = s->value.string;
-		}
-
-	}
+/** { key:value ... } */
+object_definition:
+	LBRACE field_list RBRACE
+	| LBRACE NEWLINE field_list RBRACE
 ;
 
 field_list:
@@ -229,7 +292,11 @@ int main(int argc, char *argv[]) {
 
 	signal(SIGSEGV, segvhandler);
 
-	if (argc == 2 || argc == 3) {
+	if (argc == 1) {
+		yyin = stdin;
+		yyparse();
+	}
+	else if (argc == 2) {
 		FILE *file;
 		file = fopen(argv[1], "r");
 		if (!file) {

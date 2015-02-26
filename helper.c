@@ -1,12 +1,13 @@
 
 // #include "my.h" done in including file
 
-// Symbol table
-struct symbol* symbol_table[SYMBOL_TABLE_SIZE];
+/** Symbol tables for storing variables */
+struct entity* symbol_table[SYMBOL_TABLE_SIZE];
 
-struct tok* tok_new() {
-  struct tok* token = malloc(sizeof(struct tok));
-  return token;
+/** Alocates a new entity which can be freed later */
+struct entity* new_entity() {
+  struct entity* e = malloc(sizeof(struct entity));
+  return e;
 }
 
 /** FNV-1a hashing algorithm */
@@ -30,107 +31,89 @@ int hash(char* string) {
 
 }
 
-/** Inserts a symbol into the symbol table */
-void insert_symbol(struct symbol* s) {
+/** Inserts a symbol entity into the symbol table */
+void insert_symbol_entity(struct entity* e) {
 
-  int hash_index = hash(s->name);
+  if (e->name == NULL) {
+    printf("Attempting to store a non-variable entity.\n");
+    return;
+  }
+
+  int hash_index = hash(e->name);
   if (symbol_table[hash_index] != NULL) {
-    if (strcmp(symbol_table[hash_index]->name, s->name)) {
+    if (strcmp(symbol_table[hash_index]->name, e->name)) {
       printf("There was just a hash collision in the symbol table.\n");
       printf("We're going to keep running, but I wanted you to know that its gonna break.\n");
-
     } else {
-      //redefining an already defined variable
+
+      // Redefining an already defined variable
+      // I'm not going to error handle this quite yet
 
     }
 
   }
 
-  symbol_table[hash_index] = s;
+  symbol_table[hash_index] = e;
 
 }
 
-void declare_symbol(char* name) {
-  struct symbol* s = malloc(sizeof(struct symbol));
-  s->name = strdup(name);
-  s->type = TYPE_UNDEFINED;
-  s->value.string = "";
-
-  insert_symbol(s);
-}
-
-/** Inserts raw symbol data into the symbol table */
-void insert_symbol_i(char* name, int value) {
-
-  struct symbol* s = malloc(sizeof(struct symbol));
-  s->name = strdup(name);
-  s->type = TYPE_INTEGER;
-  s->value.number = value;
-
-  insert_symbol(s);
-
-}
-
-void insert_symbol_s(char* name, char* value) {
-  struct symbol* s = malloc(sizeof(struct symbol));
-  s->name = strdup(name);
-  s->type = TYPE_STRING;
-  s->value.string = strdup(value);
-
-  insert_symbol(s);
-}
-
-void insert_symbol_o(char* name) {
-  struct symbol* s = malloc(sizeof(struct symbol));
-  s->name = strdup(name);
-  s->type = TYPE_OBJECT;
-  s->value.string = "";
-
-  insert_symbol(s);
-}
-
-struct symbol* get_symbol(char* name) {
+/** Returns the symbol of a given name
+    Returns null if the symbol is undeclared */
+struct entity* get_symbol(char* name) {
   return symbol_table[hash(name)];
 }
 
-void update_value_i(char* name, int value) {
-  struct symbol* sym = get_symbol(name);
-  if (sym == NULL) {
-    printf("Error line %d: Assigning value to an undeclared variable\n", yylineno);
-    sym = malloc(sizeof(struct symbol));
-    sym->name = strdup(name);
-  }
-  if (sym->type == TYPE_STRING) {
-    free(sym->value.string);
-  }
-  sym->value.number = value;
-  sym->type = TYPE_INTEGER;
+/** Declares a new symbol under the given name
+    This symbol will be of type undefined until it is later defined */
+void declare_symbol(char* name) {
+  struct entity* e = malloc(sizeof(struct entity));
+  e->name = strdup(name);
+  e->type = TYPE_UNDEFINED;
+  e->value.string = "";
+  insert_symbol_entity(e);
 }
 
-void update_value_s(char* name, char* value) {
-  struct symbol* sym = get_symbol(name);
-  if (sym == NULL) {
-    printf("Error line %d: Assigning value to an undeclared variable\n", yylineno);
-    sym = malloc(sizeof(struct symbol));
-    sym->name = strdup(name);
+/** Updates the value of a given symbol to become an integer */
+void update_symbol_i(char* name, int value) {
+  struct entity* e = get_symbol(name);
+  if (e == NULL) {
+    printf("Variable Access Error (line %d): Assigning value %d to an undeclared variable %s\n", yylineno, value, name);
+    e = malloc(sizeof(struct entity));
+    e->name = strdup(name);
   }
-  if (sym->type == TYPE_STRING) {
-    free(sym->value.string);
+  if (e->type == TYPE_STRING && e->value.string != NULL) {
+    free(e->value.string);
   }
-  sym->value.string = strdup(value);
-  sym->type = TYPE_STRING;
+  e->value.number = value;
+  e->type = TYPE_INTEGER;
 }
 
+/** Updates the value of a given symbol to become a string */
+void update_symbol_s(char* name, char* value) {
+  struct entity* e = get_symbol(name);
+  if (e == NULL) {
+    printf("Variable Access Error (line %d): Assigning new string to an undeclared variable %s\n", yylineno, name);
+    e = malloc(sizeof(struct entity));
+    e->name = strdup(name);
+  }
+  if (e->type == TYPE_STRING && e->value.string != NULL) {
+    free(e->value.string);
+  }
+  e->value.string = strdup(value);
+  e->type = TYPE_STRING;
+}
+
+/** Updates the value of a given symbol to become an object */
 void update_value_o(char* name) {
-  struct symbol* sym = get_symbol(name);
-  if (sym == NULL) {
-    printf("Error line %d: Assigning value to an undeclared variable\n", yylineno);
-    sym = malloc(sizeof(struct symbol));
-    sym->name = strdup(name);
+  struct entity* e = get_symbol(name);
+  if (e == NULL) {
+    printf("Variable Access Error (line %d): Assigning new object to an undeclared variable %s\n", yylineno, name);
+    e = malloc(sizeof(struct entity));
+    e->name = strdup(name);
   }
-  if (sym->type == TYPE_STRING) {
-    free(sym->value.string);
+  if (e->type == TYPE_STRING && e->value.string != NULL) {
+    free(e->value.string);
   }
-  sym->value.string = "";
-  sym->type = TYPE_OBJECT;
+  e->value.string = "";
+  e->type = TYPE_OBJECT;
 }

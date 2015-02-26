@@ -20,16 +20,13 @@
 #define debugf1(x,y) printf(x,y);
 #endif
 
-#define YYSTYPE struct tok
+#define YYSTYPE struct entity
 
-/** Enum which stores the various types we recognize
- *	These enums are used for both the type of tokens AND the type of variables
- *  Some make sense in context while others don't. Its just a shortcut. */
+/**	Enum for the types of entity values this language supports */
 typedef enum {
 	TYPE_INTEGER,
 	TYPE_RUNE,
 	TYPE_STRING,
-	TYPE_IDENTIFIER,
 	TYPE_OBJECT,
 	TYPE_UNDEFINED,
 	TYPE_RESERVED
@@ -43,40 +40,31 @@ typedef enum {
 	RESERVE_VAR
 } E_RESERVED;
 
-/** Definition for a token which is returned by the lexer
- 		Each token has a value and type */
-struct tok {
+/** The master definition for the structs our interpreter passes and stores
+		The lexer converts tokens into entities during the lexing process before
+		they undergo semantic analysis.
 
+		During lexing, name will be null because no entities should have names.
+		If the name is NOT null then that means the entity is a variable symbol.
+		In either case, the type of the entity is stored in type.
+		If its a variable, then that type is also the type of the variable. Obviously.
+
+		Objects are strange.
+		The root object is stored as type=TYPE_OBJECT, the name of the object, and no value.
+		Each key of the object is stored as its own type, with name = "parentobject.keyname".
+		This is possible becasue (A) we never need a list of all the keys of an object, and (B)
+		because periods are otherwise NOT allowed in variable names.
+*/
+struct entity {
+
+	char* name;
+
+	E_TYPE type;
 	union {
 		int number;
 		char rune;
 		char* string;
 		E_RESERVED reserved;
-	} value;
-
-	E_TYPE type;
-
-};
-
-/** Definition for a symbol which is stored in the symbol table
-		Each symbol has a name, type, and value.
-
-		If the type is undefined, value will be null and type is TYPE_UNDEFINED.
-
-		If the type is an object, we do some bs.
-		An entry for the object itself is stored under type=TYPE_OBJECT and no value.
-		Each child of the object is stored as its own symbol with type of whatever it is and
-		a name of "parentname.key".
-		We don't maintain a reference to which children exist (yet) because there's no need.
-*/
-struct symbol {
-
-	char* name;
-	E_TYPE type;
-
-	union {
-		int number;
-		char* string;
 	} value;
 
 };
