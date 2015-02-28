@@ -6,6 +6,7 @@
 
 #define my_debug 0
 #define SYMBOL_TABLE_SIZE 1000
+#define MAX_OBJECT_KEYS 20
 
 /* If macros are used here to save on a comparison at run time
  * for a global debug variable */

@@ -4,6 +4,18 @@
 /** Symbol tables for storing variables */
 struct entity* symbol_table[SYMBOL_TABLE_SIZE];
 
+/** Name of the variable which is currently being parsed. This is used for object parsing.
+    I'd like to eventually include this inside the entity object but
+    for now this is the easiest way */
+char* var_name;
+
+char* strcatc(char* c1, char* c2) {
+  char* ns = malloc(strlen(c1) + strlen(c2));
+  strcpy(ns, c1);
+  strcat(ns, c2);
+  return ns;
+}
+
 /** Alocates a new entity which can be freed later */
 struct entity* new_entity() {
   struct entity* e = malloc(sizeof(struct entity));
@@ -104,7 +116,7 @@ void update_symbol_s(char* name, char* value) {
 }
 
 /** Updates the value of a given symbol to become an object */
-void update_value_o(char* name) {
+void update_symbol_o(char* name) {
   struct entity* e = get_symbol(name);
   if (e == NULL) {
     printf("Variable Access Error (line %d): Assigning new object to an undeclared variable %s\n", yylineno, name);
@@ -116,4 +128,18 @@ void update_value_o(char* name) {
   }
   e->value.string = "";
   e->type = TYPE_OBJECT;
+}
+
+void update_symbol_undef(char* name) {
+  struct entity* e = get_symbol(name);
+  if (e == NULL) {
+    printf("Variable Access Error (line %d): Assigning new object to an undeclared variable %s\n", yylineno, name);
+    e = malloc(sizeof(struct entity));
+    e->name = strdup(name);
+  }
+  if (e->type == TYPE_STRING && e->value.string != NULL) {
+    free(e->value.string);
+  }
+  e->value.string = "";
+  e->type = TYPE_UNDEFINED;
 }

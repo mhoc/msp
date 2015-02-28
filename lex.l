@@ -72,6 +72,12 @@
 	return IDENTIFIER;
 }
 
+[A-Za-z][A-Za-z0-9]*\.[A-Za-z][A-Za-z0-9]* {
+	debug("OBJKEY ");
+	val_id
+	return OBJKEY;
+}
+
 "{" {
 	debug("LBRACE ")
 	val_rune

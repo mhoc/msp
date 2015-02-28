@@ -29,6 +29,7 @@ FILE *yyin;
 	LBRACE
 	RBRACE
 	COLON
+	OBJKEY
 
 %%
 
@@ -76,7 +77,9 @@ declaration:
 		A corresponding update_value function is called.
 		update_value will print an error if the value was not previously declared. */
 assignment:
-	IDENTIFIER EQUAL value {
+	IDENTIFIER EQUAL {
+		var_name = strdup($1.value.string);
+	} value {
 		if ($3.type == TYPE_INTEGER) {
 			update_symbol_i($1.value.string, $3.value.number);
 		}
@@ -86,6 +89,9 @@ assignment:
 		else if ($3.type == TYPE_OBJECT) {
 
 		}
+		else if ($3.type == TYPE_UNDEFINED) {
+			update_symbol_undef($1.value.string);
+		}
 	}
 ;
 
@@ -94,7 +100,9 @@ assignment:
 		insert_symbol is called based upon the type of the value passed in.
 		this function will redefine the type of the variable if it was already declared. */
 definition:
-	VARDEF IDENTIFIER EQUAL value {
+	VARDEF IDENTIFIER {
+		var_name = strdup($2.value.string);
+	} EQUAL value {
 		declare_symbol($2.value.string);
 		if ($4.type == TYPE_INTEGER) {
 			update_symbol_i($2.value.string, $4.value.number);
@@ -104,6 +112,9 @@ definition:
 		}
 		else if ($4.type == TYPE_OBJECT) {
 
+		}
+		else if ($4.type == TYPE_UNDEFINED) {
+			update_symbol_undef($2.value.string);
 		}
 	}
 ;
@@ -161,6 +172,10 @@ variable_reference:
 			printf("Variable Access Error (line %d): Use of undeclared variable %s\n", yylineno, $1.value.string);
 			$$.type = TYPE_UNDEFINED;
 		}
+		else if (e->type == TYPE_OBJECT) {
+			$$.name = e->name;
+			$$.type = e->type;
+		}
 		else if (e->type == TYPE_INTEGER) {
 			$$.name = e->name;
 			$$.type = e->type;
@@ -172,6 +187,30 @@ variable_reference:
 			$$.value.string = e->value.string;
 		}
 
+	}
+	| OBJKEY {
+		debugf1("(%s) ", $1.value.string)
+
+		struct entity* e = get_symbol($1.value.string);
+
+		if (e == NULL) {
+			printf("Variable Access Error (line %d): Use of undeclared variable %s\n", yylineno, $1.value.string);
+			$$.type = TYPE_UNDEFINED;
+		}
+		else if (e->type == TYPE_OBJECT) {
+			$$.name = e->name;
+			$$.type = e->type;
+		}
+		else if (e->type == TYPE_INTEGER) {
+			$$.name = e->name;
+			$$.type = e->type;
+			$$.value.number = e->value.number;
+
+		} else if (e->type == TYPE_STRING) {
+			$$.name = e->name;
+			$$.type = e->type;
+			$$.value.string = e->value.string;
+		}
 	}
 ;
 
@@ -238,7 +277,11 @@ multiplicative_expression:
 primary_expression:
 	INTEGER
 	| STRING
-	| variable_reference
+	| variable_reference {
+		if ($1.type == TYPE_OBJECT) {
+			printf("Type Violation (line %d): Attempting to use object type in expression\n", yylineno);
+		}
+	}
 	| LPAREN expression RPAREN {
 		$$ = $2;
 	}
@@ -271,7 +314,16 @@ final_field:
 ;
 
 field:
-	IDENTIFIER COLON expression
+	IDENTIFIER COLON expression {
+		char* varname = strcatc(strcatc(var_name, "."), $1.value.string);
+		declare_symbol(varname);
+		if ($3.type == TYPE_INTEGER) {
+			update_symbol_i(varname, $3.value.number);
+		}
+		else if ($3.type == TYPE_STRING) {
+			update_symbol_s(varname, $3.value.string);
+		}
+	}
 ;
 
 %%
