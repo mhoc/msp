@@ -69,7 +69,7 @@ statement:
 		In a declaration, all we do is add the symbol as undefined in our symbol table. */
 declaration:
 	VARDEF IDENTIFIER {
-		declare_symbol($2.value.string);
+		declareSymbol($2.value.string);
 	}
 ;
 
@@ -77,21 +77,11 @@ declaration:
 		A corresponding update_value function is called.
 		update_value will print an error if the value was not previously declared. */
 assignment:
-	IDENTIFIER EQUAL {
-		var_name = strdup($1.value.string);
-	} value {
-		if ($3.type == TYPE_INTEGER) {
-			update_symbol_i($1.value.string, $3.value.number);
-		}
-		else if ($3.type == TYPE_STRING) {
-			update_symbol_s($1.value.string, $3.value.string);
-		}
-		else if ($3.type == TYPE_OBJECT) {
-
-		}
-		else if ($3.type == TYPE_UNDEFINED) {
-			update_symbol_undef($1.value.string);
-		}
+	IDENTIFIER EQUAL value {
+		defineSymbol($1.value.string, &$3, 1);
+	}
+	| OBJKEY EQUAL value {
+		defineSymbol($1.value.string, &$3, 0);
 	}
 ;
 
@@ -100,22 +90,9 @@ assignment:
 		insert_symbol is called based upon the type of the value passed in.
 		this function will redefine the type of the variable if it was already declared. */
 definition:
-	VARDEF IDENTIFIER {
-		var_name = strdup($2.value.string);
-	} EQUAL value {
-		declare_symbol($2.value.string);
-		if ($4.type == TYPE_INTEGER) {
-			update_symbol_i($2.value.string, $4.value.number);
-		}
-		else if ($4.type == TYPE_STRING) {
-			update_symbol_s($2.value.string, $4.value.string);
-		}
-		else if ($4.type == TYPE_OBJECT) {
-
-		}
-		else if ($4.type == TYPE_UNDEFINED) {
-			update_symbol_undef($2.value.string);
-		}
+	VARDEF IDENTIFIER EQUAL value {
+		declareSymbol($2.value.string);
+		defineSymbol($2.value.string, &$4, 1);
 	}
 ;
 
@@ -123,32 +100,10 @@ definition:
 		Right now this is hard-coded to only work with document.write() */
 parameter_list:
 	expression {
-		if ($1.type == TYPE_STRING) {
-			if (strcmp($1.value.string, "<br />")) {
-				printf("%s", $1.value.string);
-			} else {
-				printf("\n");
-			}
-		}
-		else if ($1.type == TYPE_INTEGER) {
-			printf("%i", $1.value.number);
-		} else {
-			printf("Error (line %d): Attempting to print a non-integer or string value\n");
-		}
+		printExpression(&$1);
 	}
 	| parameter_list COMMA expression {
-		if ($3.type == TYPE_STRING) {
-			if (strcmp($3.value.string, "<br />")) {
-				printf("%s", $3.value.string);
-			} else {
-				printf("\n");
-			}
-		}
-		else if ($3.type == TYPE_INTEGER) {
-			printf("%i", $3.value.number);
-		} else {
-			printf("Error (line %d): Attempting to print a non-integer or string value\n");
-		}
+		printExpression(&$3);
 	}
 	| /* empty */
 ;
@@ -159,58 +114,16 @@ parameter_list:
 value:
 	expression
 	| object_definition
+;
 
 /** Any reference to a variable which has been previously declared and defined.
     If it has not been declared or defined, a type error is printed */
 variable_reference:
 	IDENTIFIER {
-		debugf1("(%s) ", $1.value.string)
-
-		struct entity* e = get_symbol($1.value.string);
-
-		if (e == NULL) {
-			printf("Variable Access Error (line %d): Use of undeclared variable %s\n", yylineno, $1.value.string);
-			$$.type = TYPE_UNDEFINED;
-		}
-		else if (e->type == TYPE_OBJECT) {
-			$$.name = e->name;
-			$$.type = e->type;
-		}
-		else if (e->type == TYPE_INTEGER) {
-			$$.name = e->name;
-			$$.type = e->type;
-			$$.value.number = e->value.number;
-
-		} else if (e->type == TYPE_STRING) {
-			$$.name = e->name;
-			$$.type = e->type;
-			$$.value.string = e->value.string;
-		}
-
+		$$ = *getSymbol($1.value.string);
 	}
 	| OBJKEY {
-		debugf1("(%s) ", $1.value.string)
-
-		struct entity* e = get_symbol($1.value.string);
-
-		if (e == NULL) {
-			printf("Variable Access Error (line %d): Use of undeclared variable %s\n", yylineno, $1.value.string);
-			$$.type = TYPE_UNDEFINED;
-		}
-		else if (e->type == TYPE_OBJECT) {
-			$$.name = e->name;
-			$$.type = e->type;
-		}
-		else if (e->type == TYPE_INTEGER) {
-			$$.name = e->name;
-			$$.type = e->type;
-			$$.value.number = e->value.number;
-
-		} else if (e->type == TYPE_STRING) {
-			$$.name = e->name;
-			$$.type = e->type;
-			$$.value.string = e->value.string;
-		}
+		$$ = *getSymbol($1.value.string);
 	}
 ;
 
@@ -227,50 +140,20 @@ expression:
 additive_expression:
 	multiplicative_expression
 	| additive_expression PLUS multiplicative_expression {
-		if ($1.type == TYPE_INTEGER && $3.type == TYPE_INTEGER) {
-			$1.value.number += $3.value.number;
-			$$ = $1;
-		}
-		else if ($1.type == TYPE_STRING && $3.type == TYPE_STRING) {
-			char* newstr = malloc(strlen($1.value.string) + strlen($3.value.string));
-			strcpy(newstr, $1.value.string);
-			strcat(newstr, $3.value.string);
-			$1.value.string = newstr;
-			$$ = $1;
-		} else {
-			printf("Type Violation Error (line %d): Attempting to apply addition to unsupported types\n", yylineno);
-		}
+		$$ = addTokens($1, $3);
 	}
 	| additive_expression MINUS multiplicative_expression {
-		if ($1.type == TYPE_INTEGER && $3.type == TYPE_INTEGER) {
-			$1.value.number -= $3.value.number;
-			$$ = $1;
-		}
-		else {
-			printf("Type Violation Error (line %d): Attempting to apply subtraction to unsupported types\n", yylineno);
-		}
+		$$ = subtractTokens($1, $3);
 	}
 ;
 
 multiplicative_expression:
 	primary_expression
 	| multiplicative_expression MULT primary_expression {
-		if ($1.type == TYPE_INTEGER && $3.type == TYPE_INTEGER) {
-			$1.value.number *= $3.value.number;
-			$$ = $1;
-		}
-		else {
-			printf("Type Violation (line %d): Attempting to apply multiplication to unsupported types\n", yylineno);
-		}
+		$$ = multiplyTokens($1, $3);
 	}
 	| multiplicative_expression DIVIDE primary_expression {
-		if ($1.type == TYPE_INTEGER && $3.type == TYPE_INTEGER) {
-			$1.value.number /= $3.value.number;
-			$$ = $1;
-		}
-		else {
-			printf("Type Violation (line %d): Attempting to apply division to unsupported types\n", yylineno);
-		}
+		$$ = divideTokens($1, $3);
 	}
 ;
 
@@ -278,7 +161,7 @@ primary_expression:
 	INTEGER
 	| STRING
 	| variable_reference {
-		if ($1.type == TYPE_OBJECT) {
+		if ($1.type == TYPE_FIELDLIST) {
 			printf("Type Violation (line %d): Attempting to use object type in expression\n", yylineno);
 		}
 	}
@@ -289,18 +172,30 @@ primary_expression:
 
 /** { key:value ... } */
 object_definition:
-	LBRACE field_list RBRACE
-	| LBRACE NEWLINE field_list RBRACE
+	LBRACE field_list RBRACE {
+		$$ = $2;
+	}
+	| LBRACE NEWLINE field_list RBRACE {
+		$$ = $3;
+	}
 ;
 
 field_list:
-	interim_field_list final_field
+	interim_field_list final_field {
+		addToFieldList($1.value.fieldList, &$2);
+		$$ = $1;
+	}
 	| /* empty */
 ;
 
 interim_field_list:
-	interim_field_list interim_field
-	| /* empty */
+	interim_field_list interim_field {
+		addToFieldList($1.value.fieldList, &$2);
+		$$ = $1;
+	}
+	| {
+		$$ = *newFieldList();
+	}
 ;
 
 interim_field:
@@ -315,14 +210,7 @@ final_field:
 
 field:
 	IDENTIFIER COLON expression {
-		char* varname = strcatc(strcatc(var_name, "."), $1.value.string);
-		declare_symbol(varname);
-		if ($3.type == TYPE_INTEGER) {
-			update_symbol_i(varname, $3.value.number);
-		}
-		else if ($3.type == TYPE_STRING) {
-			update_symbol_s(varname, $3.value.string);
-		}
+		$$ = *createField($1.value.string, &$3);
 	}
 ;
 

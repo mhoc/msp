@@ -150,4 +150,8 @@
 	return RPAREN;
 }
 
+. {
+	printf("Uncaught token %s. This is probably a syntax error.", yytext);
+}
+
 %%

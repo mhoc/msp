@@ -6,3 +6,4 @@ lex.yy.c
 *.out
 *.output
 parser
+*.pyc

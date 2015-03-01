@@ -2,24 +2,17 @@
 // #include "my.h" done in including file
 
 /** Symbol tables for storing variables */
-struct entity* symbol_table[SYMBOL_TABLE_SIZE];
+Symbol* symbolTable[SYMBOL_TABLE_SIZE];
 
-/** Name of the variable which is currently being parsed. This is used for object parsing.
-    I'd like to eventually include this inside the entity object but
-    for now this is the easiest way */
-char* var_name;
+/********************
+  * Utility methods *
+  ********************/
 
 char* strcatc(char* c1, char* c2) {
   char* ns = malloc(strlen(c1) + strlen(c2));
   strcpy(ns, c1);
   strcat(ns, c2);
   return ns;
-}
-
-/** Alocates a new entity which can be freed later */
-struct entity* new_entity() {
-  struct entity* e = malloc(sizeof(struct entity));
-  return e;
 }
 
 /** FNV-1a hashing algorithm */
@@ -43,103 +36,265 @@ int hash(char* string) {
 
 }
 
-/** Inserts a symbol entity into the symbol table */
-void insert_symbol_entity(struct entity* e) {
+/****************************
+  * Symbol table management *
+  ****************************/
 
-  if (e->name == NULL) {
-    printf("Attempting to store a non-variable entity.\n");
+void declareSymbol(char* name) {
+
+  // Hash the name and get the current variable stored
+  int hashIndex = hash(name);
+  Symbol* declared = symbolTable[hashIndex];
+
+  // If we aren't storing one, create it here
+  if (declared == NULL) {
+    declared = malloc(sizeof(Symbol));
+    declared->name = strdup(name);
+  }
+  else if (strcmp(name, declared->name)) {
+    printf("~~ Hash Collision ~~");
+  }
+  else {
+    // Redeclaration
+    // TODO FREE OLD RESOURCES
+  }
+
+  // Set the symbol's value as undefined
+  declared->type = TYPE_UNDEFINED;
+
+  // Declare it in the table
+  symbolTable[hashIndex] = declared;
+
+}
+
+/** Generic symbol definition dispatch */
+void defineSymbol(char* name, Token* token, int displayError) {
+
+  // Hash and get the name
+  int hashIndex = hash(name);
+  Symbol* declared = symbolTable[hashIndex];
+
+  // Throw an error if the symbol isnt defined
+  if (declared == NULL) {
+    if (token->type != TYPE_FIELD && token->type != TYPE_FIELDLIST && displayError) {
+      printf("Error (line %d): Attempting to define the value of a variable which has not been declared\n", yylineno);
+    }
+    declared = malloc(sizeof(Symbol));
+    declared->name = strdup(name);
+  }
+
+  // Free old resources
+  // TODO
+  // fuck it we'll use c++ for the next part lol
+  // (said no one in the real world ever)
+
+  // Assign a new type and value
+  declared->type = token->type;
+  switch (declared->type) {
+    case TYPE_INTEGER:
+      declared->value.number = token->value.number; break;
+    case TYPE_STRING:
+      declared->value.string = token->value.string; break;
+    case TYPE_FIELDLIST:
+      declared->value.fieldList = token->value.fieldList; break;
+    case TYPE_FIELD:
+      declared->type = token->value.field->type;
+      if (token->value.field->type == TYPE_INTEGER) {
+        declared->value.number = token->value.field->value.number;
+      }
+      else if (token->value.field->type == TYPE_STRING) {
+        declared->value.string = token->value.field->value.string;
+      }
+    //case TYPE_UNDEFINED:
+      // TODO
+  }
+
+  // If this is a field list, recall defineSymbol on every item in the field list
+  if (declared->type == TYPE_FIELDLIST) {
+    for (int i = 0; i < declared->value.fieldList->size; i++) {
+      // holy jesus christ the spaghetti
+      char* tname = strcatc(name, strcatc(".", declared->value.fieldList->list[i]->name));
+
+      // its coming out of my pockets
+      int hashindex = hash(tname);
+      // who wrote this stuff?
+      Symbol* field = malloc(sizeof(Symbol));
+      field->name = tname;
+      field->type = declared->value.fieldList->list[i]->type;
+
+
+      switch (field->type) {
+        case TYPE_INTEGER:
+          field->value.number = declared->value.fieldList->list[i]->value.number; break;
+        case TYPE_STRING:
+          field->value.number = declared->value.fieldList->list[i]->value.string; break;
+      }
+
+      symbolTable[hashindex] = field;
+
+    }
+  }
+
+  symbolTable[hashIndex] = declared;
+
+}
+
+Token* getSymbol(char* name) {
+  Symbol* s = symbolTable[hash(name)];
+
+  if (s == NULL) {
+    printf("Error (line %d): Use of undeclared variable %s\n", yylineno, name);
+  }
+
+  Token* t = malloc(sizeof(Token));
+  t->type = s->type;
+
+  switch (t->type) {
+    case TYPE_INTEGER:
+      t->value.number = s->value.number; break;
+    case TYPE_STRING:
+      t->value.string = s->value.string; break;
+    case TYPE_FIELDLIST:
+      t->value.fieldList = s->value.fieldList; break;
+    //case TYPE_UNDEFINED:
+      // Do nothing
+  }
+
+  return t;
+}
+
+/****************
+  * Printing    *
+  ****************/
+
+void printExpression(Token* token) {
+  if (token->type == TYPE_STRING) {
+    if (strcmp(token->value.string, "<br />")) {
+      printf("%s", token->value.string);
+    } else {
+      printf("\n");
+    }
+  }
+  else if (token->type == TYPE_INTEGER) {
+    printf("%i", token->value.number);
+  }
+  else if (token->type == TYPE_UNDEFINED) {
+    printf("undefined");
+  }
+  else {
+    printf("Error (line %d): Attempting to print a non-integer or string value\n");
+  }
+}
+
+/****************
+  * Expressions *
+  ****************/
+
+Token addTokens(Token t1, Token t2) {
+
+  if (t1.type == TYPE_INTEGER && t2.type == TYPE_INTEGER) {
+    t1.value.number += t2.value.number;
+  }
+
+  else if (t1.type == TYPE_STRING && t2.type == TYPE_STRING) {
+    char* newstr = malloc(strlen(t1.value.string) + strlen(t2.value.string));
+    strcpy(newstr, t1.value.string);
+    strcat(newstr, t2.value.string);
+    t1.value.string = newstr;
+  }
+  else if (t1.type == TYPE_UNDEFINED) {
+    // Basically just return T1.
+  }
+  else {
+    printf("Error (line %d): Attempting to apply addition to unsupported types\n", yylineno);
+  }
+
+  return t1;
+
+}
+
+Token subtractTokens(Token t1, Token t2) {
+
+  if (t1.type == TYPE_INTEGER && t2.type == TYPE_INTEGER) {
+    t1.value.number -= t2.value.number;
+  }
+
+  else {
+    printf("Error (line %d): Attempting to apply subtraction to unsupported types\n", yylineno);
+  }
+
+  return t1;
+
+}
+
+Token multiplyTokens(Token t1, Token t2) {
+
+  if (t1.type == TYPE_INTEGER && t2.type == TYPE_INTEGER) {
+    t1.value.number *= t2.value.number;
+  }
+
+  else {
+    printf("Error (line %d): Attempting to apply multiplication to unsupported types\n", yylineno);
+  }
+
+  return t1;
+
+}
+
+Token divideTokens(Token t1, Token t2) {
+
+  if (t1.type == TYPE_INTEGER && t2.type == TYPE_INTEGER) {
+    t1.value.number /= t2.value.number;
+  }
+
+  else {
+    printf("Error (line %d): Attempting to apply division to unsupported types\n", yylineno);
+  }
+
+  return t1;
+
+}
+
+/************
+  * OBJECTS *
+  ************/
+
+Token* createField(char* name, Token* value) {
+  Token* t = malloc(sizeof(Token));
+  t->type = TYPE_FIELD;
+
+  Symbol* s = malloc(sizeof(Symbol));
+  s->name = strdup(name);
+  s->type = value->type;
+
+  switch (s->type) {
+    case TYPE_INTEGER:
+      s->value.number = value->value.number; break;
+    case TYPE_STRING:
+      s->value.string = value->value.string; break;
+  }
+
+  t->value.field = s;
+  return t;
+}
+
+Token* newFieldList() {
+  Token* t = malloc(sizeof(Token));
+  t->type = TYPE_FIELDLIST;
+  t->value.fieldList = malloc(sizeof(FieldList));
+  t->value.fieldList->size = 0;
+  t->value.fieldList->maxSize = 4;
+  t->value.fieldList->list = malloc(sizeof(Symbol*) * 4);
+  return t;
+}
+
+void addToFieldList(FieldList* list, Token* t) {
+
+  if (list->size >= list->maxSize) {
+    printf("Too many!");
     return;
   }
 
-  int hash_index = hash(e->name);
-  if (symbol_table[hash_index] != NULL) {
-    if (strcmp(symbol_table[hash_index]->name, e->name)) {
-      printf("There was just a hash collision in the symbol table.\n");
-      printf("We're going to keep running, but I wanted you to know that its gonna break.\n");
-    } else {
+  list->list[list->size++] = t->value.field;
 
-      // Redefining an already defined variable
-      // I'm not going to error handle this quite yet
-
-    }
-
-  }
-
-  symbol_table[hash_index] = e;
-
-}
-
-/** Returns the symbol of a given name
-    Returns null if the symbol is undeclared */
-struct entity* get_symbol(char* name) {
-  return symbol_table[hash(name)];
-}
-
-/** Declares a new symbol under the given name
-    This symbol will be of type undefined until it is later defined */
-void declare_symbol(char* name) {
-  struct entity* e = malloc(sizeof(struct entity));
-  e->name = strdup(name);
-  e->type = TYPE_UNDEFINED;
-  e->value.string = "";
-  insert_symbol_entity(e);
-}
-
-/** Updates the value of a given symbol to become an integer */
-void update_symbol_i(char* name, int value) {
-  struct entity* e = get_symbol(name);
-  if (e == NULL) {
-    printf("Variable Access Error (line %d): Assigning value %d to an undeclared variable %s\n", yylineno, value, name);
-    e = malloc(sizeof(struct entity));
-    e->name = strdup(name);
-  }
-  if (e->type == TYPE_STRING && e->value.string != NULL) {
-    free(e->value.string);
-  }
-  e->value.number = value;
-  e->type = TYPE_INTEGER;
-}
-
-/** Updates the value of a given symbol to become a string */
-void update_symbol_s(char* name, char* value) {
-  struct entity* e = get_symbol(name);
-  if (e == NULL) {
-    printf("Variable Access Error (line %d): Assigning new string to an undeclared variable %s\n", yylineno, name);
-    e = malloc(sizeof(struct entity));
-    e->name = strdup(name);
-  }
-  if (e->type == TYPE_STRING && e->value.string != NULL) {
-    free(e->value.string);
-  }
-  e->value.string = strdup(value);
-  e->type = TYPE_STRING;
-}
-
-/** Updates the value of a given symbol to become an object */
-void update_symbol_o(char* name) {
-  struct entity* e = get_symbol(name);
-  if (e == NULL) {
-    printf("Variable Access Error (line %d): Assigning new object to an undeclared variable %s\n", yylineno, name);
-    e = malloc(sizeof(struct entity));
-    e->name = strdup(name);
-  }
-  if (e->type == TYPE_STRING && e->value.string != NULL) {
-    free(e->value.string);
-  }
-  e->value.string = "";
-  e->type = TYPE_OBJECT;
-}
-
-void update_symbol_undef(char* name) {
-  struct entity* e = get_symbol(name);
-  if (e == NULL) {
-    printf("Variable Access Error (line %d): Assigning new object to an undeclared variable %s\n", yylineno, name);
-    e = malloc(sizeof(struct entity));
-    e->name = strdup(name);
-  }
-  if (e->type == TYPE_STRING && e->value.string != NULL) {
-    free(e->value.string);
-  }
-  e->value.string = "";
-  e->type = TYPE_UNDEFINED;
 }

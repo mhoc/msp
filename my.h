@@ -21,17 +21,18 @@
 #define debugf1(x,y) printf(x,y);
 #endif
 
-#define YYSTYPE struct entity
+#define YYSTYPE Token
 
 /**	Enum for the types of entity values this language supports */
 typedef enum {
 	TYPE_INTEGER,
 	TYPE_RUNE,
 	TYPE_STRING,
-	TYPE_OBJECT,
+	TYPE_FIELD,
+	TYPE_FIELDLIST,
 	TYPE_UNDEFINED,
 	TYPE_RESERVED
-} E_TYPE;
+} Type;
 
 /** Enum for each reserved keyword. We have 4 right now. */
 typedef enum {
@@ -41,31 +42,36 @@ typedef enum {
 	RESERVE_VAR
 } E_RESERVED;
 
-/** The master definition for the structs our interpreter passes and stores
-		The lexer converts tokens into entities during the lexing process before
-		they undergo semantic analysis.
+typedef struct s Symbol;
 
-		During lexing, name will be null because no entities should have names.
-		If the name is NOT null then that means the entity is a variable symbol.
-		In either case, the type of the entity is stored in type.
-		If its a variable, then that type is also the type of the variable. Obviously.
+typedef struct {
+	int size;
+	int maxSize;
+	Symbol** list;
+} FieldList;
 
-		Objects are strange.
-		The root object is stored as type=TYPE_OBJECT, the name of the object, and no value.
-		Each key of the object is stored as its own type, with name = "parentobject.keyname".
-		This is possible becasue (A) we never need a list of all the keys of an object, and (B)
-		because periods are otherwise NOT allowed in variable names.
-*/
-struct entity {
+typedef struct {
 
-	char* name;
-
-	E_TYPE type;
+	Type type;
 	union {
 		int number;
 		char rune;
 		char* string;
+		Symbol* field;
+		FieldList* fieldList;
 		E_RESERVED reserved;
+	} value;
+
+} Token;
+
+struct s {
+
+	char* name;
+	Type type;
+	union {
+		int number;
+		char* string;
+		FieldList* fieldList;
 	} value;
 
 };

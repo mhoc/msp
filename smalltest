@@ -1,4 +1,4 @@
 <script type="text/JavaScript">
-var a = { hello: "what", goodbye: " the" };
-document.write(a.hello, a.goodbye);
+var a = { b:5, c:6 };
+document.write(a.b);
 </script>
