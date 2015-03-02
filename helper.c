@@ -21,7 +21,8 @@ int hash(char* string) {
   int fnv_offset_basis = 2166136261;
 
   int hash = fnv_offset_basis;
-  for (int i = 0; i < strlen(string); i++) {
+  int i;
+  for (i = 0; i < strlen(string); i++) {
     char c = string[i];
     hash = hash ^ c;
     hash = hash * fnv_prime;
@@ -111,7 +112,8 @@ void defineSymbol(char* name, Token* token, int displayError) {
 
   // If this is a field list, recall defineSymbol on every item in the field list
   if (declared->type == TYPE_FIELDLIST) {
-    for (int i = 0; i < declared->value.fieldList->size; i++) {
+    int i;
+    for (i = 0; i < declared->value.fieldList->size; i++) {
       // holy jesus christ the spaghetti
       char* tname = strcatc(name, strcatc(".", declared->value.fieldList->list[i]->name));
 
