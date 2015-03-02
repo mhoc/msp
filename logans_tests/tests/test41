@@ -1,0 +1,5 @@
+<script type="text/JavaScript">
+var a = {a: 3}
+a.b = 5
+document.write(a.a + a.b, "<br />")
+</script>

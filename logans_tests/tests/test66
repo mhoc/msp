@@ -1,3 +1,6 @@
 <script type="text/JavaScript">
-var a = a;
+x = 10
+var a = x
+var y = a
+var a = y + x
 </script>

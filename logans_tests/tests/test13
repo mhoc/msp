@@ -1,0 +1,19 @@
+<script type="text/JavaScript">
+var two = 2 ; var ten = 10
+var linebreak = "<br />"
+document.write("two plus ten = ")
+var result = two + ten
+document.write(result)
+document.write(linebreak)
+result = ten * ten
+document.write("ten * ten = ", result)
+document.write(linebreak)
+document.write("ten / two = ")
+result = ten / two
+document.write(result)
+var ID
+ID = result
+document.write(linebreak)
+document.write(ID)
+
+</script>

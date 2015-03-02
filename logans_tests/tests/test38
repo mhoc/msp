@@ -1,3 +1,4 @@
 <script type="text/JavaScript">
-var a = a;
+var a = 9 + 1
+document.write(a, "<br />")
 </script>

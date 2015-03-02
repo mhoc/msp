@@ -1,0 +1,7 @@
+<script type="text/JavaScript">
+var a = {
+    color: "blue" + "grey"
+}
+
+document.write(a.color, "<br />")
+</script>

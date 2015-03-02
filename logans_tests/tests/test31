@@ -1,3 +1,5 @@
 <script type="text/JavaScript">
-var a = a;
+var a = {
+    age: 5 + 4
+}
 </script>

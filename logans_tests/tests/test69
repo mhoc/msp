@@ -1,0 +1,8 @@
+<script type="text/JavaScript">
+var a = {
+    name: "Logan",
+    last: "Gore",
+    age: 21
+    }
+document.write(a, "<br />")
+</script>

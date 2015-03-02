@@ -1,0 +1,14 @@
+<script type="text/JavaScript">
+var a = 2
+var b;
+var c = a + b
+c = a + b
+c = a + b
+c = a + b
+c = a + b
+c = a + b
+c = a + b
+c = a + b
+c = a + b
+c = a + b
+</script>

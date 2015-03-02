@@ -1,0 +1,6 @@
+<script type="text/JavaScript">
+var a = {
+    name: "Logan",
+    age: 44
+}
+</script>

@@ -1,0 +1,4 @@
+<script type="text/JavaScript">
+document.write("Hello", 3); document.write("a", 3, 22, "b");
+document.write("<br />")
+</script>

@@ -1,0 +1,11 @@
+<script type="text/JavaScript">
+var a = 2
+var b;
+var c = b
+var d = c
+var e = d
+var f = e
+var g = a + e
+document.write(g)
+document.write("<br />")
+</script>
