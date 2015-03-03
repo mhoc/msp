@@ -8,7 +8,7 @@ lex.yy.c: lex.l
 	lex lex.l
 
 clean:
-	rm -f lex.yy.c y.tab.c y.tab.h y.dot y.output parser y.vcg test.py cases.py
+	rm -f lex.yy.c y.tab.c y.tab.h y.dot y.output parser y.vcg test.py cases.py cases.pyc
 	rm -rf tests
 
 testgh: parser

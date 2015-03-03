@@ -8,6 +8,33 @@ Symbol* symbolTable[SYMBOL_TABLE_SIZE];
   * Utility methods *
   ********************/
 
+void printType(Type t) {
+  if (t == TYPE_INTEGER) {
+    printf("TYPE_INTEGER ");
+  }
+  else if (t == TYPE_STRING) {
+    printf("TYPE_STRING ");
+  }
+  else if (t == TYPE_FIELD) {
+    printf("TYPE_FIELD ");
+  }
+  else if (t == TYPE_FIELDLIST) {
+    printf("TYPE_FIELDLIST ");
+  }
+  else if (t == TYPE_UNDEFINED) {
+    printf("TYPE_UNDEFINED ");
+  }
+  else if (t == TYPE_RUNE) {
+    printf("TYPE_RUNE ");
+  }
+  else if (t == TYPE_RESERVED) {
+    printf("TYPE_RESERVED ");
+  }
+  else {
+    printf("TYPE UNRECOGNIZED ");
+  }
+}
+
 char* strcatc(char* c1, char* c2) {
   char* ns = malloc(strlen(c1) + strlen(c2));
   strcpy(ns, c1);
@@ -75,10 +102,22 @@ void defineSymbol(char* name, Token* token, int displayError) {
   int hashIndex = hash(name);
   Symbol* declared = symbolTable[hashIndex];
 
+  // Check and see if the variable object exists
+  int isField = 0;
+  char* objectname = strtok(strdup(name), ".");
+  if (strcmp(objectname, name)) {
+    Symbol* parentObject = symbolTable[hash(objectname)];
+    if (parentObject->type != TYPE_FIELDLIST) {
+      printf("Line %d, type violation\n", yylineno - 1);
+      return;
+    }
+    isField = 1;
+  }
+
   // Throw an error if the symbol isnt defined
   if (declared == NULL) {
-    if (token->type != TYPE_FIELD && token->type != TYPE_FIELDLIST && displayError) {
-      printf("Error (line %d): Attempting to define the value of a variable which has not been declared\n", yylineno);
+    if (token->type != TYPE_FIELD && token->type != TYPE_FIELDLIST && displayError && !isField) {
+      printf("Line %d, type violation\n", yylineno - 1);
     }
     declared = malloc(sizeof(Symbol));
     declared->name = strdup(name);
@@ -114,6 +153,7 @@ void defineSymbol(char* name, Token* token, int displayError) {
   if (declared->type == TYPE_FIELDLIST) {
     int i;
     for (i = 0; i < declared->value.fieldList->size; i++) {
+
       // holy jesus christ the spaghetti
       char* tname = strcatc(name, strcatc(".", declared->value.fieldList->list[i]->name));
 
@@ -124,12 +164,11 @@ void defineSymbol(char* name, Token* token, int displayError) {
       field->name = tname;
       field->type = declared->value.fieldList->list[i]->type;
 
-
       switch (field->type) {
         case TYPE_INTEGER:
           field->value.number = declared->value.fieldList->list[i]->value.number; break;
         case TYPE_STRING:
-          field->value.number = declared->value.fieldList->list[i]->value.string; break;
+          field->value.string = declared->value.fieldList->list[i]->value.string; break;
       }
 
       symbolTable[hashindex] = field;
@@ -143,12 +182,14 @@ void defineSymbol(char* name, Token* token, int displayError) {
 
 Token* getSymbol(char* name) {
   Symbol* s = symbolTable[hash(name)];
+  Token* t = malloc(sizeof(Token));
 
   if (s == NULL) {
-    printf("Error (line %d): Use of undeclared variable %s\n", yylineno, name);
+    printf("Line %d, type violation\n", yylineno);
+    t->type = TYPE_UNDEFINED;
+    return t;
   }
 
-  Token* t = malloc(sizeof(Token));
   t->type = s->type;
 
   switch (t->type) {
@@ -184,7 +225,7 @@ void printExpression(Token* token) {
     printf("undefined");
   }
   else {
-    printf("Error (line %d): Attempting to print a non-integer or string value\n");
+    printf("Line %d, type violation\n", yylineno);
   }
 }
 
@@ -197,7 +238,6 @@ Token addTokens(Token t1, Token t2) {
   if (t1.type == TYPE_INTEGER && t2.type == TYPE_INTEGER) {
     t1.value.number += t2.value.number;
   }
-
   else if (t1.type == TYPE_STRING && t2.type == TYPE_STRING) {
     char* newstr = malloc(strlen(t1.value.string) + strlen(t2.value.string));
     strcpy(newstr, t1.value.string);
@@ -205,10 +245,14 @@ Token addTokens(Token t1, Token t2) {
     t1.value.string = newstr;
   }
   else if (t1.type == TYPE_UNDEFINED) {
-    // Basically just return T1.
+    return t1;
   }
+  else if (t2.type == TYPE_UNDEFINED) {
+    return t2;
+  }
+
   else {
-    printf("Error (line %d): Attempting to apply addition to unsupported types\n", yylineno);
+    printf("Line %d, type violation\n", yylineno);
   }
 
   return t1;
@@ -222,7 +266,7 @@ Token subtractTokens(Token t1, Token t2) {
   }
 
   else {
-    printf("Error (line %d): Attempting to apply subtraction to unsupported types\n", yylineno);
+    printf("Line %d, type violation\n", yylineno);
   }
 
   return t1;
@@ -236,7 +280,7 @@ Token multiplyTokens(Token t1, Token t2) {
   }
 
   else {
-    printf("Error (line %d): Attempting to apply multiplication to unsupported types\n", yylineno);
+    printf("Line %d, type violation\n", yylineno);
   }
 
   return t1;
@@ -250,7 +294,7 @@ Token divideTokens(Token t1, Token t2) {
   }
 
   else {
-    printf("Error (line %d): Attempting to apply division to unsupported types\n", yylineno);
+    printf("Line %d, type violation\n", yylineno);
   }
 
   return t1;

@@ -39,7 +39,8 @@
 	return DOCUMENT_WRITE;
 }
 
-\"[^\"\n]*\" {
+\"(\\.|[^\\"\n])*\" {
+/*"[^\"\\n]*" {*/
 	debug("STRING ")
 	char* nstr = malloc(strlen(yytext));
 	memcpy(nstr, yytext + sizeof(char), strlen(yytext)-2);
@@ -50,7 +51,7 @@
 }
 
 "var"[ \t] {
-	/* the var keyword requires a space at the end. this is taken care of here */
+	/* the var keyword requires a	space at the end. this is taken care of here */
 	debug("VARDEF ")
 	val_res(RESERVE_VAR)
 	return VARDEF;

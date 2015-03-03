@@ -162,7 +162,7 @@ primary_expression:
 	| STRING
 	| variable_reference {
 		if ($1.type == TYPE_FIELDLIST) {
-			printf("Type Violation (line %d): Attempting to use object type in expression\n", yylineno);
+			printf("Line %d, type violation\n", yylineno);
 		}
 	}
 	| LPAREN expression RPAREN {
@@ -185,7 +185,9 @@ field_list:
 		addToFieldList($1.value.fieldList, &$2);
 		$$ = $1;
 	}
-	| /* empty */
+	| {
+		$$ = *newFieldList();
+	}
 ;
 
 interim_field_list:
@@ -224,7 +226,7 @@ void segvhandler(int sig, siginfo_t *si, void *unused) {
 }
 
 yyerror(char *s) {
-    fprintf(stderr, "error: %s, line: %d\n", s, yylineno);
+    fprintf(stderr, "%s\n", s);
     return 1;
 }
 

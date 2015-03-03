@@ -1,3 +1,4 @@
 <script type="text/JavaScript">
-var a = a;
+var a = {};
+a.b = 2;
 </script>
