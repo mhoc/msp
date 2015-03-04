@@ -8,3 +8,6 @@ lex.yy.c
 parser
 *.pyc
 y.go
+nex/nex
+miniscript.nn.go
+main
