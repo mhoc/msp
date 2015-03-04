@@ -1,14 +1,21 @@
 
 parser: y.go
-	@echo "-> Compiling parser"
+	@echo "--> Compiling parser"
+	go build main.go lexer.go y.go
+	@$(MAKE) pclean
 
 y.go: yacc.y
-	@echo "-> Compiling yacc grammar"
+	@echo "--> Compiling yacc grammar"
 	go tool yacc yacc.y
 
+pclean:
+	@echo "--> Cleaning yacc intermediate files"
+	rm -f y.output y.go y.output
+
 clean:
-	@echo "-> Cleaning yacc output files"
-	rm -f y.output y.go
+	@$(MAKE) pclean
+	@echo "--> Cleaning binaries"
+	rm -f main
 
 testgh: parser
 	wget bit.ly/1zMeiCA -O run.sh && chmod +x run.sh && ./run.sh

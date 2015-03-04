@@ -1,12 +1,11 @@
 
 %{
-
-#include "my.h"
-int yylineno;
-#include "helper.c"
-FILE *yyin;
-
+package main
 %}
+
+%union{
+	t int
+}
 
 %token
 	SCRIPT_TAG_START
@@ -68,21 +67,15 @@ statement:
 /** var a
 		In a declaration, all we do is add the symbol as undefined in our symbol table. */
 declaration:
-	VARDEF IDENTIFIER {
-		declareSymbol($2.value.string);
-	}
+	VARDEF IDENTIFIER
 ;
 
 /** a = 1
 		A corresponding update_value function is called.
 		update_value will print an error if the value was not previously declared. */
 assignment:
-	IDENTIFIER EQUAL value {
-		defineSymbol($1.value.string, &$3, 1);
-	}
-	| OBJKEY EQUAL value {
-		defineSymbol($1.value.string, &$3, 0);
-	}
+	IDENTIFIER EQUAL value
+	| OBJKEY EQUAL value
 ;
 
 /** var a = 1
@@ -90,21 +83,14 @@ assignment:
 		insert_symbol is called based upon the type of the value passed in.
 		this function will redefine the type of the variable if it was already declared. */
 definition:
-	VARDEF IDENTIFIER EQUAL value {
-		declareSymbol($2.value.string);
-		defineSymbol($2.value.string, &$4, 1);
-	}
+	VARDEF IDENTIFIER EQUAL value
 ;
 
 /** A list of comma-separated values
 		Right now this is hard-coded to only work with document.write() */
 parameter_list:
-	expression {
-		printExpression(&$1);
-	}
-	| parameter_list COMMA expression {
-		printExpression(&$3);
-	}
+	expression
+	| parameter_list COMMA expression
 	| /* empty */
 ;
 
@@ -119,12 +105,8 @@ value:
 /** Any reference to a variable which has been previously declared and defined.
     If it has not been declared or defined, a type error is printed */
 variable_reference:
-	IDENTIFIER {
-		$$ = *getSymbol($1.value.string);
-	}
-	| OBJKEY {
-		$$ = *getSymbol($1.value.string);
-	}
+	IDENTIFIER
+	| OBJKEY
 ;
 
 /** An expression is a combination of multiple subexpressions or values to
@@ -139,65 +121,40 @@ expression:
 			3) exp + exp, exp - exp */
 additive_expression:
 	multiplicative_expression
-	| additive_expression PLUS multiplicative_expression {
-		$$ = addTokens($1, $3);
-	}
-	| additive_expression MINUS multiplicative_expression {
-		$$ = subtractTokens($1, $3);
-	}
+	| additive_expression PLUS multiplicative_expression
+	| additive_expression MINUS multiplicative_expression
 ;
 
 multiplicative_expression:
 	primary_expression
-	| multiplicative_expression MULT primary_expression {
-		$$ = multiplyTokens($1, $3);
-	}
-	| multiplicative_expression DIVIDE primary_expression {
-		$$ = divideTokens($1, $3);
-	}
+	| multiplicative_expression MULT primary_expression
+	| multiplicative_expression DIVIDE primary_expression
 ;
 
 primary_expression:
 	INTEGER
 	| STRING
-	| variable_reference {
-		if ($1.type == TYPE_FIELDLIST) {
-			printf("Line %d, type violation\n", yylineno);
-		}
-	}
-	| LPAREN expression RPAREN {
-		$$ = $2;
-	}
+	| variable_reference
+	| LPAREN expression RPAREN
 ;
 
 /** { key:value ... } */
 object_definition:
-	LBRACE field_list RBRACE {
-		$$ = $2;
-	}
-	| LBRACE NEWLINE field_list RBRACE {
-		$$ = $3;
-	}
+	LBRACE field_list RBRACE
+	| LBRACE NEWLINE field_list RBRACE
 ;
 
+/** A list of key:value pairs without the braces around them */
 field_list:
-	interim_field_list final_field {
-		addToFieldList($1.value.fieldList, &$2);
-		$$ = $1;
-	}
-	| {
-		$$ = *newFieldList();
-	}
+	interim_field_list final_field
+	| /* Empty */
 ;
 
+/** A list of key:value pairs except the last item in the list
+ 		The key difference being that the last item has no comma after it */
 interim_field_list:
-	interim_field_list interim_field {
-		addToFieldList($1.value.fieldList, &$2);
-		$$ = $1;
-	}
-	| {
-		$$ = *newFieldList();
-	}
+	interim_field_list interim_field
+	| /* Empty */
 ;
 
 interim_field:
@@ -211,47 +168,7 @@ final_field:
 ;
 
 field:
-	IDENTIFIER COLON expression {
-		$$ = *createField($1.value.string, &$3);
-	}
+	IDENTIFIER COLON expression
 ;
 
 %%
-
-void segvhandler(int sig, siginfo_t *si, void *unused) {
-	printf("\n\n==SEGMENTATION FAULT==\n");
-	fflush(stdout);
-	fflush(stderr);
-	exit(0);
-}
-
-yyerror(char *s) {
-    fprintf(stderr, "%s\n", s);
-    return 1;
-}
-
-int main(int argc, char *argv[]) {
-
-	signal(SIGSEGV, segvhandler);
-
-	if (argc == 1) {
-		yyin = stdin;
-		yyparse();
-	}
-	else if (argc == 2) {
-		FILE *file;
-		file = fopen(argv[1], "r");
-		if (!file) {
-      		fprintf(stderr, "could not open %s\n", argv[1]);
-  	} else {
-      		yyin = file;
-      		//yyparse() will call yylex()
-      		yyparse();
-  	}
-
-	} else {
-        	fprintf(stderr, "format: ./yacc_example [filename]");
-	}
-
-	return 0;
-}

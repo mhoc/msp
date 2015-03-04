@@ -7,3 +7,4 @@ lex.yy.c
 *.output
 parser
 *.pyc
+y.go
