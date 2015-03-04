@@ -1,15 +1,14 @@
-parser: y.tab.c lex.yy.c helper.c my.h
-	gcc y.tab.c lex.yy.c -o parser -lfl -w
 
-y.tab.c: yacc.y
-	bison -y -d -g -t --verbose yacc.y
+parser: y.go
+	@echo "-> Compiling parser"
 
-lex.yy.c: lex.l
-	lex lex.l
+y.go: yacc.y
+	@echo "-> Compiling yacc grammar"
+	go tool yacc yacc.y
 
 clean:
-	rm -f lex.yy.c y.tab.c y.tab.h y.dot y.output parser y.vcg test.py cases.py cases.pyc
-	rm -rf tests
+	@echo "-> Cleaning yacc output files"
+	rm -f y.output y.go
 
 testgh: parser
 	wget bit.ly/1zMeiCA -O run.sh && chmod +x run.sh && ./run.sh
@@ -19,4 +18,3 @@ testlocal: parser
 	@cp ~/src/cs352-test-cases/cases.py .
 	python test.py
 	@$(MAKE) clean
-
