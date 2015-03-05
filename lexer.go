@@ -20,19 +20,43 @@ type yyLex struct {
 }
 
 func (x *yyLex) Lex(yylval *yySymType) int {
-  c := x.pop()
-  var found bool
-  var val int
 
-  // Lex all of the unique single characters
-  found, val = lexUniqueChar(c)
-  if found {
-    return val
+  buffer := new(bytes.Buffer)
+
+  for {
+    c := x.peek()
+
+    // If we read whitespace as the first thing, just ignore it
+    isWs, delim := isWhiteSpace(c)
+    if buffer.Len() == 0 && isWs {
+      x.pop()
+      continue
+    }
+
+    // If the first actual character we read is a "unique symbol" then
+    // we just return that symbol as what was lexed
+    isDelim, delim := isUniqueSymbol(c)
+    if buffer.Len() == 0 && isDelim {
+      x.pop()
+      return delim
+    }
+
+    // If the character we popped is a delimiter of some kind (whitespace or unique)
+    // and the buffer has something in it, then we return what was inside the buffer
+    // without popping the next character
+    if isWs || isDelim {
+      found, value := matchBuffer(buffer, yylval)
+      if found {
+        return value
+      } else {
+        return -1
+      }
+    }
+
+    // Now we can write the byte to the buffer
+    buffer.WriteByte(x.pop())
+
   }
-
-  // Build a buffer of
-  found, val = lexReservedWord(x.line)
-
 }
 
 func (x *yyLex) Error(msg string) {
@@ -55,7 +79,51 @@ func (x *yyLex) peek() byte {
   return x.line[0]
 }
 
-func lexUniqueChar(c byte) (bool, int) {
+func matchBuffer(buffer bytes.Buffer, yylval *yySymType) (bool, int) {
+
+  s := buffer.String()
+  found, value := isReservedWord(s, yylval)
+  if found {
+    return value
+  }
+
+  found, value := isIdentifier(s, yylval)
+  if found {
+    return value
+  }
+
+}
+
+func isIdentifier(s string, yylval *yySymType) (bool, int) {
+
+}
+
+func isReservedWord(s string, yllval *yySymType) (bool, int) {
+  switch s {
+    case "var":
+      return true, VARDEF
+    case "<script type=\"text/JavaScript\">":
+      return true, SCRIPT_TAG_START
+    case "</script>":
+      return true, SCRIPT_TAG_END
+    case "document.write":
+      return true, DOCUMENT_WRITE
+  }
+  return false, -1
+}
+
+func isWhiteSpace(c byte) (bool, int) {
+  switch c {
+    case ' ':
+    case '\t':
+      return true, WHITESPACE
+    case '\n':
+      return true, NEWLINE
+  }
+  return false, -1
+}
+
+func isUniqueSymbol(c byte) (bool, int) {
   switch c {
     case EOF:
       return true, EOF
@@ -85,19 +153,4 @@ func lexUniqueChar(c byte) (bool, int) {
       return true, RPAREN
   }
   return false, -1
-}
-
-func lexReservedWords(c byte) (bool, int) {
-
-  // We maintain a byte buffer of what we've seen going forward
-  add := func(b *bytes.Buffer, b byte) {
-		if _, err := b.WriteByte(b); err != nil {
-			log.Fatalf("WriteByte: %s", err)
-		}
-	}
-
-
-	var b bytes.Buffer
-	add(&b, c)
-
 }

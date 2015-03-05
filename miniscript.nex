@@ -1,10 +1,16 @@
 
-/\n/  {
-  nLines++; nChars++
+/\n+/ {
+  return NEWLINE
 }
-/./   {
-  nChars++
+
+/<script type=\"text\/JavaScript\">/ {
+  return SCRIPT_TAG_START
 }
+
+/<\/script>/ {
+  return SCRIPT_TAG_END
+}
+
 //
 
 package main
