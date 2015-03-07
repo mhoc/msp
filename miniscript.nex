@@ -1,14 +1,116 @@
 
 /\n+/ {
+  LogSyntax("NEWLINE\n")
   return NEWLINE
 }
 
 /<script type=\"text\/JavaScript\">/ {
+  LogSyntax("SCRIPT_TAG_START ")
+  lval.vtype = TYPE_RESERVED
   return SCRIPT_TAG_START
 }
 
 /<\/script>/ {
+  LogSyntax("SCRIPT_TAG_END ")
   return SCRIPT_TAG_END
+}
+
+/document\.write/ {
+  LogSyntax("DOCUMENT_WRITE ")
+  return DOCUMENT_WRITE
+}
+
+/var[ \t]/ {
+  LogSyntax("VARDEF ")
+  return VARDEF
+}
+
+/[ \t]+/ {
+  LogSyntax("")
+}
+
+/[0-9]+/ {
+  LogSyntax("INTEGER ")
+  return INTEGER
+}
+
+/[A-Za-z][A-Za-z0-9]*\.[A-Za-z][A-Za-z0-9]*/ {
+  LogSyntax("OBJKEY ")
+  return OBJKEY
+}
+
+/[A-Za-z][A-Za-z0-9_]*/ {
+  LogSyntax("IDEN ")
+  return IDENTIFIER
+}
+
+/\"(\\.|[^\\"\n])*\"/ {
+  LogSyntax("STRING ")
+  return STRING
+}
+
+/=/ {
+  LogSyntax("EQUAL ")
+  return EQUAL
+}
+
+/{/ {
+  LogSyntax("LBRACE ")
+  return LBRACE
+}
+
+/}/ {
+  LogSyntax("RBRACE ")
+  return RBRACE
+}
+
+/\(/ {
+  LogSyntax("LPAREN ")
+  return LPAREN
+}
+
+/\)/ {
+  LogSyntax("RPAREN ")
+}
+
+/,/ {
+  LogSyntax("COMMA ")
+  return COMMA
+}
+
+/\+/ {
+  LogSyntax("PLUS ")
+  return PLUS
+}
+
+/-/ {
+  LogSyntax("MINUS ")
+  return MINUS
+}
+
+/\*/ {
+  LogSyntax("MULT ")
+  return MULT
+}
+
+/\// {
+  LogSyntax("DIVIDE ")
+  return DIVIDE
+}
+
+/:/ {
+  LogSyntax("COLON ")
+  return COLON
+}
+
+/;/ {
+  LogSyntax("SEMICOLON ")
+  return SEMICOLON
+}
+
+/./ {
+  fmt.Printf("Uncaught character " + string(yylex.Text()[0]) + " ")
+  return int(yylex.Text()[0])
 }
 
 //
@@ -19,9 +121,3 @@ import (
   "fmt"
   "os"
 )
-
-func main() {
-  var nLines, nChars int
-  NN_FUN(NewLexer(os.Stdin))
-  fmt.Printf("%d %d\n", nLines, nChars)
-}

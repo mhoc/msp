@@ -1,25 +1,25 @@
 
-parser: main.go miniscript.nn.go
+parser: main.go miniscript.nn.go y.go logger.go
 	@echo "--> Compiling parser"
-	go build main.go y.go miniscript.nn.go
+	go build main.go y.go miniscript.nn.go logger.go
 	@$(MAKE) uclean
 
 y.go: yacc.y
 	@echo "--> Compiling yacc grammar"
 	go tool yacc yacc.y
 
-miniscript.nn.go: y.go miniscript.nex nexb
+miniscript.nn.go: miniscript.nex nexb
 	@echo "--> Creating lexical analyzer"
-	./nexb -r -s miniscript.nex
+	./nexb miniscript.nex
 
 nexb: nex/nex.go
 	@echo "--> Compiling nex lexical analyzer tool"
-	@cd nex && go build -o nexb nex.go
+	cd nex && go build -o nexb nex.go
 	@mv nex/nexb .
 
 uclean:
 	@echo "--> Cleaning yacc intermediate files"
-	rm -f y.output y.go 
+	rm -f y.output y.go
 	@echo "--> Cleaning nex intermediate files"
 	rm -f nexb miniscript.nn.go
 

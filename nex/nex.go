@@ -1,6 +1,6 @@
 
 // Nex is a f/lex-like replacment for golang available
-// at https://github.com/blynn/nex. 
+// at https://github.com/blynn/nex.
 
 // Substantial copy-and-paste from src/pkg/regexp.
 package main
@@ -765,7 +765,8 @@ func writeLex(out *bufio.Writer, root rule) {
 	if !*customError {
 		// TODO: I can't remember what this was for!
 		out.WriteString(`func (yylex Lexer) Error(e string) {
-  panic(e)
+  fmt.Printf(e)
+	os.Exit(0)
 }`)
 	}
 	out.WriteString(`
