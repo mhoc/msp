@@ -9,7 +9,7 @@ const (
   LOG_TRACE LogLevel = iota
 )
 
-var DisplayLevel []LogLevel = []LogLevel{ LOG_SYNTAX, LOG_TRACE }
+var DisplayLevel []LogLevel = []LogLevel{ LOG_TRACE }
 
 func contains(s []LogLevel, e LogLevel) bool {
     for _, a := range s { if a == e { return true } }
@@ -24,6 +24,6 @@ func LogSyntax(s string) {
 
 func LogTrace(s string) {
   if contains(DisplayLevel, LOG_TRACE) {
-    fmt.Printf(s)
+    fmt.Println(s)
   }
 }

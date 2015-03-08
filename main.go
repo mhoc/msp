@@ -2,11 +2,11 @@
 package main
 
 import (
-  "log"
   "os"
 )
 
 func main() {
+  LogTrace("Opening input file")
 
   // Parse command line arguments
   var file *os.File;
@@ -18,9 +18,10 @@ func main() {
   }
 
   if err != nil {
-    log.Panic("File name provided does not exist")
+    panic("File name provided does not exist")
   }
 
+  LogTrace("Beginning lex")
   yyParse(NewLexer(file))
 
 }
