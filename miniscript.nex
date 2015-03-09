@@ -1,110 +1,110 @@
 
 /\n+/ {
-  LogSyntax("NEWLINE\n")
+  log.Syntax("NEWLINE\n")
   return NEWLINE
 }
 
 /<script type=\"text\/JavaScript\">/ {
-  LogSyntax("SCRIPT_TAG_START ")
+  log.Syntax("SCRIPT_TAG_START ")
   lval.vtype = TYPE_RESERVED
   return SCRIPT_TAG_START
 }
 
 /<\/script>/ {
-  LogSyntax("SCRIPT_TAG_END ")
+  log.Syntax("SCRIPT_TAG_END ")
   return SCRIPT_TAG_END
 }
 
 /document\.write/ {
-  LogSyntax("DOCUMENT_WRITE ")
+  log.Syntax("DOCUMENT_WRITE ")
   return DOCUMENT_WRITE
 }
 
 /var[ \t]/ {
-  LogSyntax("VARDEF ")
+  log.Syntax("VARDEF ")
   return VARDEF
 }
 
 /[ \t]+/ {
-  LogSyntax("")
+  log.Syntax("")
 }
 
 /[0-9]+/ {
-  LogSyntax("INTEGER ")
+  log.Syntax("INTEGER ")
   return INTEGER
 }
 
 /[A-Za-z][A-Za-z0-9]*\.[A-Za-z][A-Za-z0-9]*/ {
-  LogSyntax("OBJKEY ")
+  log.Syntax("OBJKEY ")
   return OBJKEY
 }
 
 /[A-Za-z][A-Za-z0-9_]*/ {
-  LogSyntax("IDEN ")
+  log.Syntax("IDEN ")
   return IDENTIFIER
 }
 
 /\"(\\.|[^\\"\n])*\"/ {
-  LogSyntax("STRING ")
+  log.Syntax("STRING ")
   return STRING
 }
 
 /=/ {
-  LogSyntax("EQUAL ")
+  log.Syntax("EQUAL ")
   return EQUAL
 }
 
 /{/ {
-  LogSyntax("LBRACE ")
+  log.Syntax("LBRACE ")
   return LBRACE
 }
 
 /}/ {
-  LogSyntax("RBRACE ")
+  log.Syntax("RBRACE ")
   return RBRACE
 }
 
 /\(/ {
-  LogSyntax("LPAREN ")
+  log.Syntax("LPAREN ")
   return LPAREN
 }
 
 /\)/ {
-  LogSyntax("RPAREN ")
+  log.Syntax("RPAREN ")
 }
 
 /,/ {
-  LogSyntax("COMMA ")
+  log.Syntax("COMMA ")
   return COMMA
 }
 
 /\+/ {
-  LogSyntax("PLUS ")
+  log.Syntax("PLUS ")
   return PLUS
 }
 
 /-/ {
-  LogSyntax("MINUS ")
+  log.Syntax("MINUS ")
   return MINUS
 }
 
 /\*/ {
-  LogSyntax("MULT ")
+  log.Syntax("MULT ")
   return MULT
 }
 
 /\// {
-  LogSyntax("DIVIDE ")
+  log.Syntax("DIVIDE ")
   return DIVIDE
 }
 
 /:/ {
-  LogSyntax("COLON ")
+  log.Syntax("COLON ")
   return COLON
 }
 
 /;/ {
-  LogSyntax("SEMICOLON ")
+  log.Syntax("SEMICOLON ")
   return SEMICOLON
 }
 
@@ -120,4 +120,5 @@ package main
 import (
   "fmt"
   "os"
+  "mhoc.co/msp/log"
 )

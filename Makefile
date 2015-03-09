@@ -1,7 +1,7 @@
 
-parser: main.go miniscript.nn.go y.go logger.go
+parser: main.go miniscript.nn.go y.go
 	@echo "=== Compiling parser ===="
-	go build -o parser main.go y.go miniscript.nn.go logger.go
+	go build -o parser main.go y.go miniscript.nn.go
 	@$(MAKE) uclean
 
 y.go: yacc.y

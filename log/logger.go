@@ -1,7 +1,9 @@
 
-package main
+package log
 
-import "fmt"
+import (
+  "fmt"
+)
 
 type LogLevel int
 const (
@@ -16,13 +18,13 @@ func contains(s []LogLevel, e LogLevel) bool {
     return false
 }
 
-func LogSyntax(s string) {
+func Syntax(s string) {
   if contains(DisplayLevel, LOG_SYNTAX) {
     fmt.Printf(s)
   }
 }
 
-func LogTrace(s string) {
+func Trace(s string) {
   if contains(DisplayLevel, LOG_TRACE) {
     fmt.Println(s)
   }
