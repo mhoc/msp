@@ -5,27 +5,23 @@ import (
   "fmt"
 )
 
-type LogLevel int
 const (
-  LOG_SYNTAX LogLevel = iota
-  LOG_TRACE LogLevel = iota
+  LOG_SYNTAX bool = true
+  LOG_TRACE bool = false
 )
 
-var DisplayLevel []LogLevel = []LogLevel{ LOG_TRACE }
-
-func contains(s []LogLevel, e LogLevel) bool {
-    for _, a := range s { if a == e { return true } }
-    return false
-}
-
 func Syntax(s string) {
-  if contains(DisplayLevel, LOG_SYNTAX) {
+  if LOG_SYNTAX {
     fmt.Printf(s)
   }
 }
 
 func Trace(s string) {
-  if contains(DisplayLevel, LOG_TRACE) {
-    fmt.Println(s)
+  if LOG_TRACE {
+    fmt.Printf(s)
   }
+}
+
+func Traceln(s string) {
+  Trace(s + "\n")
 }
