@@ -1,8 +1,8 @@
 
 // Nex is a f/lex-like replacment for golang available
-// at https://github.com/blynn/nex.
+// at https://github.com/blynn/nex. The source code is copied here
+// and compiled during make due to customizations I have made
 
-// Substantial copy-and-paste from src/pkg/regexp.
 package main
 
 import (
