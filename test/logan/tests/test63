@@ -1,4 +1,0 @@
-<script type="text/JavaScript">
-var x = 1
-var a = x + 1 + "a"
-</script>

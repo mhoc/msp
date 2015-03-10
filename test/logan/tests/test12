@@ -1,4 +1,0 @@
-<script type="text/JavaScript">
-document.write("param 1", param2, 55)
-document.write("<br />")
-</script>

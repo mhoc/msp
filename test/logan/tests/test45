@@ -1,4 +1,0 @@
-<script type="text/JavaScript">
-var a = {a: "hey"}
-document.write(a.b, "<br />")
-</script>

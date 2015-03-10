@@ -1,3 +1,0 @@
-[submodule "test/integration"]
-	path = test/integration
-	url = git@github.com:mhoc/cs352-integration-test
