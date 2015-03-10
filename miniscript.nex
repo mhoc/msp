@@ -1,110 +1,136 @@
 
 /\n+/ {
-  log.Syntax("NEWLINE\n")
+  log.Token("NEWLINE\n")
+  log.Trace("Lexed newline", 1)
   return NEWLINE
 }
 
 /<script type=\"text\/JavaScript\">/ {
-  log.Syntax("SCRIPT_TAG_START ")
+  log.Token("SCRIPT_TAG_START ")
+  log.Trace("Lexed start script tag", 1)
   lval.vtype = TYPE_RESERVED
   return SCRIPT_TAG_START
 }
 
 /<\/script>/ {
-  log.Syntax("SCRIPT_TAG_END ")
+  log.Token("SCRIPT_TAG_END ")
+  log.Trace("Lexed end script tag", 1)
   return SCRIPT_TAG_END
 }
 
 /document\.write/ {
-  log.Syntax("DOCUMENT_WRITE ")
+  log.Token("DOCUMENT_WRITE ")
+  log.Trace("Lexed document write function call", 1)
   return DOCUMENT_WRITE
 }
 
 /var[ \t]/ {
-  log.Syntax("VARDEF ")
+  log.Token("VARDEF ")
+  log.Trace("Lexed var keyword", 1)
   return VARDEF
 }
 
 /[ \t]+/ {
-  log.Syntax("")
+  log.Token("")
 }
 
 /[0-9]+/ {
-  log.Syntax("INTEGER ")
+  log.Token("INTEGER ")
+  log.TokenData("(" + yylex.Text() + ") ")
+  log.Trace("Lexed integer " + yylex.Text(), 1)
   return INTEGER
 }
 
 /[A-Za-z][A-Za-z0-9]*\.[A-Za-z][A-Za-z0-9]*/ {
-  log.Syntax("OBJKEY ")
+  log.Token("OBJKEY ")
+  log.TokenData("(" + yylex.Text() + ") ")
+  log.Trace("Lexed object key " + yylex.Text(), 1)
   return OBJKEY
 }
 
 /[A-Za-z][A-Za-z0-9_]*/ {
-  log.Syntax("IDEN ")
+  log.Token("IDEN ")
+  log.TokenData("(" + yylex.Text() + ") ")
+  log.Trace("Lexed identifier " + yylex.Text(), 1)
   return IDENTIFIER
 }
 
 /\"(\\.|[^\\"\n])*\"/ {
-  log.Syntax("STRING ")
+  log.Token("STRING ")
+  log.TokenData("(" + yylex.Text() + ") ")
+  log.Trace("Lexed string " + yylex.Text(), 1)
   return STRING
 }
 
 /=/ {
-  log.Syntax("EQUAL ")
+  log.Token("EQUAL ")
+  log.Trace("Lexed equal sign", 1)
   return EQUAL
 }
 
 /{/ {
-  log.Syntax("LBRACE ")
+  log.Token("LBRACE ")
+  log.Trace("Lexed left brace", 1)
   return LBRACE
 }
 
 /}/ {
-  log.Syntax("RBRACE ")
+  log.Token("RBRACE ")
+  log.Trace("Lexed right brace", 1)
   return RBRACE
 }
 
 /\(/ {
-  log.Syntax("LPAREN ")
+  log.Token("LPAREN ")
+  log.Trace("Lexed left paren", 1)
   return LPAREN
 }
 
 /\)/ {
-  log.Syntax("RPAREN ")
+  log.Token("RPAREN ")
+  log.Trace("Lexed right paren", 1)
+  return RPAREN
 }
 
 /,/ {
-  log.Syntax("COMMA ")
+  log.Token("COMMA ")
+  log.Trace("Lexed comma", 1)
   return COMMA
 }
 
 /\+/ {
-  log.Syntax("PLUS ")
+  log.Token("PLUS ")
+  log.Trace("Lexed plus", 1)
   return PLUS
 }
 
 /-/ {
-  log.Syntax("MINUS ")
+  log.Token("MINUS ")
+  log.Trace("Lexed minus", 1)
   return MINUS
 }
 
 /\*/ {
-  log.Syntax("MULT ")
+  log.Token("MULT ")
+  log.Trace("Lexed mult", 1)
   return MULT
 }
 
 /\// {
-  log.Syntax("DIVIDE ")
+  log.Token("DIVIDE ")
+  log.Trace("Lexed divide", 1)
   return DIVIDE
 }
 
 /:/ {
-  log.Syntax("COLON ")
+  log.Token("COLON ")
+  log.Trace("Lexed colon", 1)
   return COLON
 }
 
 /;/ {
-  log.Syntax("SEMICOLON ")
+  log.Token("SEMICOLON ")
+  log.Trace("Lexed semicolon", 1)
   return SEMICOLON
 }
 

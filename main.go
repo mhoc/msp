@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-  log.Traceln("Opening input file")
+  log.Trace("Opening input file", 2)
 
   // Parse command line arguments
   var file *os.File;
@@ -22,7 +22,7 @@ func main() {
     panic("File name provided does not exist")
   }
 
-  log.Traceln("Beginning lex")
+  log.Trace("Beginning lex", 2)
   yyParse(NewLexer(file))
 
 }
