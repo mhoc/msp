@@ -15,8 +15,8 @@ import (
 const (
   LOG_TOKENS bool =           false
   LOG_EXPANDED_TOKENS bool =  false
-  LOG_TRACE_1 bool =          true
-  LOG_TRACE_2 bool =          true
+  LOG_TRACE_1 bool =          false
+  LOG_TRACE_2 bool =          false
 )
 
 func LogToken(s string) {

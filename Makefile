@@ -9,7 +9,8 @@ parser: main.go miniscript.nn.go y.go
 	@printf "> "
 	cp *.go src/mhoc.co/msp
 	@printf "> "
-	cp -r log src/mhoc.co/msp
+	cp -r token src/mhoc.co/msp
+	cp -r util src/mhoc.co/msp
 	@echo "Building parser binary"
 	@printf "> "
 	go build -o parser mhoc.co/msp

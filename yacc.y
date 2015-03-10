@@ -81,7 +81,6 @@ declaration:
 		update_value will print an error if the value was not previously declared. */
 assignment:
 	IDENTIFIER EQUAL value
-	| OBJKEY EQUAL value
 ;
 
 /** var a = 1
@@ -112,7 +111,6 @@ value:
     If it has not been declared or defined, a type error is printed */
 variable_reference:
 	IDENTIFIER
-	| OBJKEY
 ;
 
 /** An expression is a combination of multiple subexpressions or values to
