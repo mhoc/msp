@@ -3,32 +3,14 @@
 
 package main
 
-type ValueType int
-type ReservedWord int
-
-const (
-  TYPE_INTEGER ValueType = iota
-  TYPE_STRING ValueType = iota
-  TYPE_OBJECT ValueType = iota
-	TYPE_UNDEFINED ValueType = iota
-	TYPE_RESERVED ValueType = iota
-)
-
-const (
-	RESERVED_START_TAG ReservedWord = iota
-	RESERVED_END_TAG ReservedWord = iota
-	RESERVED_DOCUMENT_WRITE ReservedWord = iota
-	RESERVED_VARDEF ReservedWord = iota
+import (
+  "mhoc.co/msp/token"
 )
 
 %}
 
 %union {
-	vtype ValueType
-	n int
-	s string
-	c byte
-
+  t token.Token
 }
 
 %token
@@ -53,7 +35,6 @@ const (
 	LBRACE
 	RBRACE
 	COLON
-	OBJKEY
 
 %%
 

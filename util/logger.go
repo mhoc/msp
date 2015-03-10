@@ -1,5 +1,5 @@
 
-package log
+package util
 
 import (
   "fmt"
@@ -19,19 +19,19 @@ const (
   LOG_TRACE_2 bool =          true
 )
 
-func Token(s string) {
+func LogToken(s string) {
   if LOG_TOKENS {
     fmt.Printf(s)
   }
 }
 
-func TokenData(s string) {
+func LogTokenData(s string) {
   if LOG_EXPANDED_TOKENS {
     fmt.Printf(s)
   }
 }
 
-func Trace(s string, level int) {
+func LogTrace(s string, level int) {
   if level == 1 && LOG_TRACE_1 {
     fmt.Println(s)
   } else if level == 2 && LOG_TRACE_2 {

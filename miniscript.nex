@@ -41,14 +41,7 @@
   return INTEGER
 }
 
-/[A-Za-z][A-Za-z0-9]*\.[A-Za-z][A-Za-z0-9]*/ {
-  log.Token("OBJKEY ")
-  log.TokenData("(" + yylex.Text() + ") ")
-  log.Trace("Lexed object key " + yylex.Text(), 1)
-  return OBJKEY
-}
-
-/[A-Za-z][A-Za-z0-9_]*/ {
+/[A-Za-z][A-Za-z0-9\.]*/ {
   log.Token("IDEN ")
   log.TokenData("(" + yylex.Text() + ") ")
   log.Trace("Lexed identifier " + yylex.Text(), 1)
