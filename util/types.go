@@ -1,7 +1,11 @@
 
 package util
 
-/** Miscellaneous type definitions which don't deserve their own package */
+/** All type definitions for the compiler */
+
+type Token struct {
+  Value interface{}
+}
 
 // Objects are anything such as { a: 5, b: "hello" }
 // Our implementation supports nested objects
@@ -17,6 +21,12 @@ type Object map[string]interface{}
 // We dont store these inside objects, but instead simply use them for type
 // safety during the semantic parsing process
 type Field struct {
+  Name string
+  Value interface{}
+}
+
+// Symbols are what are stored in the symbol table when they are declared
+type Symbol struct {
   Name string
   Value interface{}
 }

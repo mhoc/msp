@@ -15,8 +15,7 @@ import (
 const (
   LOG_TOKENS bool =           false
   LOG_EXPANDED_TOKENS bool =  false
-  LOG_TRACE_1 bool =          false
-  LOG_TRACE_2 bool =          false
+  LOG_TRACE bool =            false
 )
 
 func LogToken(s string) {
@@ -31,10 +30,8 @@ func LogTokenData(s string) {
   }
 }
 
-func LogTrace(s string, level int) {
-  if level == 1 && LOG_TRACE_1 {
-    fmt.Println(s)
-  } else if level == 2 && LOG_TRACE_2 {
+func LogTrace(s string) {
+  if LOG_TRACE {
     fmt.Println(s)
   }
 }
