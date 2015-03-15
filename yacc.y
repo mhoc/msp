@@ -4,13 +4,14 @@
 package main
 
 import (
-  "mhoc.co/msp/token"
+  "fmt"
+  "mhoc.co/msp/ast"
 )
 
 %}
 
 %union {
-  t token.Token
+  n ast.Node
 }
 
 %token
@@ -73,7 +74,9 @@ statement:
 /** var a
 		In a declaration, all we do is add the symbol as undefined in our symbol table. */
 declaration:
-	VARDEF IDENTIFIER
+	VARDEF IDENTIFIER {
+    fmt.Println($2)
+  }
 ;
 
 /** a = 1

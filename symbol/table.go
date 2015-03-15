@@ -2,16 +2,15 @@
 package symbol
 
 import (
-  "fmt"
   "mhoc.co/msp/util"
 )
 
-var symbolTable map[string]Symbol*
+var symbolTable map[string]*util.Symbol
 
 // Declares a new variable in the symbol table with an undefined value
 func Declare(name string) {
   util.LogTrace("Declaring new symbol " + name)
-  symbolTable[name] = &Symbol{}
+  symbolTable[name] = &util.Symbol{}
 }
 
 func Define(name string, value interface{}) {

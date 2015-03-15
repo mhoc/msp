@@ -8,7 +8,8 @@ parser: main.go miniscript.nn.go y.go
 	@echo $(COLOR) Creating temp GOPATH fs structure to support multipackage compilation $(WHITE)
 	mkdir -p src/mhoc.co/msp
 	cp *.go src/mhoc.co/msp
-	cp -r token src/mhoc.co/msp
+	cp -r ast src/mhoc.co/msp
+	cp -r symbol src/mhoc.co/msp
 	cp -r util src/mhoc.co/msp
 	@echo $(COLOR) Building parser binary $(WHITE)
 	go build -o parser mhoc.co/msp

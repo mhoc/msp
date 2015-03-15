@@ -30,3 +30,23 @@ Just something to keep in mind.
 ## Cleaning
 
 `make clean`
+
+# General Compiler/AST Design
+
+yyLex is called from main which runs lex on an input file then uses go yacc to
+run semantic analysis. This process builds an AST for the input file. After
+the AST is built, we DFS-traverse the AST to execute each step.
+
+Each node in the ast is an ast.Node struct interface. This provides Execute()
+functionality among other things. Every struct which implements ast.Node implements
+an Execute() function which then "executes" that node, sometimes by re-calling
+Execute() on its children, sometimes by accessing the symbol table, etc etc.
+
+Here are the types of nodes we currently recognize:
+
+```
+StatementList
+Declaration
+
+
+```
