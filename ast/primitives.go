@@ -23,7 +23,7 @@ func (i Integer) Execute() interface{} {
 }
 
 func (i Integer) Print(p string) {
-  fmt.Printf("%s%d\n", p, i.Value)
+  fmt.Printf("%s[integer] %d\n", p, i.Value)
 }
 
 // ====================
@@ -38,7 +38,7 @@ func (s String) Execute() interface{} {
 }
 
 func (s String) Print(p string) {
-  fmt.Println(p + s.Value)
+  fmt.Println(p + "[string] " + s.Value)
 }
 
 // ====================

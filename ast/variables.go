@@ -1,13 +1,16 @@
 
 // Different usages of variables
-//  DECLARATIONS
-//  DEFINITIONS
-//  ASSIGNMENTS
-//  REFERENCES
+//  DECLARATION
+//  DEFINITION
+//  ASSIGNMENT
+//  REFERENCE
 
 package ast
 
-import "fmt"
+import (
+  "fmt"
+  "mhoc.co/msp/symbol"
+)
 
 // ====================
 // Variable declaration:: var a;
@@ -22,12 +25,12 @@ func (d Declaration) Execute() interface{} {
 }
 
 func (d Declaration) Print(p string) {
-  fmt.Println(p + "Declaration")
+  fmt.Println(p + "Declare")
   d.Var.Print(p + "| ")
 }
 
 // ====================
-// Variable Definition:: var a = 1
+// Variable Definition:: [var a = 1]
 // Definitions are essentially just typedefed assignments in this language,
 // But the Execute() function is different
 // ====================
@@ -43,14 +46,14 @@ func (d Definition) Execute() interface{} {
 }
 
 func (d Definition) Print(p string) {
-  fmt.Println(p + "Definition")
+  fmt.Println(p + "Define")
   d.Decl.Print(p + "| ")
   d.AssignNode.Print(p + "| ")
 }
 
 // ====================
-// Equals, Assignment:: a    =  1
-//                      LHS     RHS
+// Equals, Assignment:: var [a    =  1]
+//                          LHS     RHS
 // ====================
 type Assignment struct {
   Lhs *Variable
@@ -70,19 +73,19 @@ func (a Assignment) Print(p string) {
 }
 
 // ====================
-// Variable reference:: var something = myvar;
+// Variable reference:: var something = [myvar];
 // ====================
 type Reference struct {
   Var *Variable
   Value interface{}
 }
 
-func (vr VarReference) Execute() interface{} {
+func (vr Reference) Execute() interface{} {
   // TODO: GET Value of variable
   return vr.Value
 }
 
-func (vr VarReference) Print(p string) {
+func (vr Reference) Print(p string) {
   switch vr.Value.(type) {
     case int:
       fmt.Println(p + vr.Var.VariableName + "=" + string(vr.Value.(int)))

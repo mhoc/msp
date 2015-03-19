@@ -89,7 +89,10 @@ statement:
 	declaration
 	| assignment
 	| definition
-	| DOCUMENT_WRITE LPAREN parameter_list RPAREN
+	| DOCUMENT_WRITE LPAREN parameter_list RPAREN {
+    $3.N.(*ast.FunctionCall).Name = "document.write"
+    $$.N = $3.N
+  }
 ;
 
 /** var a
@@ -130,9 +133,18 @@ definition:
 /** A list of comma-separated values
 		Right now this is hard-coded to only work with document.write() */
 parameter_list:
-	expression
-	| parameter_list COMMA expression
-	| /* empty */
+	expression {
+    fc := &ast.FunctionCall{Args: make([]ast.Node, 0, 0)}
+    fc.Args = append(fc.Args, $1.N)
+    $$.N = fc
+  }
+	| parameter_list COMMA expression {
+    $1.N.(*ast.FunctionCall).Args = append($1.N.(*ast.FunctionCall).Args, $3.N)
+    $$.N = $1.N
+  }
+	| {
+    $$.N = &ast.FunctionCall{Args: make([]ast.Node, 0, 0)}
+  }
 ;
 
 /** A value is any entity which can be assigned to a variable.

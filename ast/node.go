@@ -4,11 +4,6 @@
 
 package ast
 
-import (
-  "fmt"
-  "mhoc.co/msp/symbol"
-)
-
 // ====================
 // Every Node in our AST decends from this Node interface
 // ====================
