@@ -6,12 +6,13 @@ package main
 import (
   "fmt"
   "mhoc.co/msp/ast"
+  "mhoc.co/msp/util"
 )
 
 %}
 
 %union {
-  n ast.Node
+  N ast.Node
 }
 
 %token
@@ -39,18 +40,38 @@ import (
 
 %%
 
+/** After the entire thing is finished, log the AST if we want to */
+target:
+  file {
+    fmt.Print("")
+    if util.LOG_AST {
+      $1.N.Print("")
+    }
+  }
+;
+
 /** A file is the entire thing we are parsing.
 		It takes care of the script tags at the start and end. */
 file:
-	SCRIPT_TAG_START NEWLINE program SCRIPT_TAG_END
-	| SCRIPT_TAG_START NEWLINE program SCRIPT_TAG_END NEWLINE
-	| NEWLINE SCRIPT_TAG_START NEWLINE program SCRIPT_TAG_END NEWLINE
+	SCRIPT_TAG_START NEWLINE program SCRIPT_TAG_END {
+    $$ = $3
+  }
+	| SCRIPT_TAG_START NEWLINE program SCRIPT_TAG_END NEWLINE {
+    $$ = $3
+  }
+	| NEWLINE SCRIPT_TAG_START NEWLINE program SCRIPT_TAG_END NEWLINE {
+    $$ = $4
+  }
 ;
 
 /** A program is a series of lines, each followed by a newline. */
 program:
-	program line NEWLINE
-	| /* Empty */
+	program line NEWLINE {
+    $$.N.(*ast.StatementList).List = append($1.N.(*ast.StatementList).List, $2.N)
+  }
+	| {
+    $$.N = &ast.StatementList{List: make([]ast.Node, 0, 2)}
+  }
 ;
 
 /** Each line is a statement terminated by an optional semicolon.
@@ -74,9 +95,7 @@ statement:
 /** var a
 		In a declaration, all we do is add the symbol as undefined in our symbol table. */
 declaration:
-	VARDEF IDENTIFIER {
-    fmt.Println($2)
-  }
+	VARDEF IDENTIFIER
 ;
 
 /** a = 1
@@ -91,7 +110,13 @@ assignment:
 		insert_symbol is called based upon the type of the value passed in.
 		this function will redefine the type of the variable if it was already declared. */
 definition:
-	VARDEF IDENTIFIER EQUAL value
+	VARDEF IDENTIFIER EQUAL value {
+    assign := &ast.Assignment{}
+    assign.Lhs = $2.N.(*ast.Declaration)
+    assign.Rhs = $4.N
+    def := &ast.Definition{AssignNode: assign}
+    $$.N = def
+  }
 ;
 
 /** A list of comma-separated values

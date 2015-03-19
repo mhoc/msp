@@ -1,3 +1,4 @@
 <script type="text/JavaScript">
-var a;
+var a = "hello"
+var b = 5
 </script>

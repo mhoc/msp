@@ -37,6 +37,8 @@
   util.LogToken("INTEGER ")
   util.LogTokenData("(" + yylex.Text() + ") ")
   util.LogTrace("Lexed integer " + yylex.Text())
+  value, _ := strconv.Atoi(yylex.Text())
+  lval.N = &ast.Integer{Value: value}
   return INTEGER
 }
 
@@ -44,6 +46,7 @@
   util.LogToken("IDEN ")
   util.LogTokenData("(" + yylex.Text() + ") ")
   util.LogTrace("Lexed identifier " + yylex.Text())
+  lval.N = &ast.Declaration{VariableName: yylex.Text()}
   return IDENTIFIER
 }
 
@@ -51,6 +54,7 @@
   util.LogToken("STRING ")
   util.LogTokenData("(" + yylex.Text() + ") ")
   util.LogTrace("Lexed string " + yylex.Text())
+  lval.N = &ast.String{Value: yylex.Text()[1:len(yylex.Text())-1]}
   return STRING
 }
 
@@ -137,5 +141,7 @@ package main
 import (
   "fmt"
   "os"
+  "strconv"
+  "mhoc.co/msp/ast"
   "mhoc.co/msp/util"
 )

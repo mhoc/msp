@@ -22,7 +22,7 @@ type Node interface {
 
   // We provide printing functionality for a visual representation of the AST contained
   // in ast/print.go. The process for this is very similar to Execute()
-  Print()
+  Print(prefix string)
 
 }
 
@@ -34,17 +34,48 @@ type StatementList struct {
   List []Node
 }
 
-func (s *StatementList) Execute() interface{} {
+func (s StatementList) Execute() interface{} {
   for _, child := range s.List {
     child.Execute()
   }
   return nil
 }
 
-func (s *StatementList) Print() {
+func (s StatementList) Print(p string) {
   for _, child := range s.List {
-    child.Print()
+    fmt.Println("Statement")
+    child.Print("| ")
   }
+}
+
+// ====================
+// Integer. Any static integer inside the code.
+// ====================
+type Integer struct {
+  Value int
+}
+
+func (i Integer) Execute() interface{} {
+  return i.Value
+}
+
+func (i Integer) Print(p string) {
+  fmt.Printf("%s%d\n", p, i.Value)
+}
+
+// ====================
+// String. Any static string inside the code.
+// ====================
+type String struct {
+  Value string
+}
+
+func (s String) Execute() interface{} {
+  return s.Value
+}
+
+func (s String) Print(p string) {
+  fmt.Println(p + s.Value)
 }
 
 // ====================
@@ -54,11 +85,76 @@ type Declaration struct {
   VariableName string
 }
 
-func (d *Declaration) Execute() interface{} {
+func (d Declaration) Execute() interface{} {
   symbol.Declare(d.VariableName)
   return d.VariableName
 }
 
-func (d *Declaration) Print() {
-  fmt.Println(d.VariableName)
+func (d Declaration) Print(p string) {
+  fmt.Println(p + d.VariableName)
+}
+
+// ====================
+// Variable Definition:: var a = 1
+// Definitions are essentially just typedefed assignments in this language,
+// But the Execute() function is different
+// ====================
+type Definition struct {
+  AssignNode *Assignment
+}
+
+func (d Definition) Execute() interface{} {
+  // TODO Declare Variable
+  // TODO Assign Variable
+  return nil
+}
+
+func (d Definition) Print(p string) {
+  fmt.Println(p + "Definition")
+  d.AssignNode.Print(p + "| ")
+}
+
+// ====================
+// Variable reference:: var something = myvar;
+// ====================
+type VarReference struct {
+  VariableName string
+  Value interface{}
+}
+
+func (vr VarReference) Execute() interface{} {
+  // TODO: GET Value of variable
+  return vr.Value
+}
+
+func (vr VarReference) Print(p string) {
+  switch vr.Value.(type) {
+    case int:
+      fmt.Println(p + vr.VariableName + "=" + string(vr.Value.(int)))
+      break
+    case string:
+      fmt.Println(p + vr.VariableName + "=" + vr.Value.(string))
+      break
+  }
+}
+
+// ====================
+// Equals, Assignment:: a    =  1
+//                      LHS     RHS
+// ====================
+type Assignment struct {
+  Lhs *Declaration
+  Rhs Node
+}
+
+func (a Assignment) Execute() interface{} {
+  // Reset the value at lhs to be rhs
+  // Return nothing
+  return nil
+}
+
+func (a Assignment) Print(p string) {
+  fmt.Println(p + "Assign")
+  a.Lhs.Print(p + "| ")
+  a.Rhs.Print(p + "| ")
 }

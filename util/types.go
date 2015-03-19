@@ -4,6 +4,7 @@ package util
 /** All type definitions for the compiler */
 
 type Token struct {
+  Type int
   Value interface{}
 }
 
