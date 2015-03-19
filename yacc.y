@@ -71,7 +71,7 @@ program:
 	program line NEWLINE {
     $$.N.(*ast.StatementList).List = append($1.N.(*ast.StatementList).List, $2.N)
   }
-	| {
+  | {
     $$.N = &ast.StatementList{List: make([]ast.Node, 0, 2)}
   }
 ;

@@ -1,7 +1,9 @@
 
-/\n+/ {
+/\n/ {
   log.Token("NEWLINE\n")
   log.Trace("Lexed newline")
+  log.LineNo++
+  fmt.Printf("%d ", log.LineNo)
   return NEWLINE
 }
 
@@ -34,7 +36,7 @@
 }
 
 /[0-9]+/ {
-  log.Token("INTEGER[" + yylex.Text() + "]")
+  log.Token("INTEGER[" + yylex.Text() + "] ")
   log.Trace("Lexed integer " + yylex.Text())
   value, _ := strconv.Atoi(yylex.Text())
   lval.N = &ast.Integer{Value: value}
@@ -42,14 +44,14 @@
 }
 
 /[A-Za-z][A-Za-z0-9\.]*/ {
-  log.Token("IDENTIFIER[" + yylex.Text() + "]")
+  log.Token("IDENTIFIER[" + yylex.Text() + "] ")
   log.Trace("Lexed identifier " + yylex.Text())
   lval.N = &ast.Variable{VariableName: yylex.Text()}
   return IDENTIFIER
 }
 
 /\"(\\.|[^\\"\n])*\"/ {
-  log.Token("STRING[" + yylex.Text() + "]")
+  log.Token("STRING[" + yylex.Text() + "] ")
   log.Trace("Lexed string " + yylex.Text())
   lval.N = &ast.String{Value: yylex.Text()[1:len(yylex.Text())-1]}
   return STRING

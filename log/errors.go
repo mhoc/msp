@@ -47,6 +47,11 @@ const (
   CONDITION ErrorType = iota
 )
 
+// The line we are currently lexing
+// Nex offers this functionality in a struct but it isn't exported
+// from the package, and we need it here in errors
+var LineNo int = 1
+
 var Stmt int = 0
 var lastLogged int = -1
 

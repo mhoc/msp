@@ -1,6 +1,10 @@
 <script type="text/JavaScript">
 var a = "hello"
 var b
+
 b = 555
-var c = {d: 5, e: "hello"}
+
+var c = {d: 5,
+e: "hello"}
+
 </script>
