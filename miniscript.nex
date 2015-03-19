@@ -46,7 +46,7 @@
   util.LogToken("IDEN ")
   util.LogTokenData("(" + yylex.Text() + ") ")
   util.LogTrace("Lexed identifier " + yylex.Text())
-  lval.N = &ast.Declaration{VariableName: yylex.Text()}
+  lval.N = &ast.Variable{VariableName: yylex.Text()}
   return IDENTIFIER
 }
 

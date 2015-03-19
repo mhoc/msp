@@ -49,49 +49,20 @@ func (s StatementList) Print(p string) {
 }
 
 // ====================
-// Integer. Any static integer inside the code.
-// ====================
-type Integer struct {
-  Value int
-}
-
-func (i Integer) Execute() interface{} {
-  return i.Value
-}
-
-func (i Integer) Print(p string) {
-  fmt.Printf("%s%d\n", p, i.Value)
-}
-
-// ====================
-// String. Any static string inside the code.
-// ====================
-type String struct {
-  Value string
-}
-
-func (s String) Execute() interface{} {
-  return s.Value
-}
-
-func (s String) Print(p string) {
-  fmt.Println(p + s.Value)
-}
-
-// ====================
 // Variable declaration:: var a;
 // ====================
 type Declaration struct {
-  VariableName string
+  Var *Variable
 }
 
 func (d Declaration) Execute() interface{} {
-  symbol.Declare(d.VariableName)
-  return d.VariableName
+  symbol.Declare(d.Var.VariableName)
+  return d.Var.VariableName
 }
 
 func (d Declaration) Print(p string) {
-  fmt.Println(p + d.VariableName)
+  fmt.Println(p + "Declaration")
+  d.Var.Print(p + "| ")
 }
 
 // ====================
@@ -100,6 +71,7 @@ func (d Declaration) Print(p string) {
 // But the Execute() function is different
 // ====================
 type Definition struct {
+  Decl *Declaration
   AssignNode *Assignment
 }
 
@@ -111,31 +83,8 @@ func (d Definition) Execute() interface{} {
 
 func (d Definition) Print(p string) {
   fmt.Println(p + "Definition")
+  d.Decl.Print(p + "| ")
   d.AssignNode.Print(p + "| ")
-}
-
-// ====================
-// Variable reference:: var something = myvar;
-// ====================
-type VarReference struct {
-  VariableName string
-  Value interface{}
-}
-
-func (vr VarReference) Execute() interface{} {
-  // TODO: GET Value of variable
-  return vr.Value
-}
-
-func (vr VarReference) Print(p string) {
-  switch vr.Value.(type) {
-    case int:
-      fmt.Println(p + vr.VariableName + "=" + string(vr.Value.(int)))
-      break
-    case string:
-      fmt.Println(p + vr.VariableName + "=" + vr.Value.(string))
-      break
-  }
 }
 
 // ====================
@@ -143,7 +92,7 @@ func (vr VarReference) Print(p string) {
 //                      LHS     RHS
 // ====================
 type Assignment struct {
-  Lhs *Declaration
+  Lhs *Variable
   Rhs Node
 }
 
@@ -157,4 +106,28 @@ func (a Assignment) Print(p string) {
   fmt.Println(p + "Assign")
   a.Lhs.Print(p + "| ")
   a.Rhs.Print(p + "| ")
+}
+
+// ====================
+// Variable reference:: var something = myvar;
+// ====================
+type VarReference struct {
+  Var *Variable
+  Value interface{}
+}
+
+func (vr VarReference) Execute() interface{} {
+  // TODO: GET Value of variable
+  return vr.Value
+}
+
+func (vr VarReference) Print(p string) {
+  switch vr.Value.(type) {
+    case int:
+      fmt.Println(p + vr.Var.VariableName + "=" + string(vr.Value.(int)))
+      break
+    case string:
+      fmt.Println(p + vr.Var.VariableName + "=" + vr.Value.(string))
+      break
+  }
 }

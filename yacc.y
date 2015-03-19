@@ -95,14 +95,22 @@ statement:
 /** var a
 		In a declaration, all we do is add the symbol as undefined in our symbol table. */
 declaration:
-	VARDEF IDENTIFIER
+	VARDEF IDENTIFIER {
+    decl := &ast.Declaration{Var: $2.N.(*ast.Variable)}
+    $$.N = decl
+  }
 ;
 
 /** a = 1
 		A corresponding update_value function is called.
 		update_value will print an error if the value was not previously declared. */
 assignment:
-	IDENTIFIER EQUAL value
+	IDENTIFIER EQUAL value {
+    assign := &ast.Assignment{}
+    assign.Lhs = $1.N.(*ast.Variable)
+    assign.Rhs = $3.N
+    $$.N = assign
+  }
 ;
 
 /** var a = 1
@@ -112,9 +120,9 @@ assignment:
 definition:
 	VARDEF IDENTIFIER EQUAL value {
     assign := &ast.Assignment{}
-    assign.Lhs = $2.N.(*ast.Declaration)
+    assign.Lhs = $2.N.(*ast.Variable)
     assign.Rhs = $4.N
-    def := &ast.Definition{AssignNode: assign}
+    def := &ast.Definition{Decl: &ast.Declaration{Var: $2.N.(*ast.Variable)}, AssignNode: assign}
     $$.N = def
   }
 ;
