@@ -86,12 +86,17 @@ func (vr Reference) Execute() interface{} {
 }
 
 func (vr Reference) Print(p string) {
+  fmt.Printf(p + "Reference\n")
+  vr.Var.Print(p + "| ")
   switch vr.Value.(type) {
     case int:
-      fmt.Println(p + vr.Var.VariableName + "=" + string(vr.Value.(int)))
+      fmt.Println(p + "| " + string(vr.Value.(int)))
       break
     case string:
-      fmt.Println(p + vr.Var.VariableName + "=" + vr.Value.(string))
+      fmt.Println(p + "| " + vr.Value.(string))
       break
+    default:
+      fmt.Println("Error: Referencing variable not of type string or int")
   }
+
 }

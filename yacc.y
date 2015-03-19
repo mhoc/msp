@@ -47,6 +47,8 @@ target:
     if util.LOG_AST {
       $1.N.Print("")
     }
+    // Execute the AST
+    //$1.N.Execute()
   }
 ;
 
@@ -192,21 +194,35 @@ primary_expression:
 
 /** { key:value ... } */
 object_definition:
-	LBRACE field_list RBRACE
-	| LBRACE NEWLINE field_list RBRACE
+	LBRACE field_list RBRACE {
+    $$.N = $2.N
+  }
+	| LBRACE NEWLINE field_list RBRACE {
+    $$.N = $3.N
+  }
 ;
 
 /** A list of key:value pairs without the braces around them */
 field_list:
-	interim_field_list final_field
-	| /* Empty */
+	interim_field_list final_field {
+    $1.N.(*ast.Object).Map[$2.N.(*ast.Field).FieldName] = $2.N.(*ast.Field).FieldValue
+    $$.N = $1.N
+  }
+	| {
+    $$.N = &ast.Object{Map: make(map[string]ast.Node)}
+  }
 ;
 
 /** A list of key:value pairs except the last item in the list
  		The key difference being that the last item has no comma after it */
 interim_field_list:
-	interim_field_list interim_field
-	| /* Empty */
+	interim_field_list interim_field {
+    $1.N.(*ast.Object).Map[$2.N.(*ast.Field).FieldName] = $2.N.(*ast.Field).FieldValue
+    $$.N = $1.N
+  }
+	| {
+    $$.N = &ast.Object{Map: make(map[string]ast.Node)}
+  }
 ;
 
 interim_field:
@@ -220,7 +236,9 @@ final_field:
 ;
 
 field:
-	IDENTIFIER COLON expression
+	IDENTIFIER COLON expression {
+    $$.N = &ast.Field{FieldName: $1.N.(*ast.Variable).VariableName, FieldValue: $3.N}
+  }
 ;
 
 %%

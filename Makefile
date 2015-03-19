@@ -38,4 +38,4 @@ uclean:
 
 clean: uclean
 	@echo $(COLOR) Deleting parser binary $(WHITE)
-	rm -f main
+	rm -f parser

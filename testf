@@ -2,5 +2,5 @@
 var a = "hello"
 var b
 b = 555
-document.write(a,b)
+var c = {d: 5, e: "hello"}
 </script>
