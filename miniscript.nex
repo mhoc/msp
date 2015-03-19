@@ -1,132 +1,129 @@
 
 /\n+/ {
-  util.LogToken("NEWLINE\n")
-  util.LogTrace("Lexed newline")
+  log.Token("NEWLINE\n")
+  log.Trace("Lexed newline")
   return NEWLINE
 }
 
 /<script type=\"text\/JavaScript\">/ {
-  util.LogToken("SCRIPT_TAG_START ")
-  util.LogTrace("Lexed start script tag")
+  log.Token("SCRIPT_TAG_START ")
+  log.Trace("Lexed start script tag")
   return SCRIPT_TAG_START
 }
 
 /<\/script>/ {
-  util.LogToken("SCRIPT_TAG_END ")
-  util.LogTrace("Lexed end script tag")
+  log.Token("SCRIPT_TAG_END ")
+  log.Trace("Lexed end script tag")
   return SCRIPT_TAG_END
 }
 
 /document\.write/ {
-  util.LogToken("DOCUMENT_WRITE ")
-  util.LogTrace("Lexed document write function call")
+  log.Token("DOCUMENT_WRITE ")
+  log.Trace("Lexed document write function call")
   return DOCUMENT_WRITE
 }
 
 /var[ \t]/ {
-  util.LogToken("VARDEF ")
-  util.LogTrace("Lexed var keyword")
+  log.Token("VARDEF ")
+  log.Trace("Lexed var keyword")
   return VARDEF
 }
 
 /[ \t]+/ {
-  util.LogToken("")
+  log.Token("")
 }
 
 /[0-9]+/ {
-  util.LogToken("INTEGER ")
-  util.LogTokenData("(" + yylex.Text() + ") ")
-  util.LogTrace("Lexed integer " + yylex.Text())
+  log.Token("INTEGER[" + yylex.Text() + "]")
+  log.Trace("Lexed integer " + yylex.Text())
   value, _ := strconv.Atoi(yylex.Text())
   lval.N = &ast.Integer{Value: value}
   return INTEGER
 }
 
 /[A-Za-z][A-Za-z0-9\.]*/ {
-  util.LogToken("IDEN ")
-  util.LogTokenData("(" + yylex.Text() + ") ")
-  util.LogTrace("Lexed identifier " + yylex.Text())
+  log.Token("IDENTIFIER[" + yylex.Text() + "]")
+  log.Trace("Lexed identifier " + yylex.Text())
   lval.N = &ast.Variable{VariableName: yylex.Text()}
   return IDENTIFIER
 }
 
 /\"(\\.|[^\\"\n])*\"/ {
-  util.LogToken("STRING ")
-  util.LogTokenData("(" + yylex.Text() + ") ")
-  util.LogTrace("Lexed string " + yylex.Text())
+  log.Token("STRING[" + yylex.Text() + "]")
+  log.Trace("Lexed string " + yylex.Text())
   lval.N = &ast.String{Value: yylex.Text()[1:len(yylex.Text())-1]}
   return STRING
 }
 
 /=/ {
-  util.LogToken("EQUAL ")
-  util.LogTrace("Lexed equal sign")
+  log.Token("EQUAL ")
+  log.Trace("Lexed equal sign")
   return EQUAL
 }
 
 /{/ {
-  util.LogToken("LBRACE ")
-  util.LogTrace("Lexed left brace")
+  log.Token("LBRACE ")
+  log.Trace("Lexed left brace")
   return LBRACE
 }
 
 /}/ {
-  util.LogToken("RBRACE ")
-  util.LogTrace("Lexed right brace")
+  log.Token("RBRACE ")
+  log.Trace("Lexed right brace")
   return RBRACE
 }
 
 /\(/ {
-  util.LogToken("LPAREN ")
-  util.LogTrace("Lexed left paren")
+  log.Token("LPAREN ")
+  log.Trace("Lexed left paren")
   return LPAREN
 }
 
 /\)/ {
-  util.LogToken("RPAREN ")
-  util.LogTrace("Lexed right paren")
+  log.Token("RPAREN ")
+  log.Trace("Lexed right paren")
   return RPAREN
 }
 
 /,/ {
-  util.LogToken("COMMA ")
-  util.LogTrace("Lexed comma")
+  log.Token("COMMA ")
+  log.Trace("Lexed comma")
   return COMMA
 }
 
 /\+/ {
-  util.LogToken("PLUS ")
-  util.LogTrace("Lexed plus")
+  log.Token("PLUS ")
+  log.Trace("Lexed plus")
   return PLUS
 }
 
 /-/ {
-  util.LogToken("MINUS ")
-  util.LogTrace("Lexed minus")
+  log.Token("MINUS ")
+  log.Trace("Lexed minus")
   return MINUS
 }
 
 /\*/ {
-  util.LogToken("MULT ")
-  util.LogTrace("Lexed mult")
+  log.Token("MULT ")
+  log.Trace("Lexed mult")
   return MULT
 }
 
 /\// {
-  util.LogToken("DIVIDE ")
-  util.LogTrace("Lexed divide")
+  log.Token("DIVIDE ")
+  log.Trace("Lexed divide")
   return DIVIDE
 }
 
 /:/ {
-  util.LogToken("COLON ")
-  util.LogTrace("Lexed colon")
+  log.Token("COLON ")
+  log.Trace("Lexed colon")
   return COLON
 }
 
 /;/ {
-  util.LogToken("SEMICOLON ")
-  util.LogTrace("Lexed semicolon")
+  log.Token("SEMICOLON ")
+  log.Trace("Lexed semicolon")
   return SEMICOLON
 }
 
@@ -143,5 +140,5 @@ import (
   "os"
   "strconv"
   "mhoc.co/msp/ast"
-  "mhoc.co/msp/util"
+  "mhoc.co/msp/log"
 )

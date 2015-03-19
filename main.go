@@ -3,11 +3,11 @@ package main
 
 import (
   "os"
-  "mhoc.co/msp/util"
+  "mhoc.co/msp/log"
 )
 
 func main() {
-  util.LogTrace("Opening input file")
+  log.Trace("Opening input file")
 
   // Parse command line arguments
   var file *os.File;
@@ -22,7 +22,7 @@ func main() {
     panic("File name provided does not exist")
   }
 
-  util.LogTrace("Beginning lex")
+  log.Trace("Beginning lex")
   yyParse(NewLexer(file))
 
 }

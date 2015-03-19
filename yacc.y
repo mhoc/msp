@@ -6,7 +6,7 @@ package main
 import (
   "fmt"
   "mhoc.co/msp/ast"
-  "mhoc.co/msp/util"
+  "mhoc.co/msp/log"
 )
 
 %}
@@ -44,7 +44,7 @@ import (
 target:
   file {
     fmt.Print("")
-    if util.LOG_AST {
+    if log.LOG_AST {
       $1.N.Print("")
     }
     // Execute the AST

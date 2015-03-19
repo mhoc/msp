@@ -1,5 +1,5 @@
 
-package util
+package log
 
 import (
   "fmt"
@@ -12,7 +12,7 @@ func CompilerError(s string) {
 }
 
 func TypeViolation(line int) {
-  
+
 }
 
 func InternalError(s string) {

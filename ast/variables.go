@@ -9,7 +9,7 @@ package ast
 
 import (
   "fmt"
-  "mhoc.co/msp/symbol"
+
 )
 
 // ====================
@@ -20,7 +20,7 @@ type Declaration struct {
 }
 
 func (d Declaration) Execute() interface{} {
-  symbol.Declare(d.Var.VariableName)
+  //symbol.Declare(d.Var.VariableName)
   return d.Var.VariableName
 }
 
