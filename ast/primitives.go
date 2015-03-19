@@ -1,4 +1,10 @@
 
+// Primitive types in the language
+// aka anything which the lexer directly returns with no semantic parsing knowledge
+// INTEGER
+// STRING
+// VARIABLE
+
 package ast
 
 import (
