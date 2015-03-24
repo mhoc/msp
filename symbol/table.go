@@ -1,0 +1,43 @@
+
+// Maintains the symbol table
+
+package symbol
+
+import (
+  "strings"
+  "mhoc.co/msp/log"
+)
+
+var SymbolTable = make(map[string]*Type)
+
+// Declares a new variable in the symbol table and sets it value to undefined
+// If the variable has already been declared, its old value is deleted
+func Declare(varn string) {
+  log.Trace("Declaring variable " + varn)
+
+  // Make sure we aren't declaring an object key
+  if strings.Contains(varn, ".") {
+    log.Error{Msg: "Attempting to declare an object key"}.Report()
+    return
+  }
+
+  // Put the variable in our symbol table
+  SymbolTable[varn] = &Type{Undefined: true}
+
+}
+
+// Assigns a given value to a variable in the symbol table
+// If the variable is undeclared, this throws an error and returns
+// If the value passed in is not of a supported type, this throws an
+// internal error and panics
+func Assign(varn string, value interface{}) {
+  log.Tracef("Assigning value %v to variable %s", value, varn)
+
+  // Check to ensure the variable is declared
+  if _, in := SymbolTable[varn]; !in {
+    log.Error{Type: log.UNDECLARED_VAR, Var: varn}.Report()
+  }
+
+  SymbolTable[varn] = &Type{Undefined: false, Value: value}
+
+}

@@ -9,7 +9,7 @@ package ast
 
 import (
   "fmt"
-
+  "mhoc.co/msp/symbol"
 )
 
 // ====================
@@ -20,8 +20,8 @@ type Declaration struct {
 }
 
 func (d Declaration) Execute() interface{} {
-  //symbol.Declare(d.Var.VariableName)
-  return d.Var.VariableName
+  symbol.Declare(d.Var.VariableName)
+  return nil
 }
 
 func (d Declaration) Print(p string) {
@@ -40,8 +40,8 @@ type Definition struct {
 }
 
 func (d Definition) Execute() interface{} {
-  // TODO Declare Variable
-  // TODO Assign Variable
+  d.Decl.Execute()
+  d.Assign.Execute()
   return nil
 }
 
@@ -61,8 +61,7 @@ type Assignment struct {
 }
 
 func (a Assignment) Execute() interface{} {
-  // Reset the value at lhs to be rhs
-  // Return nothing
+  symbol.Assign(a.Lhs.VariableName, a.Rhs.Execute())
   return nil
 }
 

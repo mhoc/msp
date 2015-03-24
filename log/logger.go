@@ -5,7 +5,6 @@ package log
 
 import (
   "fmt"
-  "mhoc.co/msp/ast"
 )
 
 // You can enable additional log levels by setting these to true
@@ -31,8 +30,9 @@ func Trace(s string) {
   }
 }
 
-func Ast(n ast.Node) {
-  if LOG_AST {
-    n.Print("")
+func Tracef(s string, f ...interface{}) {
+  if LOG_TRACE {
+    fmt.Printf(s, f...)
+    fmt.Printf("\n")
   }
 }

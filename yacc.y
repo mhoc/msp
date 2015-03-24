@@ -49,9 +49,10 @@ import (
 target:
   file {
     fmt.Print("")
-    log.Ast($1.N)
-    // Execute the AST
-    //$1.Sl.Execute()
+    if log.LOG_AST {
+      $1.N.Print("")
+    }
+    $1.N.Execute()
   }
 ;
 

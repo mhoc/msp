@@ -37,11 +37,11 @@ type Error struct {
 }
 
 const (
-  INTERNAL ErrorType = iota
-  TYPE_VIOLATION ErrorType = iota
-  UNDECLARED_VAR ErrorType = iota
-  VALUE ErrorType = iota
-  CONDITION ErrorType = iota
+  INTERNAL ErrorType = 1
+  TYPE_VIOLATION ErrorType = 2
+  UNDECLARED_VAR ErrorType = 3
+  VALUE ErrorType = 4
+  CONDITION ErrorType = 5
 )
 
 // Whether or not to display expanded error output
@@ -72,7 +72,7 @@ func (er Error) Report() {
     case CONDITION:
       er.condition()
     default:
-      panic("Attempting to report an error type which log.ErrorType does not recognize")
+      fmt.Fprintf(os.Stderr, "[%d] Generic Error\n|-> %s\n", LineNo, er.Msg)
   }
   lastLogged = Stmt
 }
