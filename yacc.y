@@ -9,6 +9,12 @@ import (
   "mhoc.co/msp/log"
 )
 
+// Each of the node types is stored in our %union
+// The return types of each grammar rule is written in a comment above the rule
+// If we know the type, we use a specific element in this struct so as to
+// cut down on type inferencing
+// If we dont know the type (aka: statement), then we just use the "No" element
+
 %}
 
 %union {
@@ -40,7 +46,6 @@ import (
 
 %%
 
-/** After the entire thing is finished, log the AST if we want to */
 target:
   file {
     fmt.Print("")
@@ -48,45 +53,62 @@ target:
       $1.N.Print("")
     }
     // Execute the AST
-    //$1.N.Execute()
+    //$1.Sl.Execute()
   }
 ;
 
-/** A file is the entire thing we are parsing.
-		It takes care of the script tags at the start and end. */
+// File -> StatementList
+// Beginning and end script tags with a program in-between them
 file:
 	SCRIPT_TAG_START NEWLINE program SCRIPT_TAG_END {
-    $$ = $3
+    $$.N = $3.N
   }
 	| SCRIPT_TAG_START NEWLINE program SCRIPT_TAG_END NEWLINE {
-    $$ = $3
+    $$.N = $3.N
   }
 	| NEWLINE SCRIPT_TAG_START NEWLINE program SCRIPT_TAG_END NEWLINE {
-    $$ = $4
+    $$.N = $4.N
   }
 ;
 
-/** A program is a series of lines, each followed by a newline. */
+// Program -> StatementList
+// A list of statement lines each separated by a newline
 program:
 	program line NEWLINE {
-    $$.N.(*ast.StatementList).List = append($1.N.(*ast.StatementList).List, $2.N)
+    // Append every statement on the line to the list of statements for the program
+    line_statements := $2.N.(*ast.StatementList).List
+    for _, item := range line_statements {
+      $1.N.(*ast.StatementList).List = append($1.N.(*ast.StatementList).List, item)
+    }
+    $$.N = $1.N
   }
   | {
-    $$.N = &ast.StatementList{List: make([]ast.Node, 0, 2)}
+    // Create a new empty statement list to pass up
+    $$.N = &ast.StatementList{List: make([]ast.Node, 0, 0)}
   }
 ;
 
-/** Each line is a statement terminated by an optional semicolon.
-  	This rule takes care of the possibility that a line could contain multiple statements.
-		If it does, each one in the center must have a semicolon. The last one is optional. */
+// Line -> StatementList
+// A single line in the program. A line can contain multiple statements through
+// the use of a semicolon
 line:
-	statement
-	| statement SEMICOLON
-	| statement SEMICOLON line
+	statement {
+    // Add the single node to the list of statements
+    $$.N = &ast.StatementList{List: []ast.Node{$1.N}}
+  }
+	| statement SEMICOLON {
+    // Add the single node to the list of statements
+    $$.N = &ast.StatementList{List: []ast.Node{$1.N}}
+  }
+	| statement SEMICOLON line {
+    // Append this statement to the list already created above
+    $3.N.(*ast.StatementList).List = append($3.N.(*ast.StatementList).List, $1.N)
+    $$.N = $3.N
+  }
 ;
 
-/** A statement is any single operation. This includes declarations (var a), assignments (a = 1),
-  	definitions (var a = 1), and function calls (document.write(a)). */
+// Statement -> Node
+// Any single statement in the program. Statements have no value in this language.
 statement:
 	declaration
 	| assignment
@@ -97,8 +119,8 @@ statement:
   }
 ;
 
-/** var a
-		In a declaration, all we do is add the symbol as undefined in our symbol table. */
+// Declaration -> Declaration
+// The declaration or redeclaration of a variable
 declaration:
 	VARDEF IDENTIFIER {
     decl := &ast.Declaration{Var: $2.N.(*ast.Variable)}
@@ -106,93 +128,102 @@ declaration:
   }
 ;
 
-/** a = 1
-		A corresponding update_value function is called.
-		update_value will print an error if the value was not previously declared. */
+// Assignment -> Assignment
+// The assignment of a value to a variable which has already been declared
 assignment:
 	IDENTIFIER EQUAL value {
-    assign := &ast.Assignment{}
-    assign.Lhs = $1.N.(*ast.Variable)
-    assign.Rhs = $3.N
+    assign := &ast.Assignment{Lhs: $1.N.(*ast.Variable), Rhs: $3.N}
     $$.N = assign
   }
 ;
 
-/** var a = 1
-		A combination declaration and assignment
-		insert_symbol is called based upon the type of the value passed in.
-		this function will redefine the type of the variable if it was already declared. */
+// Definition -> Definition
+// A combination declaration and assignment
 definition:
 	VARDEF IDENTIFIER EQUAL value {
-    assign := &ast.Assignment{}
-    assign.Lhs = $2.N.(*ast.Variable)
-    assign.Rhs = $4.N
-    def := &ast.Definition{Decl: &ast.Declaration{Var: $2.N.(*ast.Variable)}, AssignNode: assign}
+    // Create the declaration
+    decl := &ast.Declaration{Var: $2.N.(*ast.Variable)}
+    // Create the assignment
+    assign := &ast.Assignment{Lhs: $2.N.(*ast.Variable), Rhs: $4.N}
+    // Combine them into a definition
+    def := &ast.Definition{Decl: decl, Assign: assign}
     $$.N = def
   }
 ;
 
-/** A list of comma-separated values
-		Right now this is hard-coded to only work with document.write() */
+// Parameter List -> FunctionCall
+// The list of parameters which a function is called.
+// This is where we build the actual function call that gets added to the ast
 parameter_list:
 	expression {
-    fc := &ast.FunctionCall{Args: make([]ast.Node, 0, 0)}
-    fc.Args = append(fc.Args, $1.N)
+    // Create a new function call with a single argument
+    fc := &ast.FunctionCall{Args: []ast.Node{$1.N}}
     $$.N = fc
   }
 	| parameter_list COMMA expression {
+    // Append this expression to our list of arguments from $1
     $1.N.(*ast.FunctionCall).Args = append($1.N.(*ast.FunctionCall).Args, $3.N)
     $$.N = $1.N
   }
 	| {
-    $$.N = &ast.FunctionCall{Args: make([]ast.Node, 0, 0)}
+    // Create an empty argument function call
+    $$.N = &ast.FunctionCall{Args: []ast.Node{}}
   }
 ;
 
-/** A value is any entity which can be assigned to a variable.
-		expressions, in particular, are the only ones that can be recursed into
-		sub-expressions AND are the only ones that can be printed. */
+// Value -> Node
+// Anything in the language which can be assigned to a variable
 value:
 	expression
 	| object_definition
 ;
 
-/** Any reference to a variable which has been previously declared and defined.
-    If it has not been declared or defined, a type error is printed */
-variable_reference:
-	IDENTIFIER
-;
-
-/** An expression is a combination of multiple subexpressions or values to
-		produce a single expression_value. */
+// Expression -> Node
+// Any combination of multiple sub-expressions to produce a single value
 expression:
 	additive_expression
 ;
 
-/** These sub-expression rules define an order of operations such that
-			1) "a", 1, a, (exp)
-			2) exp * exp, exp / exp
-			3) exp + exp, exp - exp */
+// Additive Expression -> Node
+// Order of operations level 3
 additive_expression:
 	multiplicative_expression
 	| additive_expression PLUS multiplicative_expression
 	| additive_expression MINUS multiplicative_expression
 ;
 
+// Multiplicative Expression -> Node
+// Order of operations level 2
 multiplicative_expression:
 	primary_expression
 	| multiplicative_expression MULT primary_expression
 	| multiplicative_expression DIVIDE primary_expression
 ;
 
+// Primary Expression -> Node
+// Order of operations level 1
 primary_expression:
 	INTEGER
 	| STRING
 	| variable_reference
-	| LPAREN expression RPAREN
+	| LPAREN expression RPAREN {
+    $$.N = $2.N
+  }
 ;
 
-/** { key:value ... } */
+// Variable Reference -> Reference
+// Any usage of a variable inside a value
+variable_reference:
+	IDENTIFIER {
+    // Create the reference object
+    // We dont actually look up and store the value of the variable until execution
+    vr := &ast.Reference{Var: $1.N.(*ast.Variable)}
+    $$.N = vr
+  }
+;
+
+// Object definition -> Object
+// The typed definition of an object inside the source code
 object_definition:
 	LBRACE field_list RBRACE {
     $$.N = $2.N
@@ -202,39 +233,51 @@ object_definition:
   }
 ;
 
-/** A list of key:value pairs without the braces around them */
+// Field List -> Object
+// The list of fields without the braces around them
 field_list:
 	interim_field_list final_field {
+    // Add the final field to the list of all the fields
     $1.N.(*ast.Object).Map[$2.N.(*ast.Field).FieldName] = $2.N.(*ast.Field).FieldValue
     $$.N = $1.N
   }
 	| {
+    // Return an empty object
     $$.N = &ast.Object{Map: make(map[string]ast.Node)}
   }
 ;
 
-/** A list of key:value pairs except the last item in the list
- 		The key difference being that the last item has no comma after it */
+// Interim Field List -> Object
+// This is every field in the object definition except for the last one
+// due to the fact that the last one is the only one without a comma after it
 interim_field_list:
 	interim_field_list interim_field {
+    // Add the interim field to the list of all interim fields
     $1.N.(*ast.Object).Map[$2.N.(*ast.Field).FieldName] = $2.N.(*ast.Field).FieldValue
     $$.N = $1.N
   }
 	| {
+    // Return an empty list of interim fields
     $$.N = &ast.Object{Map: make(map[string]ast.Node)}
   }
 ;
 
+// Interim field -> Field
+// A single field followed by a required comma
 interim_field:
 	field COMMA
 	| field COMMA NEWLINE
 ;
 
+// Final field -> Field
+// A single field followed by no comma
 final_field:
 	field
 	| field NEWLINE
 ;
 
+// Field -> Field
+// A single key:value pair
 field:
 	IDENTIFIER COLON expression {
     $$.N = &ast.Field{FieldName: $1.N.(*ast.Variable).VariableName, FieldValue: $3.N}

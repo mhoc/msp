@@ -3,7 +3,6 @@
   log.Token("NEWLINE\n")
   log.Trace("Lexed newline")
   log.LineNo++
-  fmt.Printf("%d ", log.LineNo)
   return NEWLINE
 }
 

@@ -36,7 +36,7 @@ func (d Declaration) Print(p string) {
 // ====================
 type Definition struct {
   Decl *Declaration
-  AssignNode *Assignment
+  Assign *Assignment
 }
 
 func (d Definition) Execute() interface{} {
@@ -48,7 +48,7 @@ func (d Definition) Execute() interface{} {
 func (d Definition) Print(p string) {
   fmt.Println(p + "Define")
   d.Decl.Print(p + "| ")
-  d.AssignNode.Print(p + "| ")
+  d.Assign.Print(p + "| ")
 }
 
 // ====================

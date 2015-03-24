@@ -15,9 +15,9 @@ import (
 //            the bool flag is stored here but the actual check is done in yacc.y after target is parsed
 
 const (
-  LOG_TOKENS bool = true
+  LOG_TOKENS bool = false
   LOG_TRACE bool =  false
-  LOG_AST bool =    false
+  LOG_AST bool =    true
 )
 
 func Token(s string) {
