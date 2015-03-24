@@ -15,9 +15,9 @@ import (
 //  LOG_AST : logs the entire ast of any node which is passed into log.Ast
 
 const (
-  LOG_TOKENS bool = false
+  LOG_TOKENS bool = true
   LOG_TRACE bool =  false
-  LOG_AST bool =    true
+  LOG_AST bool =    false
 )
 
 func Token(s string) {

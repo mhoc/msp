@@ -1,4 +1,7 @@
 <script type="text/JavaScript">
 var a = "hello"
-var b; var c; var d; var e
+var b; b = 55
+
+var c = "goodbye"
+
 </script>

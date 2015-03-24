@@ -58,21 +58,21 @@ target:
 // File -> StatementList
 // Beginning and end script tags with a program in-between them
 file:
-	SCRIPT_TAG_START NEWLINE program SCRIPT_TAG_END {
+	SCRIPT_TAG_START newlines program SCRIPT_TAG_END {
     $$.N = $3.N
   }
-	| SCRIPT_TAG_START NEWLINE program SCRIPT_TAG_END NEWLINE {
+	| SCRIPT_TAG_START newlines program SCRIPT_TAG_END newlines {
     $$.N = $3.N
   }
-	| NEWLINE SCRIPT_TAG_START NEWLINE program SCRIPT_TAG_END NEWLINE {
+	| newlines SCRIPT_TAG_START newlines program SCRIPT_TAG_END newlines {
     $$.N = $4.N
   }
 ;
 
 // Program -> StatementList
-// A list of statement lines each separated by a newline
+// A list of statement lines each separated by a newlines
 program:
-	program line NEWLINE {
+	program line newlines {
     // Append every statement on the line to the list of statements for the program
     line_statements := $2.N.(*ast.StatementList).List
     for _, item := range line_statements {
@@ -228,7 +228,7 @@ object_definition:
 	LBRACE field_list RBRACE {
     $$.N = $2.N
   }
-	| LBRACE NEWLINE field_list RBRACE {
+	| LBRACE newlines field_list RBRACE {
     $$.N = $3.N
   }
 ;
@@ -266,14 +266,14 @@ interim_field_list:
 // A single field followed by a required comma
 interim_field:
 	field COMMA
-	| field COMMA NEWLINE
+	| field COMMA newlines
 ;
 
 // Final field -> Field
 // A single field followed by no comma
 final_field:
 	field
-	| field NEWLINE
+	| field newlines
 ;
 
 // Field -> Field
@@ -282,6 +282,17 @@ field:
 	IDENTIFIER COLON expression {
     $$.N = &ast.Field{FieldName: $1.N.(*ast.Variable).VariableName, FieldValue: $3.N}
   }
+;
+
+// New Lines -> Nothing
+// This is so weird and I hate it but it works
+// Previously I had '\n+' as NEWLINE in my lexer, but I wanted to be able to maintain
+// my own linenumber count so I changed it to '\n'. Then everything stopped
+// working if the user had more than 1 newline. So this is an emulation of
+// the \n+ behavior. Oh yes.
+newlines:
+  NEWLINE
+  | newlines NEWLINE
 ;
 
 %%
