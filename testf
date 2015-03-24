@@ -1,6 +1,4 @@
 <script type="text/JavaScript">
 var a = "hello"
-var b; b = 55
-var c = {d: 5, e: "hi", f: b}
-document.write(a)
+var b; var c; var d; var e
 </script>

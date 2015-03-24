@@ -49,9 +49,7 @@ import (
 target:
   file {
     fmt.Print("")
-    if log.LOG_AST {
-      $1.N.Print("")
-    }
+    log.Ast($1.N)
     // Execute the AST
     //$1.Sl.Execute()
   }
@@ -101,8 +99,10 @@ line:
     $$.N = &ast.StatementList{List: []ast.Node{$1.N}}
   }
 	| statement SEMICOLON line {
-    // Append this statement to the list already created above
-    $3.N.(*ast.StatementList).List = append($3.N.(*ast.StatementList).List, $1.N)
+    // Prepend this statement to the list already created above
+    // Because of the weird way the recursion is set up here, we have to prepend instead of append
+    // This is the idiomatic way to prepend in go. Looks weird. It works.
+    $3.N.(*ast.StatementList).List = append([]ast.Node{$1.N}, $3.N.(*ast.StatementList).List...)
     $$.N = $3.N
   }
 ;
