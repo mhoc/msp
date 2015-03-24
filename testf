@@ -1,12 +1,3 @@
 <script type="text/JavaScript">
-var a = "hello"
-var b; b = 55
-
-var c = "goodbye"
-
-var d = {
-  da: 5, db: "what",
-  dc: 79898
-}
-
+var a = 1 + 2 * 3
 </script>

@@ -188,16 +188,24 @@ expression:
 // Order of operations level 3
 additive_expression:
 	multiplicative_expression
-	| additive_expression PLUS multiplicative_expression
-	| additive_expression MINUS multiplicative_expression
+	| additive_expression PLUS multiplicative_expression {
+    $$.N = &ast.Add{Lhs: $1.N, Rhs: $3.N}
+  }
+	| additive_expression MINUS multiplicative_expression {
+    $$.N = &ast.Subtract{Lhs: $1.N, Rhs: $3.N}
+  }
 ;
 
 // Multiplicative Expression -> Node
 // Order of operations level 2
 multiplicative_expression:
 	primary_expression
-	| multiplicative_expression MULT primary_expression
-	| multiplicative_expression DIVIDE primary_expression
+	| multiplicative_expression MULT primary_expression {
+    $$.N = &ast.Multiply{Lhs: $1.N, Rhs: $3.N}
+  }
+	| multiplicative_expression DIVIDE primary_expression {
+    $$.N = &ast.Divide{Lhs: $1.N, Rhs: $3.N}
+  }
 ;
 
 // Primary Expression -> Node
