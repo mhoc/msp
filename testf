@@ -4,4 +4,9 @@ var b; b = 55
 
 var c = "goodbye"
 
+var d = {
+  da: 5, db: "what",
+  dc: 79898
+}
+
 </script>
