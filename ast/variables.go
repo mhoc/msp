@@ -52,8 +52,8 @@ func (d Definition) Print(p string) {
 }
 
 // ====================
-// Equals, Assignment:: var [a    =  1]
-//                          LHS     RHS
+// Equals, Assignment:: var [a  =  1]
+//                          LHS   RHS
 // ====================
 type Assignment struct {
   Lhs *Variable
@@ -77,11 +77,14 @@ func (a Assignment) Print(p string) {
 type Reference struct {
   Var *Variable
   Value interface{}
+  Undefined bool
 }
 
 func (vr Reference) Execute() interface{} {
-  // TODO: GET Value of variable
-  return vr.Value
+  symbolType := symbol.Get(vr.Var.VariableName)
+  vr.Undefined = symbolType.Undefined
+  vr.Value = symbolType.Value
+  return vr
 }
 
 func (vr Reference) Print(p string) {
@@ -94,8 +97,6 @@ func (vr Reference) Print(p string) {
     case string:
       fmt.Println(p + "| " + vr.Value.(string))
       break
-    default:
-      fmt.Println("Error: Referencing variable not of type string or int")
   }
 
 }

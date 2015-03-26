@@ -1,4 +1,10 @@
 
+// Contains entities which help form expressions
+//  ADD
+//  SUBTRACT
+//  MULTIPLY
+// DIVIDE
+
 package ast
 
 import (

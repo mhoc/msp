@@ -1,7 +1,12 @@
 
+// Contains anything related to functions
+//  FUNCTIONCALL
+
 package ast
 
-import "fmt"
+import (
+  "fmt"
+)
 
 // ====================
 // Any function call
@@ -29,6 +34,13 @@ func (f FunctionCall) Execute() interface{} {
           argv = "\n"
         }
         fmt.Printf("%s", argv)
+        break
+      case Reference:
+        if argv.(Reference).Undefined {
+          fmt.Printf("undefined")
+        } else {
+          fmt.Printf("%v", argv.(Reference).Value)
+        }
         break
     }
   }

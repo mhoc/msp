@@ -41,3 +41,18 @@ func Assign(varn string, value interface{}) {
   SymbolTable[varn] = &Type{Undefined: false, Value: value}
 
 }
+
+// Retrieves and returns the value stored in varn
+// If the value does not exist, prints an error and returns an undefined type
+func Get(varn string) *Type {
+  log.Tracef("Getting the value for variable %s", varn)
+
+  value, in := SymbolTable[varn]
+  if !in {
+    log.Error{Type: log.VALUE, Var: varn}.Report()
+    value = &Type{Undefined: true}
+  }
+
+  return value
+
+}
