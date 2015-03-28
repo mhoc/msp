@@ -1,4 +1,3 @@
 <script type="text/JavaScript">
-var a = 1
-document.write(a)
+b = 5
 </script>

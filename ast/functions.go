@@ -15,6 +15,7 @@ import (
 type FunctionCall struct {
   Name string
   Args []Node
+  Line int
 }
 
 func (f FunctionCall) Execute() interface{} {
@@ -45,6 +46,10 @@ func (f FunctionCall) Execute() interface{} {
     }
   }
   return nil
+}
+
+func (f FunctionCall) LineNo() int {
+  return f.Line
 }
 
 func (f FunctionCall) Print(p string) {

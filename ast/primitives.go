@@ -16,10 +16,15 @@ import (
 // ====================
 type Integer struct {
   Value int
+  Line int
 }
 
 func (i Integer) Execute() interface{} {
   return i.Value
+}
+
+func (i Integer) LineNo() int {
+  return i.Line
 }
 
 func (i Integer) Print(p string) {
@@ -31,10 +36,15 @@ func (i Integer) Print(p string) {
 // ====================
 type String struct {
   Value string
+  Line int
 }
 
 func (s String) Execute() interface{} {
   return s.Value
+}
+
+func (s String) LineNo() int {
+  return s.Line
 }
 
 func (s String) Print(p string) {
@@ -47,10 +57,15 @@ func (s String) Print(p string) {
 // ====================
 type Variable struct {
   VariableName string
+  Line int
 }
 
 func (v Variable) Execute() interface{} {
   return v.VariableName
+}
+
+func (v Variable) LineNo() int {
+  return v.Line
 }
 
 func (v Variable) Print(p string) {

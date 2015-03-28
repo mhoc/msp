@@ -15,6 +15,7 @@ import "fmt"
 // ===================
 type Object struct {
   Map map[string]Node
+  Line int
 }
 
 func (o Object) Execute() interface{} {
@@ -24,6 +25,10 @@ func (o Object) Execute() interface{} {
   // caller of this function will handle inserting the entire object node
   // into the table.
   return nil
+}
+
+func (o Object) LineNo() int {
+  return o.Line
 }
 
 func (o Object) Print(p string) {
@@ -43,11 +48,16 @@ func (o Object) Print(p string) {
 type Field struct {
   FieldName string
   FieldValue Node
+  Line int
 }
 
 func (f Field) Execute() interface{} {
   // Doesnt have to do anything, but it does have to be an ast.Node
   return nil
+}
+
+func (f Field) LineNo() int {
+  return f.Line
 }
 
 func (f Field) Print(p string) {

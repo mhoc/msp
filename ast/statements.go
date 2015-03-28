@@ -12,6 +12,7 @@ import "fmt"
 // ====================
 type StatementList struct {
   List []Node
+  Line int
 }
 
 func (s StatementList) Execute() interface{} {
@@ -19,6 +20,10 @@ func (s StatementList) Execute() interface{} {
     child.Execute()
   }
   return nil
+}
+
+func (s StatementList) LineNo() int {
+  return s.Line
 }
 
 func (s StatementList) Print(p string) {

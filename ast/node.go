@@ -18,6 +18,12 @@ type Node interface {
   // to return something (say, a literal or variable reference)
   Execute() interface{}
 
+  // A function which returns the line number of the source file this node is
+  // located on. Some ast nodes make no sense to have line numbers (statement lists).
+  // These will return the last line they appear on. Probably. The rest should
+  // be accurate. 
+  LineNo() int
+
   // We provide printing functionality for a visual representation of the AST contained
   // in ast/print.go. The process for this is very similar to Execute()
   Print(prefix string)

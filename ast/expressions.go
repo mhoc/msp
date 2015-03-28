@@ -17,10 +17,15 @@ import (
 type Add struct {
   Lhs Node
   Rhs Node
+  Line int
 }
 
 func (a Add) Execute() interface{} {
   return nil
+}
+
+func (a Add) LineNo() int {
+  return a.Line
 }
 
 func (a Add) Print(pre string) {
@@ -35,10 +40,15 @@ func (a Add) Print(pre string) {
 type Subtract struct {
   Lhs Node
   Rhs Node
+  Line int
 }
 
 func (s Subtract) Execute() interface{} {
   return nil
+}
+
+func (s Subtract) LineNo() int {
+  return s.Line
 }
 
 func (s Subtract) Print(pre string) {
@@ -53,10 +63,15 @@ func (s Subtract) Print(pre string) {
 type Multiply struct {
   Lhs Node
   Rhs Node
+  Line int
 }
 
 func (m Multiply) Execute() interface{} {
   return nil
+}
+
+func (m Multiply) LineNo() int {
+  return m.Line
 }
 
 func (m Multiply) Print(pre string) {
@@ -71,10 +86,15 @@ func (m Multiply) Print(pre string) {
 type Divide struct {
   Lhs Node
   Rhs Node
+  Line int
 }
 
 func (d Divide) Execute() interface{} {
   return nil
+}
+
+func (d Divide) LineNo() int {
+  return d.Line
 }
 
 func (d Divide) Print(pre string) {

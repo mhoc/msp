@@ -17,11 +17,16 @@ import (
 // ====================
 type Declaration struct {
   Var *Variable
+  Line int
 }
 
 func (d Declaration) Execute() interface{} {
   symbol.Declare(d.Var.VariableName)
   return nil
+}
+
+func (d Declaration) LineNo() int {
+  return d.Line
 }
 
 func (d Declaration) Print(p string) {
@@ -37,12 +42,17 @@ func (d Declaration) Print(p string) {
 type Definition struct {
   Decl *Declaration
   Assign *Assignment
+  Line int
 }
 
 func (d Definition) Execute() interface{} {
   d.Decl.Execute()
   d.Assign.Execute()
   return nil
+}
+
+func (d Definition) LineNo() int {
+  return d.Line
 }
 
 func (d Definition) Print(p string) {
@@ -58,11 +68,16 @@ func (d Definition) Print(p string) {
 type Assignment struct {
   Lhs *Variable
   Rhs Node
+  Line int
 }
 
 func (a Assignment) Execute() interface{} {
   symbol.Assign(a.Lhs.VariableName, a.Rhs.Execute())
   return nil
+}
+
+func (a Assignment) LineNo() int {
+  return a.Line
 }
 
 func (a Assignment) Print(p string) {
@@ -78,6 +93,7 @@ type Reference struct {
   Var *Variable
   Value interface{}
   Undefined bool
+  Line int
 }
 
 func (vr Reference) Execute() interface{} {
@@ -85,6 +101,10 @@ func (vr Reference) Execute() interface{} {
   vr.Undefined = symbolType.Undefined
   vr.Value = symbolType.Value
   return vr
+}
+
+func (vr Reference) LineNo() int {
+  return vr.Line
 }
 
 func (vr Reference) Print(p string) {
