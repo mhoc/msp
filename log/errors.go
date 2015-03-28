@@ -34,14 +34,16 @@ type Error struct {
   Type ErrorType
   Var string    // Some error types also require a variable to be reported
   Msg string    // Expanded error reporting message directly copied to stderr
+  Line int      // The line number the error occured on
 }
 
 const (
-  INTERNAL ErrorType = 1
-  TYPE_VIOLATION ErrorType = 2
-  UNDECLARED_VAR ErrorType = 3
-  VALUE ErrorType = 4
-  CONDITION ErrorType = 5
+  GENERIC ErrorType = iota
+  INTERNAL ErrorType = iota
+  TYPE_VIOLATION ErrorType = iota
+  UNDECLARED_VAR ErrorType = iota
+  VALUE ErrorType = iota
+  CONDITION ErrorType = iota
 )
 
 // Whether or not to display expanded error output
@@ -51,13 +53,22 @@ var LOG_EXPANDED_ERRORS bool
 // The line we are currently lexing
 // Nex offers this functionality in a struct but it isn't exported
 // from the package, and we need it here in errors
+// Note that if this member is accessed during the process of node.Execute(),
+// it will always read the line number of the last line of the file (for obvious
+// reasons).
 var LineNo int = 1
 
+// The current statement we are executing
+// This is incremented by the StatementLine's Execute() function call
+// It is used in error reporting, as we only report one error per line
 var Stmt int = 0
 var lastLogged int = -1
 
 func (er Error) Report() {
   switch er.Type {
+    case GENERIC:
+      fmt.Fprintf(os.Stderr, "[%d] Generic Error\n|-> %s\n", er.Line, er.Msg)
+      break
     case INTERNAL:
       panic(er.Msg)
     case TYPE_VIOLATION:
@@ -72,40 +83,40 @@ func (er Error) Report() {
     case CONDITION:
       er.condition()
     default:
-      fmt.Fprintf(os.Stderr, "[%d] Generic Error\n|-> %s\n", LineNo, er.Msg)
+      fmt.Fprintf(os.Stderr, "[%d] Error\n|-> %s\n", er.Line, er.Msg)
   }
   lastLogged = Stmt
 }
 
 func (er Error) typeViolation() {
   if LOG_EXPANDED_ERRORS {
-    fmt.Fprintf(os.Stderr, "[%d] Type Violation\n", LineNo)
+    fmt.Fprintf(os.Stderr, "[%d] Type Violation\n", er.Line)
     fmt.Fprintf(os.Stderr, "|-> %s\n", er.Msg)
   } else if lastLogged != Stmt {
-    fmt.Fprintf(os.Stderr, "line %d, type violation\n", LineNo)
+    fmt.Fprintf(os.Stderr, "line %d, type violation\n", er.Line)
   }
 }
 
 func (er Error) undeclaredVar() {
   if LOG_EXPANDED_ERRORS {
-    fmt.Fprintf(os.Stderr, "[%d] Attempting to assign to undeclared variable %s\n", LineNo, er.Var)
+    fmt.Fprintf(os.Stderr, "[%d] Attempting to assign to undeclared variable %s\n", er.Line, er.Var)
   } else if lastLogged != Stmt {
-    fmt.Fprintf(os.Stderr, "line %d, %s undeclared\n", LineNo, er.Var)
+    fmt.Fprintf(os.Stderr, "line %d, %s undeclared\n", er.Line, er.Var)
   }
 }
 
 func (er Error) value() {
   if LOG_EXPANDED_ERRORS {
-    fmt.Fprintf(os.Stderr, "[%d] Attempting to access the value of variable %s, which has no value\n", LineNo, er.Var)
+    fmt.Fprintf(os.Stderr, "[%d] Attempting to access the value of variable %s, which has no value\n", er.Line, er.Var)
   } else if lastLogged != Stmt {
-    fmt.Fprintf(os.Stderr, "line %d, %s has no value\n", LineNo, er.Var)
+    fmt.Fprintf(os.Stderr, "line %d, %s has no value\n", er.Line, er.Var)
   }
 }
 
 func (er Error) condition() {
   if LOG_EXPANDED_ERRORS {
-    fmt.Fprintf(os.Stderr, "[%d] Condition in branch could not be evaluated to true or false\n", LineNo)
+    fmt.Fprintf(os.Stderr, "[%d] Condition in branch could not be evaluated to true or false\n", er.Line)
   } else if lastLogged != Stmt {
-    fmt.Fprintf(os.Stderr, "line %d, condition unknown\n", LineNo)
+    fmt.Fprintf(os.Stderr, "line %d, condition unknown\n", er.Line)
   }
 }

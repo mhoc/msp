@@ -41,12 +41,3 @@ Each node in the ast is an ast.Node struct interface. This provides Execute()
 functionality among other things. Every struct which implements ast.Node implements
 an Execute() function which then "executes" that node, sometimes by re-calling
 Execute() on its children, sometimes by accessing the symbol table, etc etc.
-
-Here are the types of nodes we currently recognize:
-
-```
-StatementList
-Declaration
-
-
-```

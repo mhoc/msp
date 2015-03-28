@@ -4,7 +4,10 @@
 
 package ast
 
-import "fmt"
+import (
+  "fmt"
+  "mhoc.co/msp/log"
+)
 
 // ====================
 // A StatementList is any ordered collection of independent statements
@@ -18,6 +21,7 @@ type StatementList struct {
 func (s StatementList) Execute() interface{} {
   for _, child := range s.List {
     child.Execute()
+    log.Stmt++
   }
   return nil
 }

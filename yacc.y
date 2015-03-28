@@ -48,6 +48,7 @@ import (
 
 target:
   file {
+    log.Trace("grm", "Target")
     fmt.Print("")
     if log.LOG_AST {
       $1.N.Print("")
@@ -60,12 +61,15 @@ target:
 // Beginning and end script tags with a program in-between them
 file:
 	SCRIPT_TAG_START newlines program SCRIPT_TAG_END {
+    log.Trace("grm", "File (start,newlines,program,end)")
     $$.N = $3.N
   }
 	| SCRIPT_TAG_START newlines program SCRIPT_TAG_END newlines {
+    log.Trace("grm", "File (start,newlines,program,end,newlines)")
     $$.N = $3.N
   }
 	| newlines SCRIPT_TAG_START newlines program SCRIPT_TAG_END newlines {
+    log.Trace("grm", "File (newlines,start,newlines,program,end,newlines)")
     $$.N = $4.N
   }
 ;
@@ -74,7 +78,7 @@ file:
 // A list of statement lines each separated by a newlines
 program:
 	program line newlines {
-    // Append every statement on the line to the list of statements for the program
+    log.Trace("grm", "Program: Appending program line")
     line_statements := $2.N.(*ast.StatementList).List
     for _, item := range line_statements {
       $1.N.(*ast.StatementList).List = append($1.N.(*ast.StatementList).List, item)
@@ -82,8 +86,8 @@ program:
     $$.N = $1.N
   }
   | {
-    // Create a new empty statement list to pass up
-    $$.N = &ast.StatementList{List: make([]ast.Node, 0, 0)}
+    log.Trace("grm", "Program: Creating new statement list")
+    $$.N = &ast.StatementList{Line: log.LineNo, List: make([]ast.Node, 0, 0)}
   }
 ;
 
@@ -92,12 +96,12 @@ program:
 // the use of a semicolon
 line:
 	statement {
-    // Add the single node to the list of statements
-    $$.N = &ast.StatementList{List: []ast.Node{$1.N}}
+    log.Trace("grm", "Line: Creating a new single statement statementlist")
+    $$.N = &ast.StatementList{Line: log.LineNo, List: []ast.Node{$1.N}}
   }
 	| statement SEMICOLON {
-    // Add the single node to the list of statements
-    $$.N = &ast.StatementList{List: []ast.Node{$1.N}}
+    log.Trace("grm", "Line Creating a new single statement statementlist;")
+    $$.N = &ast.StatementList{Line: log.LineNo, List: []ast.Node{$1.N}}
   }
 	| statement SEMICOLON line {
     // Prepend this statement to the list already created above
@@ -124,7 +128,7 @@ statement:
 // The declaration or redeclaration of a variable
 declaration:
 	VARDEF IDENTIFIER {
-    decl := &ast.Declaration{Var: $2.N.(*ast.Variable)}
+    decl := &ast.Declaration{Line: log.LineNo, Var: $2.N.(*ast.Variable)}
     $$.N = decl
   }
 ;
@@ -133,7 +137,8 @@ declaration:
 // The assignment of a value to a variable which has already been declared
 assignment:
 	IDENTIFIER EQUAL value {
-    assign := &ast.Assignment{Lhs: $1.N.(*ast.Variable), Rhs: $3.N}
+    log.Trace("grm", "Assignment")
+    assign := &ast.Assignment{Line: log.LineNo, Lhs: $1.N.(*ast.Variable), Rhs: $3.N}
     $$.N = assign
   }
 ;
@@ -158,7 +163,7 @@ definition:
 parameter_list:
 	expression {
     // Create a new function call with a single argument
-    fc := &ast.FunctionCall{Args: []ast.Node{$1.N}}
+    fc := &ast.FunctionCall{Line: log.LineNo, Args: []ast.Node{$1.N}}
     $$.N = fc
   }
 	| parameter_list COMMA expression {
@@ -168,7 +173,7 @@ parameter_list:
   }
 	| {
     // Create an empty argument function call
-    $$.N = &ast.FunctionCall{Args: []ast.Node{}}
+    $$.N = &ast.FunctionCall{Line: log.LineNo, Args: []ast.Node{}}
   }
 ;
 
@@ -190,10 +195,10 @@ expression:
 additive_expression:
 	multiplicative_expression
 	| additive_expression PLUS multiplicative_expression {
-    $$.N = &ast.Add{Lhs: $1.N, Rhs: $3.N}
+    $$.N = &ast.Add{Line: log.LineNo, Lhs: $1.N, Rhs: $3.N}
   }
 	| additive_expression MINUS multiplicative_expression {
-    $$.N = &ast.Subtract{Lhs: $1.N, Rhs: $3.N}
+    $$.N = &ast.Subtract{Line: log.LineNo, Lhs: $1.N, Rhs: $3.N}
   }
 ;
 
@@ -202,10 +207,10 @@ additive_expression:
 multiplicative_expression:
 	primary_expression
 	| multiplicative_expression MULT primary_expression {
-    $$.N = &ast.Multiply{Lhs: $1.N, Rhs: $3.N}
+    $$.N = &ast.Multiply{Line: log.LineNo, Lhs: $1.N, Rhs: $3.N}
   }
 	| multiplicative_expression DIVIDE primary_expression {
-    $$.N = &ast.Divide{Lhs: $1.N, Rhs: $3.N}
+    $$.N = &ast.Divide{Line: log.LineNo, Lhs: $1.N, Rhs: $3.N}
   }
 ;
 
@@ -226,7 +231,7 @@ variable_reference:
 	IDENTIFIER {
     // Create the reference object
     // We dont actually look up and store the value of the variable until execution
-    vr := &ast.Reference{Var: $1.N.(*ast.Variable)}
+    vr := &ast.Reference{Line: log.LineNo, Var: $1.N.(*ast.Variable)}
     $$.N = vr
   }
 ;
@@ -252,7 +257,7 @@ field_list:
   }
 	| {
     // Return an empty object
-    $$.N = &ast.Object{Map: make(map[string]ast.Node)}
+    $$.N = &ast.Object{Line: log.LineNo, Map: make(map[string]ast.Node)}
   }
 ;
 
@@ -267,7 +272,7 @@ interim_field_list:
   }
 	| {
     // Return an empty list of interim fields
-    $$.N = &ast.Object{Map: make(map[string]ast.Node)}
+    $$.N = &ast.Object{Line: log.LineNo, Map: make(map[string]ast.Node)}
   }
 ;
 
@@ -289,7 +294,7 @@ final_field:
 // A single key:value pair
 field:
 	IDENTIFIER COLON expression {
-    $$.N = &ast.Field{FieldName: $1.N.(*ast.Variable).VariableName, FieldValue: $3.N}
+    $$.N = &ast.Field{Line: log.LineNo,FieldName: $1.N.(*ast.Variable).VariableName,FieldValue: $3.N}
   }
 ;
 

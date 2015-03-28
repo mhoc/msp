@@ -72,7 +72,7 @@ type Assignment struct {
 }
 
 func (a Assignment) Execute() interface{} {
-  symbol.Assign(a.Lhs.VariableName, a.Rhs.Execute())
+  symbol.Assign(a.Lhs.VariableName, a.Rhs.Execute(), a.LineNo())
   return nil
 }
 
@@ -97,7 +97,7 @@ type Reference struct {
 }
 
 func (vr Reference) Execute() interface{} {
-  symbolType := symbol.Get(vr.Var.VariableName)
+  symbolType := symbol.Get(vr.Var.VariableName, vr.LineNo())
   vr.Undefined = symbolType.Undefined
   vr.Value = symbolType.Value
   return vr

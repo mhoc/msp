@@ -24,15 +24,14 @@ func Token(s string) {
   }
 }
 
-func Trace(s string) {
+func Trace(tag string, msg string) {
   if LOG_TRACE {
-    fmt.Println(s)
+    fmt.Printf("[%s] %s\n", tag, msg)
   }
 }
 
-func Tracef(s string, f ...interface{}) {
+func Tracef(tag string, msg string, f ...interface{}) {
   if LOG_TRACE {
-    fmt.Printf(s, f...)
-    fmt.Printf("\n")
+    fmt.Printf("[%s] %s\n", tag, fmt.Sprintf(msg, f...))
   }
 }

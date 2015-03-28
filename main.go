@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-  log.Trace("Opening input file")
+  log.Trace("m  ", "Opening input file")
 
   // Parse debug flags
   flag.BoolVar(&log.LOG_TOKENS, "log-tokens", false, "Enable list of parsed tokens")
@@ -21,10 +21,10 @@ func main() {
   var file *os.File;
   var err error;
   if flag.NArg() == 0 {
-    log.Trace("Reading from stdin")
+    log.Trace("m  ", "Reading from stdin")
     file = os.Stdin
   } else if flag.NArg() == 1 {
-    log.Trace("Reading from file " + flag.Arg(0))
+    log.Trace("m  ", "Reading from file " + flag.Arg(0))
     file, err = os.Open(flag.Arg(0))
   } else {
     panic("Must provide filename to read from or no filename at all")
@@ -34,7 +34,7 @@ func main() {
     panic("File name provided does not exist")
   }
 
-  log.Trace("Beginning lex")
+  log.Trace("m  ", "Beginning lex")
   yyParse(NewLexer(file))
 
 }
