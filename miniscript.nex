@@ -41,18 +41,18 @@
   return INTEGER
 }
 
+/[A-Za-z][A-Za-z0-9]*\.[A-Za-z][A-Za-z0-9]*/ {
+  log.Token("OBJKEY[" + yylex.Text() + "] ")
+  log.Trace("lex", "Object Key " + yylex.Text())
+  lval.Str = yylex.Text()
+  return OBJKEY
+}
+
 /[A-Za-z][A-Za-z0-9]*/ {
   log.Token("IDENTIFIER[" + yylex.Text() + "] ")
   log.Trace("lex", "Identifier " + yylex.Text())
   lval.Str = yylex.Text()
   return IDENTIFIER
-}
-
-/[A-Za-z][A-Za-z0-9]\.[A-Za-z][A-Za-z0-9]*/ {
-  log.Token("OBJKEY[" + yylex.Text() + "] ")
-  log.Trace("lex", "Object Key " + yylex.Text())
-  lval.Str = yylex.Text()
-  return OBJKEY
 }
 
 /\"(\\.|[^\\"\n])*\"/ {

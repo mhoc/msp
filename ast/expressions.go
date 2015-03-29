@@ -63,7 +63,20 @@ type Subtract struct {
 }
 
 func (s Subtract) Execute() interface{} {
-  return nil
+  left := s.Lhs.Execute()
+  right := s.Rhs.Execute()
+  leftVal := left.(*Value)
+  rightVal := right.(*Value)
+
+  if leftVal.Type == VALUE_INT && rightVal.Type == VALUE_INT {
+    leftVal.Value = leftVal.Value.(int) - rightVal.Value.(int)
+    return leftVal
+  }
+
+  log.Error{Line:s.Line, Type: log.TYPE_VIOLATION, Msg: "Attempting to add types which are not supported"}.Report()
+  leftVal.Type = VALUE_UNDEFINED
+  return leftVal
+
 }
 
 func (s Subtract) LineNo() int {
@@ -86,7 +99,19 @@ type Multiply struct {
 }
 
 func (m Multiply) Execute() interface{} {
-  return nil
+  left := m.Lhs.Execute()
+  right := m.Rhs.Execute()
+  leftVal := left.(*Value)
+  rightVal := right.(*Value)
+
+  if leftVal.Type == VALUE_INT && rightVal.Type == VALUE_INT {
+    leftVal.Value = leftVal.Value.(int) * rightVal.Value.(int)
+    return leftVal
+  }
+
+  log.Error{Line:m.Line, Type: log.TYPE_VIOLATION, Msg: "Attempting to add types which are not supported"}.Report()
+  leftVal.Type = VALUE_UNDEFINED
+  return leftVal
 }
 
 func (m Multiply) LineNo() int {
@@ -109,7 +134,19 @@ type Divide struct {
 }
 
 func (d Divide) Execute() interface{} {
-  return nil
+  left := d.Lhs.Execute()
+  right := d.Rhs.Execute()
+  leftVal := left.(*Value)
+  rightVal := right.(*Value)
+
+  if leftVal.Type == VALUE_INT && rightVal.Type == VALUE_INT {
+    leftVal.Value = leftVal.Value.(int) / rightVal.Value.(int)
+    return leftVal
+  }
+
+  log.Error{Line:d.Line, Type: log.TYPE_VIOLATION, Msg: "Attempting to add types which are not supported"}.Report()
+  leftVal.Type = VALUE_UNDEFINED
+  return leftVal
 }
 
 func (d Divide) LineNo() int {

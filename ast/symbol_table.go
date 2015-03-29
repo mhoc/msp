@@ -42,10 +42,35 @@ func SymAssign(name string, value *Value) {
 func SymGet(name string, lineno int) *Value {
   log.Tracef("tbl", "Getting the value for variable %s", name)
 
+  var value *Value
+
+  if (strings.Contains(name, ".")) {
+    sp := strings.Split(name, ".")
+    parent := sp[0]
+    child := sp[1]
+
+    value, in := SymbolTable[parent]
+    if !in {
+      log.Error{Line: lineno, Type: log.VALUE, Var: name}.Report()
+      value = &Value{Type: VALUE_UNDEFINED, Line: lineno}
+      return value
+    }
+
+    value, in = value.Value.(map[string]*Value)[child]
+    if !in {
+      log.Error{Line: lineno, Type: log.VALUE, Var: name}.Report()
+      value = &Value{Type: VALUE_UNDEFINED, Line: lineno}
+      return value
+    }
+
+    return value
+  }
+
   value, in := SymbolTable[name]
   if !in {
     log.Error{Line: lineno, Type: log.VALUE, Var: name}.Report()
     value = &Value{Type: VALUE_UNDEFINED, Line: lineno}
+    return value
   }
 
   return value

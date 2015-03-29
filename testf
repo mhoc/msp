@@ -1,3 +1,7 @@
 <script type="text/JavaScript">
-document.write(5 + "hello")
+var a = {
+  b: 5, c: 12, d: "hello"
+}
+document.write(a.b + a.c)
+document.write(a.d)
 </script>
