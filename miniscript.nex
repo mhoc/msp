@@ -36,22 +36,29 @@
 /[0-9]+/ {
   log.Token("INTEGER[" + yylex.Text() + "] ")
   log.Trace("lex", "Integer " + yylex.Text())
-  value, _ := strconv.Atoi(yylex.Text())
-  lval.N = &ast.Integer{Line: log.LineNo, Value: value}
+  integer, _ := strconv.Atoi(yylex.Text())
+  lval.N = &ast.Value{Type: ast.VALUE_INT, Value: integer, Line: log.LineNo}
   return INTEGER
 }
 
-/[A-Za-z][A-Za-z0-9\.]*/ {
+/[A-Za-z][A-Za-z0-9]*/ {
   log.Token("IDENTIFIER[" + yylex.Text() + "] ")
   log.Trace("lex", "Identifier " + yylex.Text())
-  lval.N = &ast.Variable{Line: log.LineNo, VariableName: yylex.Text()}
+  lval.Str = yylex.Text()
   return IDENTIFIER
+}
+
+/[A-Za-z][A-Za-z0-9]\.[A-Za-z][A-Za-z0-9]*/ {
+  log.Token("OBJKEY[" + yylex.Text() + "] ")
+  log.Trace("lex", "Object Key " + yylex.Text())
+  lval.Str = yylex.Text()
+  return OBJKEY
 }
 
 /\"(\\.|[^\\"\n])*\"/ {
   log.Token("STRING[" + yylex.Text() + "] ")
   log.Trace("lex", "String " + yylex.Text())
-  lval.N = &ast.String{Line: log.LineNo, Value: yylex.Text()[1:len(yylex.Text())-1]}
+  lval.N = &ast.Value{Type: ast.VALUE_STRING, Value: yylex.Text()[1:len(yylex.Text())-1], Line: log.LineNo}
   return STRING
 }
 

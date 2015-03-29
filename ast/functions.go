@@ -25,23 +25,19 @@ func (f FunctionCall) Execute() interface{} {
     panic("Error: Attempting to call function that is not document.write")
   }
   for _, arg := range f.Args {
-    argv := arg.Execute()
-    switch argv.(type) {
-      case int:
-        fmt.Printf("%d", argv)
+    argv := arg.Execute().(Value)
+    switch argv.Type {
+      case VALUE_UNDEFINED:
+        fmt.Printf("undefined")
         break
-      case string:
-        if argv == "<br />" {
-          argv = "\n"
-        }
-        fmt.Printf("%s", argv)
+      case VALUE_INT:
+        fmt.Printf("%d", argv.Value)
         break
-      case Reference:
-        if argv.(Reference).Undefined {
-          fmt.Printf("undefined")
-        } else {
-          fmt.Printf("%v", argv.(Reference).Value)
+      case VALUE_STRING:
+        if argv.Value == "<br />" {
+          argv.Value = "\n"
         }
+        fmt.Printf("%s", argv.Value)
         break
     }
   }

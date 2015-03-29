@@ -19,6 +19,8 @@ import (
 
 %union {
   N ast.Node
+  Str string
+  Int int
 }
 
 %token
@@ -26,6 +28,7 @@ import (
 	SCRIPT_TAG_END
 	VARDEF
 	IDENTIFIER
+  OBJKEY
 	DOCUMENT_WRITE
 	NEWLINE
 	WHITESPACE
@@ -128,8 +131,7 @@ statement:
 // The declaration or redeclaration of a variable
 declaration:
 	VARDEF IDENTIFIER {
-    decl := &ast.Declaration{Line: log.LineNo, Var: $2.N.(*ast.Variable)}
-    $$.N = decl
+    $$.N = &ast.Declaration{Line: log.LineNo, Name: $2.Str}
   }
 ;
 
@@ -138,8 +140,7 @@ declaration:
 assignment:
 	IDENTIFIER EQUAL value {
     log.Trace("grm", "Assignment")
-    assign := &ast.Assignment{Line: log.LineNo, Lhs: $1.N.(*ast.Variable), Rhs: $3.N}
-    $$.N = assign
+    $$.N = &ast.Assignment{Line: log.LineNo, Name: $1.Str, Rhs: $3.N}
   }
 ;
 
@@ -148,9 +149,9 @@ assignment:
 definition:
 	VARDEF IDENTIFIER EQUAL value {
     // Create the declaration
-    decl := &ast.Declaration{Var: $2.N.(*ast.Variable)}
+    decl := &ast.Declaration{Name: $2.Str}
     // Create the assignment
-    assign := &ast.Assignment{Lhs: $2.N.(*ast.Variable), Rhs: $4.N}
+    assign := &ast.Assignment{Name: $2.Str, Rhs: $4.N}
     // Combine them into a definition
     def := &ast.Definition{Decl: decl, Assign: assign}
     $$.N = def
@@ -231,8 +232,10 @@ variable_reference:
 	IDENTIFIER {
     // Create the reference object
     // We dont actually look up and store the value of the variable until execution
-    vr := &ast.Reference{Line: log.LineNo, Var: $1.N.(*ast.Variable)}
-    $$.N = vr
+    $$.N = &ast.Reference{Line: log.LineNo, Name: $1.Str}
+  }
+  | OBJKEY {
+    $$.N = &ast.Reference{Line: log.LineNo, Name: $1.Str}
   }
 ;
 
@@ -294,7 +297,7 @@ final_field:
 // A single key:value pair
 field:
 	IDENTIFIER COLON expression {
-    $$.N = &ast.Field{Line: log.LineNo,FieldName: $1.N.(*ast.Variable).VariableName,FieldValue: $3.N}
+    $$.N = &ast.Field{Line: log.LineNo, FieldName: $1.Str, FieldValue: $3.N}
   }
 ;
 

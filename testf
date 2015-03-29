@@ -1,3 +1,5 @@
 <script type="text/JavaScript">
-document.write("hey", "there", "<br />", "buddy")
+var a = 12
+var b = a
+document.write(b)
 </script>

@@ -9,20 +9,18 @@ package ast
 
 import (
   "fmt"
-  //"reflect"
-  "mhoc.co/msp/symbol"
 )
 
 // ====================
 // Variable declaration:: var a;
 // ====================
 type Declaration struct {
-  Var *Variable
+  Name string
   Line int
 }
 
 func (d Declaration) Execute() interface{} {
-  symbol.Declare(d.Var.VariableName)
+  SymDeclare(d.Name)
   return nil
 }
 
@@ -32,7 +30,7 @@ func (d Declaration) LineNo() int {
 
 func (d Declaration) Print(p string) {
   fmt.Println(p + "Declare")
-  d.Var.Print(p + "| ")
+  fmt.Printf(p + "| %s\n", d.Name)
 }
 
 // ====================
@@ -67,24 +65,20 @@ func (d Definition) Print(p string) {
 //                          LHS   RHS
 // ====================
 type Assignment struct {
-  Lhs *Variable
+  Name string
   Rhs Node
   Line int
 }
 
 func (a Assignment) Execute() interface{} {
   rhsResult := a.Rhs.Execute()
-/*
-  typestr := reflect.TypeOf(rhsResult).Name()
-  if (typestr == "Reference") {
-    if (rhsResult.(Reference).Undefined) {
-      rhsResult = &symbol.Type{Undefined: true}
-    } else {
-      rhsResult = symbol.Get(rhsResult.(Reference).Var.VariableName, a.LineNo())
-    }
-  }
-*/
-  symbol.Assign(a.Lhs.VariableName, rhsResult, a.LineNo())
+
+  // The type of the right side should always be a Value
+  // This line is included just to throw an error if it ever isn't, which is
+  // mainly for debugging
+  rightValue := rhsResult.(Value)
+
+  SymAssign(a.Name, rightValue)
   return nil
 }
 
@@ -94,7 +88,7 @@ func (a Assignment) LineNo() int {
 
 func (a Assignment) Print(p string) {
   fmt.Println(p + "Assign")
-  a.Lhs.Print(p + "| ")
+  fmt.Printf(p + "| %s\n", a.Name)
   a.Rhs.Print(p + "| ")
 }
 
@@ -102,16 +96,14 @@ func (a Assignment) Print(p string) {
 // Variable reference:: var something = [myvar];
 // ====================
 type Reference struct {
-  Var *Variable
-  Value interface{}
-  Undefined bool
+  Name string
+  Value *Value
   Line int
 }
 
 func (vr Reference) Execute() interface{} {
-  symbolType := symbol.Get(vr.Var.VariableName, vr.LineNo())
-  vr.Undefined = symbolType.Undefined
-  vr.Value = symbolType.Value
+  value := SymGet(vr.Name, vr.LineNo())
+  vr.Value = value
   return vr
 }
 
@@ -121,14 +113,5 @@ func (vr Reference) LineNo() int {
 
 func (vr Reference) Print(p string) {
   fmt.Printf(p + "Reference\n")
-  vr.Var.Print(p + "| ")
-  switch vr.Value.(type) {
-    case int:
-      fmt.Println(p + "| " + string(vr.Value.(int)))
-      break
-    case string:
-      fmt.Println(p + "| " + vr.Value.(string))
-      break
-  }
-
+  vr.Value.Print(p + "| ")
 }
