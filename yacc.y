@@ -61,15 +61,15 @@ target:
 // Beginning and end script tags with a program in-between them
 file:
 	SCRIPT_TAG_START newlines program SCRIPT_TAG_END {
-    log.Trace("grm", "File (start,newlines,program,end)")
+    log.Trace("grm", "File: start,newlines,program,end")
     $$.N = $3.N
   }
 	| SCRIPT_TAG_START newlines program SCRIPT_TAG_END newlines {
-    log.Trace("grm", "File (start,newlines,program,end,newlines)")
+    log.Trace("grm", "File: start,newlines,program,end,newlines")
     $$.N = $3.N
   }
 	| newlines SCRIPT_TAG_START newlines program SCRIPT_TAG_END newlines {
-    log.Trace("grm", "File (newlines,start,newlines,program,end,newlines)")
+    log.Trace("grm", "File: newlines,start,newlines,program,end,newlines")
     $$.N = $4.N
   }
 ;
@@ -77,14 +77,14 @@ file:
 // Program -> StatementList
 // A list of statement lines each separated by a newlines
 program:
-	program line newlines {
+	program line {
     log.Trace("grm", "Program: Appending program line")
     line_statements := $2.N.(*ast.StatementList).List
     for _, item := range line_statements {
       $1.N.(*ast.StatementList).List = append($1.N.(*ast.StatementList).List, item)
     }
     $$.N = $1.N
-  }
+  } newlines
   | {
     log.Trace("grm", "Program: Creating new statement list")
     $$.N = &ast.StatementList{Line: log.LineNo, List: make([]ast.Node, 0, 0)}
@@ -305,8 +305,12 @@ field:
 // working if the user had more than 1 newline. So this is an emulation of
 // the \n+ behavior. Oh yes.
 newlines:
-  NEWLINE
-  | newlines NEWLINE
+  NEWLINE {
+    log.LineNo++
+  }
+  | newlines NEWLINE {
+    log.LineNo++
+  }
 ;
 
 %%

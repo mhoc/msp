@@ -2,7 +2,6 @@
 /\n/ {
   log.Token("NEWLINE\n")
   log.Trace("lex", "Newline")
-  log.LineNo++
   return NEWLINE
 }
 
