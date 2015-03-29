@@ -24,8 +24,8 @@ type Add struct {
 func (a Add) Execute() interface{} {
   left := a.Lhs.Execute()
   right := a.Rhs.Execute()
-  leftVal := left.(Value)
-  rightVal := right.(Value)
+  leftVal := left.(*Value)
+  rightVal := right.(*Value)
 
   if leftVal.Type == VALUE_INT && rightVal.Type == VALUE_INT {
     leftVal.Value = leftVal.Value.(int) + rightVal.Value.(int)
@@ -38,7 +38,7 @@ func (a Add) Execute() interface{} {
   }
 
   log.Error{Line:a.Line, Type: log.TYPE_VIOLATION, Msg: "Attempting to add types which are not supported"}.Report()
-  leftVal.Value = VALUE_UNDEFINED
+  leftVal.Type = VALUE_UNDEFINED
   return leftVal
 
 }

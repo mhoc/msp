@@ -9,22 +9,32 @@ package ast
 
 import "fmt"
 
-// ===================
+// ====================
 // Object literals
-// {a: "hello", b: 5}
-// ===================
+// When objects are statically typed into the source code, these are generated.
+// When an object is executed, it returns a Value of type VALUE_OBJECT
+// This is strange but actually makes sense. By definition, Values are
+// primitive and can only exist as leaves on an AST tree. Objects are not
+// generally leaves. They are nodes themselves with children which are values
+// ====================
 type Object struct {
   Map map[string]Node
   Line int
 }
 
 func (o Object) Execute() interface{} {
-  // Im not actually sure if anything needs to be done here
-  // We definitely dont return anything (becuase objects do not have value and cannot be used in expressions)
-  // We dont need to insert each kv pair into our symbol table because the
-  // caller of this function will handle inserting the entire object node
-  // into the table.
-  return nil
+  // Here, we traverse each value in the object and evaluate it
+  // then build a new map (stored in a Value) containing the evaluated values
+
+  // Build the new value
+  v := &Value{Type:VALUE_OBJECT, Value: make(map[string]*Value)}
+
+  for key, value := range o.Map {
+    v.Value.(map[string]*Value)[key] = value.Execute().(*Value)
+  }
+
+  return v
+
 }
 
 func (o Object) LineNo() int {
@@ -32,7 +42,7 @@ func (o Object) LineNo() int {
 }
 
 func (o Object) Print(p string) {
-  fmt.Println(p + "Object")
+  fmt.Println(p + "Object Node")
   for key, value := range o.Map {
     fmt.Printf(p + "| %s\n", key)
     value.Print(p + "| | ")

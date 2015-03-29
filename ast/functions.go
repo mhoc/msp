@@ -25,7 +25,7 @@ func (f FunctionCall) Execute() interface{} {
     panic("Error: Attempting to call function that is not document.write")
   }
   for _, arg := range f.Args {
-    argv := arg.Execute().(Value)
+    argv := arg.Execute().(*Value)
     switch argv.Type {
       case VALUE_UNDEFINED:
         fmt.Printf("undefined")

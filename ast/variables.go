@@ -76,7 +76,7 @@ func (a Assignment) Execute() interface{} {
   // The type of the right side should always be a Value
   // This line is included just to throw an error if it ever isn't, which is
   // mainly for debugging
-  rightValue := rhsResult.(Value)
+  rightValue := rhsResult.(*Value)
 
   SymAssign(a.Name, rightValue)
   return nil
@@ -103,8 +103,7 @@ type Reference struct {
 
 func (vr Reference) Execute() interface{} {
   value := SymGet(vr.Name, vr.LineNo())
-  vr.Value = value
-  return vr
+  return value
 }
 
 func (vr Reference) LineNo() int {

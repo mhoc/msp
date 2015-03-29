@@ -17,9 +17,10 @@ import (
 // ===================
 type ValueType int
 const (
-  VALUE_UNDEFINED ValueType = iota
-  VALUE_INT ValueType = iota
-  VALUE_STRING ValueType = iota
+  VALUE_UNDEFINED ValueType = iota  // Disregard value of Value
+  VALUE_INT ValueType = iota        // type(Value) == int
+  VALUE_STRING ValueType = iota     // type(Value) == string
+  VALUE_OBJECT ValueType = iota     // type(Value) == map[string]*Value
 )
 type Value struct {
   Type ValueType
@@ -30,7 +31,7 @@ type Value struct {
 func (v Value) Execute() interface{} {
   // We just return the value itself, not the containing interface
   // because we need information about its type in parent ast nodes
-  return v
+  return &v
 }
 
 func (v Value) LineNo() int {
@@ -47,6 +48,13 @@ func (v Value) Print(p string) {
       break
     case VALUE_STRING:
       fmt.Printf(p + "[str] %v\n", v.Value)
+      break
+    case VALUE_OBJECT:
+      fmt.Println(p + "Object Value")
+      for key, value := range v.Value.(map[string]*Value) {
+        fmt.Printf(p + "| %s\n", key)
+        value.Print(p + "| | ")
+      }
       break
   }
 }

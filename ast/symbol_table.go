@@ -27,7 +27,7 @@ func SymDeclare(name string) {
 
 }
 
-func SymAssign(name string, value Value) {
+func SymAssign(name string, value *Value) {
   log.Tracef("tbl", "Assigning value %v to variable %s", value.Value, name)
 
   // Check to ensure the variable is declared
