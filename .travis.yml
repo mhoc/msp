@@ -6,8 +6,11 @@ go:
 
 branches:
   only:
-    - go-refactor
+    - master
 
 install:
   - make
 
+script:
+  - make test
+  

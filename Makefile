@@ -34,8 +34,16 @@ uclean:
 	@echo $(COLOR) Cleaning nex intermediate files $(WHITE)
 	rm -f nexb miniscript.nn.go
 	@echo $(COLOR) Cleaning GOPATH temp structure $(WHITE)
-	rm -rf src
+	rm -rf src bin cs352-integration-test
 
 clean: uclean
 	@echo $(COLOR) Deleting parser binary $(WHITE)
-	rm -f parser
+	rm -f parser cs352-integration-test
+
+test: parser
+	@echo $(COLOR) Downloading test cases $(WHITE)
+	rm -rf cs352-integration-test
+	git clone http://github.com/mhoc/cs352-integration-test.git
+	@echo $(COLOR) Running test cases $(WHITE)
+	@cd cs352-integration-test && go run main.go ../parser
+	@$(MAKE) clean
