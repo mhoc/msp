@@ -9,6 +9,7 @@ package ast
 
 import (
   "fmt"
+  //"reflect"
   "mhoc.co/msp/symbol"
 )
 
@@ -72,7 +73,18 @@ type Assignment struct {
 }
 
 func (a Assignment) Execute() interface{} {
-  symbol.Assign(a.Lhs.VariableName, a.Rhs.Execute(), a.LineNo())
+  rhsResult := a.Rhs.Execute()
+/*
+  typestr := reflect.TypeOf(rhsResult).Name()
+  if (typestr == "Reference") {
+    if (rhsResult.(Reference).Undefined) {
+      rhsResult = &symbol.Type{Undefined: true}
+    } else {
+      rhsResult = symbol.Get(rhsResult.(Reference).Var.VariableName, a.LineNo())
+    }
+  }
+*/
+  symbol.Assign(a.Lhs.VariableName, rhsResult, a.LineNo())
   return nil
 }
 

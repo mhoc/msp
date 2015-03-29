@@ -9,6 +9,8 @@ package ast
 
 import (
   "fmt"
+  "reflect"
+  "mhoc.co/msp/log"
 )
 
 // ====================
@@ -21,7 +23,22 @@ type Add struct {
 }
 
 func (a Add) Execute() interface{} {
-  return nil
+  left := a.Lhs.Execute()
+  right := a.Rhs.Execute()
+  leftType := reflect.TypeOf(left)
+  rightType := reflect.TypeOf(right)
+
+  if leftType.Name() == "int" && rightType.Name() == "int" {
+    return left.(int) + right.(int)
+  }
+
+  if leftType.Name() == "string" && rightType.Name() == "string" {
+    return left.(string) + right.(string)
+  }
+
+  log.Error{Line:a.Line, Type: log.TYPE_VIOLATION, Msg: "Attempting to add type which is not supported"}.Report()
+  return &Reference{Undefined: true}
+
 }
 
 func (a Add) LineNo() int {
