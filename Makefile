@@ -45,5 +45,5 @@ test: parser
 	rm -rf cs352-integration-test
 	git clone http://github.com/mhoc/cs352-integration-test.git
 	@echo $(COLOR) Running test cases $(WHITE)
-	@cd cs352-integration-test && go run main.go ../parser
+	@cd cs352-integration-test && go run main.go --exit-on-fail ../parser
 	@$(MAKE) clean
