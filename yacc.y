@@ -1,12 +1,25 @@
 
 %{
 
-#include "my.h"
-int yylineno;
-#include "helper.c"
-FILE *yyin;
+package main
+
+import (
+  "fmt"
+  "mhoc.co/msp/ast"
+  "mhoc.co/msp/log"
+)
+
+// Each of the node types is stored in our %union
+// The return types of each grammar rule is written in a comment above the rule
+// If we know the type, we use a specific element in this struct so as to
+// cut down on type inferencing
+// If we dont know the type (aka: statement), then we just use the "No" element
 
 %}
+
+%union {
+  N ast.Node
+}
 
 %token
 	SCRIPT_TAG_START
@@ -15,6 +28,7 @@ FILE *yyin;
 	IDENTIFIER
 	DOCUMENT_WRITE
 	NEWLINE
+	WHITESPACE
 	SEMICOLON
 	EQUAL
 	INTEGER
@@ -29,229 +43,274 @@ FILE *yyin;
 	LBRACE
 	RBRACE
 	COLON
-	OBJKEY
 
 %%
 
-/** A file is the entire thing we are parsing.
-		It takes care of the script tags at the start and end. */
+target:
+  file {
+    log.Trace("grm", "Target")
+    fmt.Print("")
+    if log.LOG_AST {
+      $1.N.Print("")
+    }
+    $1.N.Execute()
+  }
+;
+
+// File -> StatementList
+// Beginning and end script tags with a program in-between them
 file:
-	SCRIPT_TAG_START NEWLINE program SCRIPT_TAG_END
-	| SCRIPT_TAG_START NEWLINE program SCRIPT_TAG_END NEWLINE
-	| NEWLINE SCRIPT_TAG_START NEWLINE program SCRIPT_TAG_END NEWLINE
+	SCRIPT_TAG_START newlines program SCRIPT_TAG_END {
+    log.Trace("grm", "File: start,newlines,program,end")
+    $$.N = $3.N
+  }
+	| SCRIPT_TAG_START newlines program SCRIPT_TAG_END newlines {
+    log.Trace("grm", "File: start,newlines,program,end,newlines")
+    $$.N = $3.N
+  }
+	| newlines SCRIPT_TAG_START newlines program SCRIPT_TAG_END newlines {
+    log.Trace("grm", "File: newlines,start,newlines,program,end,newlines")
+    $$.N = $4.N
+  }
 ;
 
-/** A program is a series of lines, each followed by a newline. */
+// Program -> StatementList
+// A list of statement lines each separated by a newlines
 program:
-	program line NEWLINE
-	| /* Empty */
+	program line {
+    log.Trace("grm", "Program: Appending program line")
+    line_statements := $2.N.(*ast.StatementList).List
+    for _, item := range line_statements {
+      $1.N.(*ast.StatementList).List = append($1.N.(*ast.StatementList).List, item)
+    }
+    $$.N = $1.N
+  } newlines
+  | {
+    log.Trace("grm", "Program: Creating new statement list")
+    $$.N = &ast.StatementList{Line: log.LineNo, List: make([]ast.Node, 0, 0)}
+  }
 ;
 
-/** Each line is a statement terminated by an optional semicolon.
-  	This rule takes care of the possibility that a line could contain multiple statements.
-		If it does, each one in the center must have a semicolon. The last one is optional. */
+// Line -> StatementList
+// A single line in the program. A line can contain multiple statements through
+// the use of a semicolon
 line:
-	statement
-	| statement SEMICOLON
-	| statement SEMICOLON line
+	statement {
+    log.Trace("grm", "Line: Creating a new single statement statementlist")
+    $$.N = &ast.StatementList{Line: log.LineNo, List: []ast.Node{$1.N}}
+  }
+	| statement SEMICOLON {
+    log.Trace("grm", "Line Creating a new single statement statementlist;")
+    $$.N = &ast.StatementList{Line: log.LineNo, List: []ast.Node{$1.N}}
+  }
+	| statement SEMICOLON line {
+    // Prepend this statement to the list already created above
+    // Because of the weird way the recursion is set up here, we have to prepend instead of append
+    // This is the idiomatic way to prepend in go. Looks weird. It works.
+    $3.N.(*ast.StatementList).List = append([]ast.Node{$1.N}, $3.N.(*ast.StatementList).List...)
+    $$.N = $3.N
+  }
 ;
 
-/** A statement is any single operation. This includes declarations (var a), assignments (a = 1),
-  	definitions (var a = 1), and function calls (document.write(a)). */
+// Statement -> Node
+// Any single statement in the program. Statements have no value in this language.
 statement:
 	declaration
 	| assignment
 	| definition
-	| DOCUMENT_WRITE LPAREN parameter_list RPAREN
+	| DOCUMENT_WRITE LPAREN parameter_list RPAREN {
+    $3.N.(*ast.FunctionCall).Name = "document.write"
+    $$.N = $3.N
+  }
 ;
 
-/** var a
-		In a declaration, all we do is add the symbol as undefined in our symbol table. */
+// Declaration -> Declaration
+// The declaration or redeclaration of a variable
 declaration:
 	VARDEF IDENTIFIER {
-		declareSymbol($2.value.string);
-	}
+    decl := &ast.Declaration{Line: log.LineNo, Var: $2.N.(*ast.Variable)}
+    $$.N = decl
+  }
 ;
 
-/** a = 1
-		A corresponding update_value function is called.
-		update_value will print an error if the value was not previously declared. */
+// Assignment -> Assignment
+// The assignment of a value to a variable which has already been declared
 assignment:
 	IDENTIFIER EQUAL value {
-		defineSymbol($1.value.string, &$3, 1);
-	}
-	| OBJKEY EQUAL value {
-		defineSymbol($1.value.string, &$3, 0);
-	}
+    log.Trace("grm", "Assignment")
+    assign := &ast.Assignment{Line: log.LineNo, Lhs: $1.N.(*ast.Variable), Rhs: $3.N}
+    $$.N = assign
+  }
 ;
 
-/** var a = 1
-		A combination declaration and assignment
-		insert_symbol is called based upon the type of the value passed in.
-		this function will redefine the type of the variable if it was already declared. */
+// Definition -> Definition
+// A combination declaration and assignment
 definition:
 	VARDEF IDENTIFIER EQUAL value {
-		declareSymbol($2.value.string);
-		defineSymbol($2.value.string, &$4, 1);
-	}
+    // Create the declaration
+    decl := &ast.Declaration{Var: $2.N.(*ast.Variable)}
+    // Create the assignment
+    assign := &ast.Assignment{Lhs: $2.N.(*ast.Variable), Rhs: $4.N}
+    // Combine them into a definition
+    def := &ast.Definition{Decl: decl, Assign: assign}
+    $$.N = def
+  }
 ;
 
-/** A list of comma-separated values
-		Right now this is hard-coded to only work with document.write() */
+// Parameter List -> FunctionCall
+// The list of parameters which a function is called.
+// This is where we build the actual function call that gets added to the ast
 parameter_list:
 	expression {
-		printExpression(&$1);
-	}
+    // Create a new function call with a single argument
+    fc := &ast.FunctionCall{Line: log.LineNo, Args: []ast.Node{$1.N}}
+    $$.N = fc
+  }
 	| parameter_list COMMA expression {
-		printExpression(&$3);
-	}
-	| /* empty */
+    // Append this expression to our list of arguments from $1
+    $1.N.(*ast.FunctionCall).Args = append($1.N.(*ast.FunctionCall).Args, $3.N)
+    $$.N = $1.N
+  }
+	| {
+    // Create an empty argument function call
+    $$.N = &ast.FunctionCall{Line: log.LineNo, Args: []ast.Node{}}
+  }
 ;
 
-/** A value is any entity which can be assigned to a variable.
-		expressions, in particular, are the only ones that can be recursed into
-		sub-expressions AND are the only ones that can be printed. */
+// Value -> Node
+// Anything in the language which can be assigned to a variable
 value:
 	expression
 	| object_definition
 ;
 
-/** Any reference to a variable which has been previously declared and defined.
-    If it has not been declared or defined, a type error is printed */
-variable_reference:
-	IDENTIFIER {
-		$$ = *getSymbol($1.value.string);
-	}
-	| OBJKEY {
-		$$ = *getSymbol($1.value.string);
-	}
-;
-
-/** An expression is a combination of multiple subexpressions or values to
-		produce a single expression_value. */
+// Expression -> Node
+// Any combination of multiple sub-expressions to produce a single value
 expression:
 	additive_expression
 ;
 
-/** These sub-expression rules define an order of operations such that
-			1) "a", 1, a, (exp)
-			2) exp * exp, exp / exp
-			3) exp + exp, exp - exp */
+// Additive Expression -> Node
+// Order of operations level 3
 additive_expression:
 	multiplicative_expression
 	| additive_expression PLUS multiplicative_expression {
-		$$ = addTokens($1, $3);
-	}
+    $$.N = &ast.Add{Line: log.LineNo, Lhs: $1.N, Rhs: $3.N}
+  }
 	| additive_expression MINUS multiplicative_expression {
-		$$ = subtractTokens($1, $3);
-	}
+    $$.N = &ast.Subtract{Line: log.LineNo, Lhs: $1.N, Rhs: $3.N}
+  }
 ;
 
+// Multiplicative Expression -> Node
+// Order of operations level 2
 multiplicative_expression:
 	primary_expression
 	| multiplicative_expression MULT primary_expression {
-		$$ = multiplyTokens($1, $3);
-	}
+    $$.N = &ast.Multiply{Line: log.LineNo, Lhs: $1.N, Rhs: $3.N}
+  }
 	| multiplicative_expression DIVIDE primary_expression {
-		$$ = divideTokens($1, $3);
-	}
+    $$.N = &ast.Divide{Line: log.LineNo, Lhs: $1.N, Rhs: $3.N}
+  }
 ;
 
+// Primary Expression -> Node
+// Order of operations level 1
 primary_expression:
 	INTEGER
 	| STRING
-	| variable_reference {
-		if ($1.type == TYPE_FIELDLIST) {
-			printf("Line %d, type violation\n", yylineno);
-		}
-	}
+	| variable_reference
 	| LPAREN expression RPAREN {
-		$$ = $2;
-	}
+    $$.N = $2.N
+  }
 ;
 
-/** { key:value ... } */
+// Variable Reference -> Reference
+// Any usage of a variable inside a value
+variable_reference:
+	IDENTIFIER {
+    // Create the reference object
+    // We dont actually look up and store the value of the variable until execution
+    vr := &ast.Reference{Line: log.LineNo, Var: $1.N.(*ast.Variable)}
+    $$.N = vr
+  }
+;
+
+// Object definition -> Object
+// The typed definition of an object inside the source code
 object_definition:
 	LBRACE field_list RBRACE {
-		$$ = $2;
-	}
-	| LBRACE NEWLINE field_list RBRACE {
-		$$ = $3;
-	}
+    $$.N = $2.N
+  }
+	| LBRACE newlines field_list RBRACE {
+    $$.N = $3.N
+  }
 ;
 
+// Field List -> Object
+// The list of fields without the braces around them
 field_list:
 	interim_field_list final_field {
-		addToFieldList($1.value.fieldList, &$2);
-		$$ = $1;
-	}
+    // Add the final field to the list of all the fields
+    $1.N.(*ast.Object).Map[$2.N.(*ast.Field).FieldName] = $2.N.(*ast.Field).FieldValue
+    $$.N = $1.N
+  }
 	| {
-		$$ = *newFieldList();
-	}
+    // Return an empty object
+    $$.N = &ast.Object{Line: log.LineNo, Map: make(map[string]ast.Node)}
+  }
 ;
 
+// Interim Field List -> Object
+// This is every field in the object definition except for the last one
+// due to the fact that the last one is the only one without a comma after it
 interim_field_list:
 	interim_field_list interim_field {
-		addToFieldList($1.value.fieldList, &$2);
-		$$ = $1;
-	}
+    // Add the interim field to the list of all interim fields
+    $1.N.(*ast.Object).Map[$2.N.(*ast.Field).FieldName] = $2.N.(*ast.Field).FieldValue
+    $$.N = $1.N
+  }
 	| {
-		$$ = *newFieldList();
-	}
+    // Return an empty list of interim fields
+    $$.N = &ast.Object{Line: log.LineNo, Map: make(map[string]ast.Node)}
+  }
 ;
 
+// Interim field -> Field
+// A single field followed by a required comma
 interim_field:
 	field COMMA
-	| field COMMA NEWLINE
+	| field COMMA newlines
 ;
 
+// Final field -> Field
+// A single field followed by no comma
 final_field:
 	field
-	| field NEWLINE
+	| field newlines
 ;
 
+// Field -> Field
+// A single key:value pair
 field:
 	IDENTIFIER COLON expression {
-		$$ = *createField($1.value.string, &$3);
-	}
+    $$.N = &ast.Field{Line: log.LineNo,FieldName: $1.N.(*ast.Variable).VariableName,FieldValue: $3.N}
+  }
+;
+
+// New Lines -> Nothing
+// This is so weird and I hate it but it works
+// Previously I had '\n+' as NEWLINE in my lexer, but I wanted to be able to maintain
+// my own linenumber count so I changed it to '\n'. Then everything stopped
+// working if the user had more than 1 newline. So this is an emulation of
+// the \n+ behavior. Oh yes.
+newlines:
+  NEWLINE {
+    log.LineNo++
+  }
+  | newlines NEWLINE {
+    log.LineNo++
+  }
 ;
 
 %%
-
-void segvhandler(int sig, siginfo_t *si, void *unused) {
-	printf("\n\n==SEGMENTATION FAULT==\n");
-	fflush(stdout);
-	fflush(stderr);
-	exit(0);
-}
-
-yyerror(char *s) {
-    fprintf(stderr, "%s\n", s);
-    return 1;
-}
-
-int main(int argc, char *argv[]) {
-
-	signal(SIGSEGV, segvhandler);
-
-	if (argc == 1) {
-		yyin = stdin;
-		yyparse();
-	}
-	else if (argc == 2) {
-		FILE *file;
-		file = fopen(argv[1], "r");
-		if (!file) {
-      		fprintf(stderr, "could not open %s\n", argv[1]);
-  	} else {
-      		yyin = file;
-      		//yyparse() will call yylex()
-      		yyparse();
-  	}
-
-	} else {
-        	fprintf(stderr, "format: ./yacc_example [filename]");
-	}
-
-	return 0;
-}

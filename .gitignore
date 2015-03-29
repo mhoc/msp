@@ -7,3 +7,9 @@ lex.yy.c
 *.output
 parser
 *.pyc
+y.go
+nex/nex
+miniscript.nn.go
+main
+nexb
+src/*

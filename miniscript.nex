@@ -1,0 +1,144 @@
+
+/\n/ {
+  log.Token("NEWLINE\n")
+  log.Trace("lex", "Newline")
+  return NEWLINE
+}
+
+/<script type=\"text\/JavaScript\">/ {
+  log.Token("SCRIPT_TAG_START ")
+  log.Trace("lex", "Start script tag")
+  return SCRIPT_TAG_START
+}
+
+/<\/script>/ {
+  log.Token("SCRIPT_TAG_END ")
+  log.Trace("lex", "End script tag")
+  return SCRIPT_TAG_END
+}
+
+/document\.write/ {
+  log.Token("DOCUMENT_WRITE ")
+  log.Trace("lex", "Document write function call")
+  return DOCUMENT_WRITE
+}
+
+/var[ \t]/ {
+  log.Token("VARDEF ")
+  log.Trace("lex", "Var keyword")
+  return VARDEF
+}
+
+/[ \t]+/ {
+  log.Token("")
+}
+
+/[0-9]+/ {
+  log.Token("INTEGER[" + yylex.Text() + "] ")
+  log.Trace("lex", "Integer " + yylex.Text())
+  value, _ := strconv.Atoi(yylex.Text())
+  lval.N = &ast.Integer{Line: log.LineNo, Value: value}
+  return INTEGER
+}
+
+/[A-Za-z][A-Za-z0-9\.]*/ {
+  log.Token("IDENTIFIER[" + yylex.Text() + "] ")
+  log.Trace("lex", "Identifier " + yylex.Text())
+  lval.N = &ast.Variable{Line: log.LineNo, VariableName: yylex.Text()}
+  return IDENTIFIER
+}
+
+/\"(\\.|[^\\"\n])*\"/ {
+  log.Token("STRING[" + yylex.Text() + "] ")
+  log.Trace("lex", "String " + yylex.Text())
+  lval.N = &ast.String{Line: log.LineNo, Value: yylex.Text()[1:len(yylex.Text())-1]}
+  return STRING
+}
+
+/=/ {
+  log.Token("EQUAL ")
+  log.Trace("lex", "Equal sign")
+  return EQUAL
+}
+
+/{/ {
+  log.Token("LBRACE ")
+  log.Trace("lex", "Left brace")
+  return LBRACE
+}
+
+/}/ {
+  log.Token("RBRACE ")
+  log.Trace("lex", "Right brace")
+  return RBRACE
+}
+
+/\(/ {
+  log.Token("LPAREN ")
+  log.Trace("lex", "Left paren")
+  return LPAREN
+}
+
+/\)/ {
+  log.Token("RPAREN ")
+  log.Trace("lex", "Right paren")
+  return RPAREN
+}
+
+/,/ {
+  log.Token("COMMA ")
+  log.Trace("lex", "Comma")
+  return COMMA
+}
+
+/\+/ {
+  log.Token("PLUS ")
+  log.Trace("lex", "Plus")
+  return PLUS
+}
+
+/-/ {
+  log.Token("MINUS ")
+  log.Trace("lex", "Minus")
+  return MINUS
+}
+
+/\*/ {
+  log.Token("MULT ")
+  log.Trace("lex", "Mult")
+  return MULT
+}
+
+/\// {
+  log.Token("DIVIDE ")
+  log.Trace("lex", "Divide")
+  return DIVIDE
+}
+
+/:/ {
+  log.Token("COLON ")
+  log.Trace("lex", "Colon")
+  return COLON
+}
+
+/;/ {
+  log.Token("SEMICOLON ")
+  log.Trace("lex", "Semicolon")
+  return SEMICOLON
+}
+
+/./ {
+  return int(yylex.Text()[0])
+}
+
+//
+
+package main
+
+import (
+  "fmt"
+  "os"
+  "strconv"
+  "mhoc.co/msp/ast"
+  "mhoc.co/msp/log"
+)

@@ -1,22 +1,41 @@
-parser: y.tab.c lex.yy.c helper.c my.h
-	gcc y.tab.c lex.yy.c -o parser -lfl -w
 
-y.tab.c: yacc.y
-	bison -y -d -g -t --verbose yacc.y
+GOPATH := ${PWD}
+COLOR := "\033[0;32m"
+WHITE := "\033[0;00m"
 
-lex.yy.c: lex.l
-	lex lex.l
+parser: main.go miniscript.nn.go y.go
+	@echo $(COLOR) Overriding GOPATH to $(GOPATH) $(WHITE)
+	@echo $(COLOR) Creating temp GOPATH fs structure to support multipackage compilation $(WHITE)
+	mkdir -p src/mhoc.co/msp
+	cp *.go src/mhoc.co/msp
+	cp -r ast src/mhoc.co/msp
+	cp -r log src/mhoc.co/msp
+	cp -r symbol src/mhoc.co/msp
+	@echo $(COLOR) Building parser binary $(WHITE)
+	go build -o parser mhoc.co/msp
+	@$(MAKE) uclean
 
-clean:
-	rm -f lex.yy.c y.tab.c y.tab.h y.dot y.output parser y.vcg test.py cases.py cases.pyc
-	rm -rf tests
+y.go: yacc.y
+	@echo $(COLOR) Compiling yacc grammar $(WHITE)
+	go tool yacc yacc.y
 
-testgh: parser
-	wget bit.ly/1zMeiCA -O run.sh && chmod +x run.sh && ./run.sh
+miniscript.nn.go: miniscript.nex nexb
+	@echo $(COLOR) Compiling lexical analyzer $(WHITE)
+	./nexb miniscript.nex
 
-testlocal: parser
-	@cp ~/src/cs352-test-cases/test.py .
-	@cp ~/src/cs352-test-cases/cases.py .
-	python test.py
-	@$(MAKE) clean
+nexb: nex/nex.go
+	@echo $(COLOR) Compiling nex lexical analyzer tool $(WHITE)
+	cd nex && go build -o nexb nex.go
+	mv nex/nexb .
 
+uclean:
+	@echo $(COLOR) Cleaning yacc intermediate files $(WHITE)
+	rm -f y.output y.go
+	@echo $(COLOR) Cleaning nex intermediate files $(WHITE)
+	rm -f nexb miniscript.nn.go
+	@echo $(COLOR) Cleaning GOPATH temp structure $(WHITE)
+	rm -rf src
+
+clean: uclean
+	@echo $(COLOR) Deleting parser binary $(WHITE)
+	rm -f parser
