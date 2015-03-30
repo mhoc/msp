@@ -1,5 +1,7 @@
 # msp (a miniscript parser)
 
+[![Build Status](https://magnum.travis-ci.com/mhoc/msp.svg?token=noEZqHCNie4E6CC2GGKT&branch=master)](https://magnum.travis-ci.com/mhoc/msp)
+
 Michael Hockerman (mhockerm)
 CS 352 Project 3
 () April 2015
