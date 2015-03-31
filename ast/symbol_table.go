@@ -80,8 +80,8 @@ func SymGet(name string, lineno int) *Value {
 
   value, in := SymbolTable[name]
   if !in {
-    log.Error{Line: lineno, Type: log.VALUE, Var: name}.Report()
-    value = &Value{Type: VALUE_UNDEFINED, Line: lineno}
+    log.Error{Line: lineno, Type: log.TYPE_VIOLATION}.Report()
+    value = &Value{Written: false, Type: VALUE_UNDEFINED, Line: lineno}
     return value
   }
 

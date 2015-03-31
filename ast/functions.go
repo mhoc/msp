@@ -6,6 +6,7 @@ package ast
 
 import (
   "fmt"
+  "mhoc.co/msp/log"
 )
 
 // ====================
@@ -39,6 +40,9 @@ func (f FunctionCall) Execute() interface{} {
         }
         fmt.Printf("%s", argv.Value)
         break
+      default:
+        log.Error{Line:f.Line, Type: log.TYPE_VIOLATION, Msg: "Attempting to print a non-int or string type"}.Report()
+        fmt.Print("undefined")
     }
   }
   return nil

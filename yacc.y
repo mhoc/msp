@@ -200,10 +200,10 @@ expression:
 additive_expression:
 	multiplicative_expression
 	| additive_expression PLUS multiplicative_expression {
-    $$.N = &ast.Add{Line: log.LineNo, Lhs: $1.N, Rhs: $3.N}
+    $$.N = &ast.BinaryExpression{Line: log.LineNo, Lhs: $1.N, Rhs: $3.N, Op: "+"}
   }
 	| additive_expression MINUS multiplicative_expression {
-    $$.N = &ast.Subtract{Line: log.LineNo, Lhs: $1.N, Rhs: $3.N}
+    $$.N = &ast.BinaryExpression{Line: log.LineNo, Lhs: $1.N, Rhs: $3.N, Op: "-"}
   }
 ;
 
@@ -212,10 +212,10 @@ additive_expression:
 multiplicative_expression:
 	primary_expression
 	| multiplicative_expression MULT primary_expression {
-    $$.N = &ast.Multiply{Line: log.LineNo, Lhs: $1.N, Rhs: $3.N}
+    $$.N = &ast.BinaryExpression{Line: log.LineNo, Lhs: $1.N, Rhs: $3.N, Op: "*"}
   }
 	| multiplicative_expression DIVIDE primary_expression {
-    $$.N = &ast.Divide{Line: log.LineNo, Lhs: $1.N, Rhs: $3.N}
+    $$.N = &ast.BinaryExpression{Line: log.LineNo, Lhs: $1.N, Rhs: $3.N, Op: "/"}
   }
 ;
 

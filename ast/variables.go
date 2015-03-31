@@ -45,6 +45,12 @@ type Definition struct {
 }
 
 func (d Definition) Execute() interface{} {
+
+  // This is more complicated than it needs to be because of the fucking
+  // var x = x corner case. Normally I'd just execute the decl and
+  // execute the assign in that order, but NNOOOO apparently the order has
+  // to be GET the right, make the decl, THEN do the assign
+  d.Assign.Rhs.Execute()
   d.Decl.Execute()
   d.Assign.Execute()
   return nil
