@@ -26,6 +26,7 @@ type BinaryExpression struct {
 }
 
 func (be BinaryExpression) Execute() interface{} {
+  log.Tracef("ast", "Executing binary expression %s", be.Op)
 
   // Execute both sides
   left := be.Lhs.Execute().(*Value)

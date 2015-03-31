@@ -1,3 +1,5 @@
 <script type="text/JavaScript">
-var y = x
+var two = 2; var ten = 10
+var result = two + ten
+document.write(result)
 </script>

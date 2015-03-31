@@ -89,6 +89,10 @@ func SymGet(name string, lineno int) *Value {
     log.Error{Line: lineno, Type: log.VALUE, Msg: "Attempting to access a value which is undefined", Var: name}.Report()
   }
 
-  return value
+  log.Tracef("tbl", "Value was: %v", value.Value)
+
+  // Make a copy of the value. Trust me, this bug took YEARS to find.
+  nVal := &Value{Type: value.Type, Value: value.Value, Written: value.Written}
+  return nVal
 
 }
