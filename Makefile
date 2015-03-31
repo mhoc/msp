@@ -1,48 +1,46 @@
 
 GOPATH := ${PWD}
-COLOR := "\033[0;32m"
-WHITE := "\033[0;00m"
 
 parser: main.go miniscript.nn.go y.go
-	@echo $(COLOR) Overriding GOPATH to $(GOPATH) $(WHITE)
-	@echo $(COLOR) Creating temp GOPATH fs structure to support multipackage compilation $(WHITE)
+	@echo `tput smul``tput setaf 2` Overriding GOPATH to $(GOPATH) `tput sgr0`
+	@echo `tput smul``tput setaf 2` Creating temp GOPATH fs structure to support multipackage compilation `tput sgr0`
 	mkdir -p src/mhoc.co/msp
 	cp *.go src/mhoc.co/msp
 	cp -r ast src/mhoc.co/msp
 	cp -r log src/mhoc.co/msp
-	@echo $(COLOR) Building parser binary $(WHITE)
+	@echo `tput smul``tput setaf 2` Building parser binary `tput sgr0`
 	go build -o parser mhoc.co/msp
 	@$(MAKE) uclean
 
 y.go: yacc.y
-	@echo $(COLOR) Compiling yacc grammar $(WHITE)
+	@echo `tput smul``tput setaf 2` Compiling yacc grammar `tput sgr0`
 	go tool yacc yacc.y
 
 miniscript.nn.go: miniscript.nex nexb
-	@echo $(COLOR) Compiling lexical analyzer $(WHITE)
+	@echo `tput smul``tput setaf 2` Compiling lexical analyzer `tput sgr0`
 	./nexb miniscript.nex
 
 nexb: nex/nex.go
-	@echo $(COLOR) Compiling nex lexical analyzer tool $(WHITE)
+	@echo `tput smul``tput setaf 2` Compiling nex lexical analyzer tool `tput sgr0`
 	cd nex && go build -o nexb nex.go
 	mv nex/nexb .
 
 uclean:
-	@echo $(COLOR) Cleaning yacc intermediate files $(WHITE)
+	@echo `tput smul``tput setaf 2` Cleaning yacc intermediate files `tput sgr0`
 	rm -f y.output y.go
-	@echo $(COLOR) Cleaning nex intermediate files $(WHITE)
+	@echo `tput smul``tput setaf 2` Cleaning nex intermediate files `tput sgr0`
 	rm -f nexb miniscript.nn.go
-	@echo $(COLOR) Cleaning GOPATH temp structure $(WHITE)
+	@echo `tput smul``tput setaf 2` Cleaning GOPATH temp structure `tput sgr0`
 	rm -rf src bin cs352-integration-test
 
 clean: uclean
-	@echo $(COLOR) Deleting parser binary $(WHITE)
+	@echo `tput smul``tput setaf 2` Deleting parser binary `tput sgr0`
 	rm -f parser cs352-integration-test
 
 test: parser
-	@echo $(COLOR) Downloading test cases $(WHITE)
+	@echo `tput smul``tput setaf 2` Downloading test cases `tput sgr0`
 	rm -rf cs352-integration-test
 	git clone http://github.com/mhoc/cs352-integration-test.git
-	@echo $(COLOR) Running test cases $(WHITE)
+	@echo `tput smul``tput setaf 2` Running test cases `tput sgr0`
 	@cd cs352-integration-test && go run main.go --exit-on-fail ../parser
 	@$(MAKE) clean
