@@ -139,7 +139,11 @@ declaration:
 // The assignment of a value to a variable which has already been declared
 assignment:
 	IDENTIFIER EQUAL value {
-    log.Trace("grm", "Assignment")
+    log.Trace("grm", "Assignment Identifier")
+    $$.N = &ast.Assignment{Line: log.LineNo, Name: $1.Str, Rhs: $3.N}
+  }
+  | OBJKEY EQUAL value {
+    log.Trace("grm", "Assignment Obj Key")
     $$.N = &ast.Assignment{Line: log.LineNo, Name: $1.Str, Rhs: $3.N}
   }
 ;

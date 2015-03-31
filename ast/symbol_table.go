@@ -30,6 +30,18 @@ func SymDeclare(name string) {
 func SymAssign(name string, value *Value) {
   log.Tracef("tbl", "Assigning value %v to variable %s", value.Value, name)
 
+  // If its an object key, we need to get the object and add it to the object map
+  if strings.Contains(name, ".") {
+    sp := strings.Split(name, ".")
+    obj := SymGet(sp[0], value.LineNo())
+    if (obj.Type != VALUE_OBJECT) {
+      log.Error{Line: value.LineNo(), Type: log.TYPE_VIOLATION}.Report()
+      return
+    }
+    obj.Value.(map[string]*Value)[sp[1]] = value
+    return
+  }
+
   // Check to ensure the variable is declared
   if _, in := SymbolTable[name]; !in {
     log.Error{Line: value.LineNo(), Type: log.UNDECLARED_VAR, Var: name}.Report()
