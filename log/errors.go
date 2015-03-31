@@ -93,7 +93,7 @@ func (er Error) typeViolation() {
     fmt.Fprintf(os.Stderr, "[%d] Type Violation\n", er.Line)
     fmt.Fprintf(os.Stderr, "|-> %s\n", er.Msg)
   } else if lastLogged != Stmt {
-    fmt.Fprintf(os.Stderr, "line %d, type violation\n", er.Line)
+    fmt.Fprintf(os.Stderr, "Line %d, type violation\n", er.Line)
   }
 }
 
@@ -101,7 +101,7 @@ func (er Error) undeclaredVar() {
   if LOG_EXPANDED_ERRORS {
     fmt.Fprintf(os.Stderr, "[%d] Attempting to assign to undeclared variable %s\n", er.Line, er.Var)
   } else if lastLogged != Stmt {
-    fmt.Fprintf(os.Stderr, "line %d, %s undeclared\n", er.Line, er.Var)
+    fmt.Fprintf(os.Stderr, "Line %d, %s undeclared\n", er.Line, er.Var)
   }
 }
 
@@ -109,7 +109,7 @@ func (er Error) value() {
   if LOG_EXPANDED_ERRORS {
     fmt.Fprintf(os.Stderr, "[%d] Attempting to access the value of variable %s, which has no value\n", er.Line, er.Var)
   } else if lastLogged != Stmt {
-    fmt.Fprintf(os.Stderr, "line %d, %s has no value\n", er.Line, er.Var)
+    fmt.Fprintf(os.Stderr, "Line %d, %s has no value\n", er.Line, er.Var)
   }
 }
 
@@ -117,6 +117,6 @@ func (er Error) condition() {
   if LOG_EXPANDED_ERRORS {
     fmt.Fprintf(os.Stderr, "[%d] Condition in branch could not be evaluated to true or false\n", er.Line)
   } else if lastLogged != Stmt {
-    fmt.Fprintf(os.Stderr, "line %d, condition unknown\n", er.Line)
+    fmt.Fprintf(os.Stderr, "Line %d, condition unknown\n", er.Line)
   }
 }

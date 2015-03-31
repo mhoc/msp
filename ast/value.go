@@ -26,6 +26,7 @@ type Value struct {
   Type ValueType
   Value interface{}
   Line int
+  Written bool
 }
 
 func (v Value) Execute() interface{} {

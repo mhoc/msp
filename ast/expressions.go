@@ -10,6 +10,7 @@ package ast
 import (
   "fmt"
   "mhoc.co/msp/log"
+  "strings"
 )
 
 // ====================
@@ -33,6 +34,13 @@ func (a Add) Execute() interface{} {
   }
 
   if leftVal.Type == VALUE_STRING && rightVal.Type == VALUE_STRING {
+    lStr := leftVal.Value.(string)
+    rStr := rightVal.Value.(string)
+    if strings.Contains(lStr, "<br />") || strings.Contains(rStr, "<br />") {
+      log.Error{Line:a.Line, Type: log.TYPE_VIOLATION, Msg: "Attepting to concat a string which contains a linebreak"}.Report()
+      leftVal.Type = VALUE_UNDEFINED
+      return leftVal
+    }
     leftVal.Value = leftVal.Value.(string) + rightVal.Value.(string)
     return leftVal
   }

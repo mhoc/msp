@@ -23,7 +23,7 @@ func SymDeclare(name string) {
   }
 
   // Put the variable in our symbol table
-  SymbolTable[name] = &Value{Type: VALUE_UNDEFINED}
+  SymbolTable[name] = &Value{Type: VALUE_UNDEFINED, Written: false}
 
 }
 
@@ -47,7 +47,7 @@ func SymAssign(name string, value *Value) {
     log.Error{Line: value.LineNo(), Type: log.UNDECLARED_VAR, Var: name}.Report()
   }
 
-  SymbolTable[name] = &Value{Type: value.Type, Value: value.Value, Line: value.Line}
+  SymbolTable[name] = &Value{Type: value.Type, Value: value.Value, Line: value.Line, Written: true}
 
 }
 
@@ -83,6 +83,10 @@ func SymGet(name string, lineno int) *Value {
     log.Error{Line: lineno, Type: log.VALUE, Var: name}.Report()
     value = &Value{Type: VALUE_UNDEFINED, Line: lineno}
     return value
+  }
+
+  if value.Type == VALUE_UNDEFINED && !value.Written {
+    log.Error{Line: lineno, Type: log.VALUE, Msg: "Attempting to access a value which is undefined", Var: name}.Report()
   }
 
   return value
