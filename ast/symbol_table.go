@@ -86,7 +86,7 @@ func SymGet(name string, lineno int) *Value {
   }
 
   if value.Type == VALUE_UNDEFINED && !value.Written {
-    log.Error{Line: lineno, Type: log.VALUE, Msg: "Attempting to access a value which is undefined", Var: name}.Report()
+    log.Error{Line: lineno, Type: log.VALUE, Var: name}.Report()
   }
 
   log.Tracef("tbl", "Value was: %v", value.Value)

@@ -23,6 +23,20 @@
   return DOCUMENT_WRITE
 }
 
+/true/ {
+  log.Token("TRUE ")
+  log.Trace("lex", "True ")
+  lval.N = &ast.Value{Type: ast.VALUE_BOOLEAN, Value: true, Line: log.LineNo}
+  return TRUE
+}
+
+/false/ {
+  log.Token("FALSE ")
+  log.Trace("lex", "False ")
+  lval.N = &ast.Value{Type: ast.VALUE_BOOLEAN, Value: false, Line: log.LineNo}
+  return FALSE
+}
+
 /var[ \t]/ {
   log.Token("VARDEF ")
   log.Trace("lex", "Var keyword")
@@ -132,6 +146,60 @@
   log.Token("SEMICOLON ")
   log.Trace("lex", "Semicolon")
   return SEMICOLON
+}
+
+/</ {
+  log.Token("LT ")
+  log.Trace("lex", "Less Than")
+  return LT
+}
+
+/>/ {
+  log.Token("GT ")
+  log.Trace("lex", "Greater Than")
+  return GT
+}
+
+/<=/ {
+  log.Token("LTE ")
+  log.Trace("lex", "Less than or equal to")
+  return LTE
+}
+
+/>=/ {
+  log.Token("GTE ")
+  log.Trace("lex", "Greater than or equal to")
+  return GTE
+}
+
+/==/ {
+  log.Token("EQUIV ")
+  log.Trace("lex", "Equivalence")
+  return EQUIV
+}
+
+/!=/ {
+  log.Token("NEQUIV ")
+  log.Trace("lex", "NonEquivalence")
+  return NEQUIV
+}
+
+/!/ {
+  log.Token("NOT ")
+  log.Trace("lex", "Not")
+  return NOT
+}
+
+/&&/ {
+  log.Token("AND ")
+  log.Trace("lex", "And")
+  return AND
+}
+
+/\|\|/ {
+  log.Token("OR ")
+  log.Trace("lex", "Or")
+  return OR
 }
 
 /./ {

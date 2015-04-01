@@ -21,6 +21,7 @@ const (
   VALUE_INT ValueType = iota        // type(Value) == int
   VALUE_STRING ValueType = iota     // type(Value) == string
   VALUE_OBJECT ValueType = iota     // type(Value) == map[string]*Value
+  VALUE_BOOLEAN ValueType = iota    // type(Value) == bool
 )
 type Value struct {
   Type ValueType

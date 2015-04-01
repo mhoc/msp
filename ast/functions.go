@@ -35,13 +35,20 @@ func (f FunctionCall) Execute() interface{} {
         fmt.Printf("%d", argv.Value)
         break
       case VALUE_STRING:
-        if argv.Value == "<br />" {
+        if argv.Value.(string) == "<br />" {
           argv.Value = "\n"
         }
         fmt.Printf("%s", argv.Value)
         break
+      case VALUE_BOOLEAN:
+        if argv.Value.(bool) {
+          fmt.Printf("true")
+        } else {
+          fmt.Printf("false")
+        }
+        break
       default:
-        log.Error{Line:f.Line, Type: log.TYPE_VIOLATION, Msg: "Attempting to print a non-int or string type"}.Report()
+        log.Error{Line:f.Line, Type: log.TYPE_VIOLATION}.Report()
         fmt.Print("undefined")
     }
   }

@@ -33,6 +33,8 @@ import (
 	NEWLINE
 	WHITESPACE
 	SEMICOLON
+  TRUE
+  FALSE
 	EQUAL
 	INTEGER
 	PLUS
@@ -46,6 +48,15 @@ import (
 	LBRACE
 	RBRACE
 	COLON
+  GT
+  LT
+  GTE
+  LTE
+  EQUIV
+  NEQUIV
+  AND
+  OR
+  NOT
 
 %%
 
@@ -192,7 +203,46 @@ value:
 // Expression -> Node
 // Any combination of multiple sub-expressions to produce a single value
 expression:
-	additive_expression
+	boolean_expression
+  | NOT expression {
+    $$.N = &ast.UnaryExpression{Line: log.LineNo, Value: $2.N, Op: "!"}
+  }
+;
+
+// Boolean Expression -> Node
+// Order of operations level 5
+boolean_expression:
+  relational_expression
+  | boolean_expression AND relational_expression {
+    $$.N = &ast.BinaryExpression{Line: log.LineNo, Lhs: $1.N, Rhs: $3.N, Op: "&&"}
+  }
+  | boolean_expression OR relational_expression {
+    $$.N = &ast.BinaryExpression{Line: log.LineNo, Lhs: $1.N, Rhs: $3.N, Op: "||"}
+  }
+;
+
+// Relational Expression -> Node
+// Order of operations level 4
+relational_expression:
+  additive_expression
+  | relational_expression GT additive_expression {
+    $$.N = &ast.BinaryExpression{Line: log.LineNo, Lhs: $1.N, Rhs: $3.N, Op: ">"}
+  }
+  | relational_expression LT additive_expression {
+    $$.N = &ast.BinaryExpression{Line: log.LineNo, Lhs: $1.N, Rhs: $3.N, Op: "<"}
+  }
+  | relational_expression LTE additive_expression {
+    $$.N = &ast.BinaryExpression{Line: log.LineNo, Lhs: $1.N, Rhs: $3.N, Op: "<="}
+  }
+  | relational_expression GTE additive_expression {
+    $$.N = &ast.BinaryExpression{Line: log.LineNo, Lhs: $1.N, Rhs: $3.N, Op: ">="}
+  }
+  | relational_expression EQUIV additive_expression {
+    $$.N = &ast.BinaryExpression{Line: log.LineNo, Lhs: $1.N, Rhs: $3.N, Op: "=="}
+  }
+  | relational_expression NEQUIV additive_expression {
+    $$.N = &ast.BinaryExpression{Line: log.LineNo, Lhs: $1.N, Rhs: $3.N, Op: "!="}
+  }
 ;
 
 // Additive Expression -> Node
@@ -224,6 +274,8 @@ multiplicative_expression:
 primary_expression:
 	INTEGER
 	| STRING
+  | TRUE
+  | FALSE
 	| variable_reference
 	| LPAREN expression RPAREN {
     $$.N = $2.N
@@ -304,6 +356,7 @@ field:
     $$.N = &ast.Field{Line: log.LineNo, FieldName: $1.Str, FieldValue: $3.N}
   }
 ;
+
 
 // New Lines -> Nothing
 // This is so weird and I hate it but it works
