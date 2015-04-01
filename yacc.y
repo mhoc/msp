@@ -134,7 +134,7 @@ statement:
 	declaration
 	| assignment
 	| definition
-  | ifst
+  | if_statement
 	| DOCUMENT_WRITE LPAREN parameter_list RPAREN {
     $3.N.(*ast.FunctionCall).Name = "document.write"
     $$.N = $3.N
@@ -360,24 +360,37 @@ field:
   }
 ;
 
-// If statement -> If
-// The entire definition of an if statement
-ifst:
-  IF LPAREN expression RPAREN LBRACE newlines program RBRACE {
-    iff := &ast.If{Branches: make([]*ast.Branch, 1, 1), HasElse: false, Line: $3.N.LineNo()}
+// If statement -> ast.If
+if_statement:
+  IF LPAREN expression RPAREN LBRACE newlines program RBRACE if_tail {
 
-    // Create a branch for the first case that this one covers
+    // Create a branch for this if statement
     fBranch := &ast.Branch{Conditional: $3.N, IfTrue: $7.N.(*ast.StatementList), Line: $3.N.LineNo()}
-    iff.Branches[0] = fBranch
+
+    // Prepend this if statement to the list of if statements in iftail
+    iff := $9.N.(*ast.If)
+    iff.Branches = append([]*ast.Branch{fBranch}, iff.Branches...)
 
     $$.N = iff
   }
+
 ;
 
-// If tail -> Branch
-//iftail:
-//  |
-//;
+// If tail -> ast.If
+if_tail:
+  ELSE if_statement {
+    // Pass up the if statement created in $2
+    $$.N = $2.N
+  }
+  | ELSE LBRACE newlines program RBRACE {
+    // Create the if statement with an else
+    $$.N = &ast.If{Branches: make([]*ast.Branch, 0, 0), HasElse: true, Else: $4.N.(*ast.StatementList)}
+  }
+  | {
+    // Create the if statement with no else
+    $$.N = &ast.If{Branches: make([]*ast.Branch, 0, 0), HasElse: false}
+  }
+;
 
 // New Lines -> Nothing
 // This is so weird and I hate it but it works
