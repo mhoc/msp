@@ -37,6 +37,42 @@
   return FALSE
 }
 
+/if/ {
+  log.Token("IF ")
+  log.Trace("lex", "If statement")
+  return IF
+}
+
+/else/ {
+  log.Token("ELSE ")
+  log.Trace("lex", "Else statement")
+  return ELSE
+}
+
+/while/ {
+  log.Token("WHILE ")
+  log.Trace("lex", "While statement")
+  return WHILE
+}
+
+/do/ {
+  log.Token("DO ")
+  log.Trace("lex", "Do statement")
+  return DO
+}
+
+/break/ {
+  log.Token("BREAK ")
+  log.Trace("lex", "Break clause")
+  return BREAK
+}
+
+/continue/ {
+  log.Token("CONTINUE ")
+  log.Trace("lex", "Continue clause")
+  return CONTINUE
+}
+
 /var[ \t]/ {
   log.Token("VARDEF ")
   log.Trace("lex", "Var keyword")

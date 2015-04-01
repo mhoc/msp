@@ -1,5 +1,5 @@
 <script type="text/JavaScript">
-var two = 2; var ten = 10
-var result = two + ten
-document.write(result)
+if (2 == 3) {
+  document.write("hello")
+}
 </script>

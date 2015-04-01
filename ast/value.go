@@ -60,3 +60,19 @@ func (v Value) Print(p string) {
       break
   }
 }
+
+// Commits type coercion on a value to convert it to an msp boolean value
+func (v Value) ToBoolean() *Value {
+  nv := &Value{Type: VALUE_BOOLEAN, Line: v.Line}
+  switch v.Type {
+    case VALUE_BOOLEAN:
+      nv.Value = v.Value.(bool)
+    case VALUE_INT:
+      nv.Value = v.Value.(int) != 0
+    case VALUE_STRING:
+      nv.Value = len(v.Value.(string)) > 0
+    default:
+      nv.Type = VALUE_UNDEFINED
+  }
+  return nv
+}

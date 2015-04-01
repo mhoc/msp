@@ -33,8 +33,10 @@ import (
 	NEWLINE
 	WHITESPACE
 	SEMICOLON
-  TRUE
-  FALSE
+  TRUE FALSE
+  IF ELSE
+  DO WHILE
+  BREAK CONTINUE
 	EQUAL
 	INTEGER
 	PLUS
@@ -132,6 +134,7 @@ statement:
 	declaration
 	| assignment
 	| definition
+  | ifst
 	| DOCUMENT_WRITE LPAREN parameter_list RPAREN {
     $3.N.(*ast.FunctionCall).Name = "document.write"
     $$.N = $3.N
@@ -357,6 +360,24 @@ field:
   }
 ;
 
+// If statement -> If
+// The entire definition of an if statement
+ifst:
+  IF LPAREN expression RPAREN LBRACE newlines program RBRACE {
+    iff := &ast.If{Branches: make([]*ast.Branch, 1, 1), HasElse: false, Line: $3.N.LineNo()}
+
+    // Create a branch for the first case that this one covers
+    fBranch := &ast.Branch{Conditional: $3.N, IfTrue: $7.N.(*ast.StatementList), Line: $3.N.LineNo()}
+    iff.Branches[0] = fBranch
+
+    $$.N = iff
+  }
+;
+
+// If tail -> Branch
+//iftail:
+//  |
+//;
 
 // New Lines -> Nothing
 // This is so weird and I hate it but it works
