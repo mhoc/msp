@@ -130,6 +130,18 @@
   return RBRACE
 }
 
+/\[/ {
+  log.Token("LBRACKET ")
+  log.Trace("lex", "Left bracket")
+  return LBRACKET
+}
+
+/\]/ {
+  log.Token("RBRACKET ")
+  log.Trace("lex", "Right bracket")
+  return RBRACKET
+}
+
 /\(/ {
   log.Token("LPAREN ")
   log.Trace("lex", "Left paren")

@@ -18,6 +18,7 @@ import "fmt"
 // generally leaves. They are nodes themselves with children which are values
 // ====================
 type Object struct {
+  IsArray bool
   Map map[string]Node
   Line int
 }
@@ -27,7 +28,12 @@ func (o Object) Execute() interface{} {
   // then build a new map (stored in a Value) containing the evaluated values
 
   // Build the new value
-  v := &Value{Type:VALUE_OBJECT, Value: make(map[string]*Value)}
+  var v *Value
+  if (o.IsArray) {
+    v = &Value{Type:VALUE_ARRAY, Value: make(map[string]*Value)}
+  } else {
+    v = &Value{Type: VALUE_OBJECT, Value: make(map[string]*Value)}
+  }
 
   for key, value := range o.Map {
     v.Value.(map[string]*Value)[key] = value.Execute().(*Value)

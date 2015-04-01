@@ -37,18 +37,17 @@ import (
   IF ELSE
   DO WHILE
   BREAK CONTINUE
-	EQUAL
+  LPAREN RPAREN
+  LBRACKET RBRACKET
+  LBRACE RBRACE
+  EQUAL
 	INTEGER
 	PLUS
 	MINUS
 	MULT
 	DIVIDE
 	STRING
-	LPAREN
-	RPAREN
 	COMMA
-	LBRACE
-	RBRACE
 	COLON
   GT
   LT
@@ -201,6 +200,7 @@ parameter_list:
 value:
 	expression
 	| object_definition
+  | array_definition
 ;
 
 // Expression -> Node
@@ -389,6 +389,71 @@ if_tail:
   | {
     // Create the if statement with no else
     $$.N = &ast.If{Branches: make([]*ast.Branch, 0, 0), HasElse: false}
+  }
+;
+
+// Arrays -> Object
+// Under the hood, arrays are literally just objects. I dont even have a separate
+// type in the ast for them because there doesnt appear to be any need. Once
+// they are evaluated at runtime I convert it into an ast.Value with type=VALUE_ARRAY,
+// but even then the ast.Value.Value interface is exactly the same as an object.
+array_definition:
+  LBRACKET array_list RBRACKET {
+    $$.N = $2.N
+  }
+  | LBRACKET newlines array_list RBRACKET {
+    $$.N = $3.N
+  }
+;
+
+// Array List -> Object
+array_list:
+	interim_array_list final_array_item {
+    // Add the final array item to the list of all items
+    $1.N.(*ast.Object).Map[$2.N.(*ast.Field).FieldName] = $2.N.(*ast.Field).FieldValue
+    $$.N = $1.N
+  }
+	| {
+    // Return an empty object
+    $$.N = &ast.Object{Line: log.LineNo, Map: make(map[string]ast.Node)}
+  }
+;
+
+// Interim Array List -> Object
+// Literally look up at the object code. Its exactly the same. EXACTLY.
+interim_array_list:
+	interim_array_list interim_array_item {
+    // Add the interim array item to the list of all iterim array items
+    $1.N.(*ast.Object).Map[$2.N.(*ast.Field).FieldName] = $2.N.(*ast.Field).FieldValue
+    $$.N = $1.N
+  }
+	| {
+    // Return an empty list of interim array items
+    $$.N = &ast.Object{Line: log.LineNo, Map: make(map[string]ast.Node)}
+  }
+;
+
+// Interim array item -> Field
+// The field name is the index of the array. This is determined by a global
+// integer stored in the log package
+interim_array_item:
+	array_item COMMA
+	| array_item COMMA newlines
+;
+
+// Final array item -> Field
+final_array_item:
+	array_item
+	| array_item newlines
+;
+
+// A single array item -> Field
+array_item:
+  expression {
+    // Create the field
+    f := &ast.Field{Line: log.LineNo, FieldName: string(log.ArrayIndexNo), FieldValue: $1.N}
+    log.ArrayIndexNo++
+    $$.N = f
   }
 ;
 

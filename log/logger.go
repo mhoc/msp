@@ -35,3 +35,9 @@ func Tracef(tag string, msg string, f ...interface{}) {
     fmt.Printf("[%s] %s\n", tag, fmt.Sprintf(msg, f...))
   }
 }
+
+// This is a hack
+// When parsing an array, the current index of the one we are
+// parsing is stored here. It is reset when an entire static array is
+// parsed, and incremented on each field
+var ArrayIndexNo = 0

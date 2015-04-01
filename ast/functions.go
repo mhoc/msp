@@ -27,6 +27,7 @@ func (f FunctionCall) Execute() interface{} {
   }
   for _, arg := range f.Args {
     argv := arg.Execute().(*Value)
+    log.Stmt++
     switch argv.Type {
       case VALUE_UNDEFINED:
         fmt.Printf("undefined")
