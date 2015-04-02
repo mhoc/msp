@@ -29,7 +29,6 @@ func (l Loop) Execute() interface{} {
   log.Trace("ast", "Executing loop")
 
   condition := &Value{Type: VALUE_BOOLEAN, Value: true}
-
   for {
 
     if l.PreCheck {
@@ -44,12 +43,15 @@ func (l Loop) Execute() interface{} {
     if condition.Value.(bool) {
       LoopDepth++
       jump := l.Body.Execute()
+      log.Stmt -= len(l.Body.List)
       LoopDepth--
       switch jump.(type) {
         case Break:
           breakMet = true
       }
+
     } else {
+      log.Stmt += len(l.Body.List)
       break
     }
 
