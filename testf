@@ -1,10 +1,4 @@
 <script type="text/JavaScript">
-var x = 0
-if (x == 0) {
-  document.write("zero")
-} else if (x == 1) {
-  document.write("one")
-} else {
-  document.write("not zero or one")
-}
+var x = {he: "hello"}
+document.write(x[0])
 </script>

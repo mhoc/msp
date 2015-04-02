@@ -765,7 +765,7 @@ func writeLex(out *bufio.Writer, root rule) {
 	if !*customError {
 		// TODO: I can't remember what this was for!
 		out.WriteString(`func (yylex Lexer) Error(e string) {
-  fmt.Printf(e)
+  fmt.Fprintf(os.Stderr, e + "\n")
 	os.Exit(0)
 }`)
 	}

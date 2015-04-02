@@ -9,6 +9,14 @@ package ast
 
 import (
   "fmt"
+  "mhoc.co/msp/log"
+)
+
+type VariableType int
+const (
+  VAR_NORM VariableType = iota
+  VAR_OBJECT VariableType = iota
+  VAR_ARRAY VariableType = iota
 )
 
 // ====================
@@ -71,7 +79,10 @@ func (d Definition) Print(p string) {
 //                          LHS   RHS
 // ====================
 type Assignment struct {
+  Type VariableType
   Name string
+  ObjChild string
+  Index Node
   Rhs Node
   Line int
 }
@@ -84,7 +95,21 @@ func (a Assignment) Execute() interface{} {
   // mainly for debugging
   rightValue := rhsResult.(*Value)
 
-  SymAssign(a.Name, rightValue)
+  switch a.Type {
+    case VAR_NORM:
+      SymAssignVar(a.Name, rightValue)
+    case VAR_OBJECT:
+      SymAssignObj(a.Name, a.ObjChild, rightValue)
+    case VAR_ARRAY:
+    // Check to ensure the index is an int: otherwise type error
+      index := a.Index.Execute().(*Value)
+      if index.Type != VALUE_INT {
+        log.Error{Type: log.TYPE_VIOLATION, Line: a.Line}.Report()
+        return nil
+      }
+      SymAssignArr(a.Name, index.Value.(int), rightValue)
+  }
+
   return nil
 }
 
@@ -102,14 +127,31 @@ func (a Assignment) Print(p string) {
 // Variable reference:: var something = [myvar];
 // ====================
 type Reference struct {
+  Type VariableType
   Name string
-  Value *Value
+  ObjChild string
+  Index Node
   Line int
 }
 
 func (vr Reference) Execute() interface{} {
-  value := SymGet(vr.Name, vr.LineNo())
-  return value
+  switch (vr.Type) {
+    case VAR_NORM:
+      return SymGetVar(vr.Name, vr.LineNo())
+    case VAR_OBJECT:
+      return SymGetObj(vr.Name, vr.ObjChild, vr.LineNo())
+    case VAR_ARRAY:
+      // Check to ensure the index is an int: otherwise type error
+      index := vr.Index.Execute().(*Value)
+      if index.Type != VALUE_INT {
+        log.Error{Type: log.TYPE_VIOLATION, Line: vr.Line}.Report()
+        return &Value{Type: VALUE_UNDEFINED, Line: vr.Line}
+      }
+      return SymGetArr(vr.Name, index.Value.(int), vr.LineNo())
+    default:
+      panic("Bad variable reference type")
+  }
+  return nil
 }
 
 func (vr Reference) LineNo() int {
@@ -118,5 +160,4 @@ func (vr Reference) LineNo() int {
 
 func (vr Reference) Print(p string) {
   fmt.Printf(p + "Reference\n")
-  vr.Value.Print(p + "| ")
 }

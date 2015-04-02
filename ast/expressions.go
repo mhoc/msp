@@ -268,28 +268,29 @@ func handleEquiv(left *Value, right *Value, line int) *Value {
 
 func handleNequiv(left *Value, right *Value, line int) *Value {
 
-    // Integers
-    if left.Type == VALUE_INT && right.Type == VALUE_INT {
-      left.Type = VALUE_BOOLEAN
-      left.Value = left.Value.(int) != right.Value.(int)
-      return left
-    }
-
-    // Booleans
-    if left.Type == VALUE_BOOLEAN && right.Type == VALUE_BOOLEAN {
-      left.Value = left.Value.(bool) != right.Value.(bool)
-      return left
-    }
-
-    // Strings
-    if left.Type == VALUE_STRING && right.Type == VALUE_STRING {
-      left.Value = left.Value.(string) != right.Value.(string)
-      return left
-    }
-
-    log.Error{Line:line, Type: log.TYPE_VIOLATION}.Report()
-    left.Type = VALUE_UNDEFINED
+  // Integers
+  if left.Type == VALUE_INT && right.Type == VALUE_INT {
+    left.Type = VALUE_BOOLEAN
+    left.Value = left.Value.(int) != right.Value.(int)
     return left
+  }
+
+  // Booleans
+  if left.Type == VALUE_BOOLEAN && right.Type == VALUE_BOOLEAN {
+    left.Value = left.Value.(bool) != right.Value.(bool)
+    return left
+  }
+
+  // Strings
+  if left.Type == VALUE_STRING && right.Type == VALUE_STRING {
+    left.Type = VALUE_BOOLEAN
+    left.Value = left.Value.(string) != right.Value.(string)
+    return left
+  }
+
+  log.Error{Line:line, Type: log.TYPE_VIOLATION}.Report()
+  left.Type = VALUE_UNDEFINED
+  return left
 
 }
 

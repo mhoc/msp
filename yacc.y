@@ -5,6 +5,7 @@ package main
 
 import (
   "fmt"
+  "strings"
   "mhoc.co/msp/ast"
   "mhoc.co/msp/log"
 )
@@ -20,7 +21,6 @@ import (
 %union {
   N ast.Node
   Str string
-  Int int
 }
 
 %token
@@ -153,11 +153,16 @@ declaration:
 assignment:
 	IDENTIFIER EQUAL value {
     log.Trace("grm", "Assignment Identifier")
-    $$.N = &ast.Assignment{Line: log.LineNo, Name: $1.Str, Rhs: $3.N}
+    $$.N = &ast.Assignment{Line: log.LineNo, Type: ast.VAR_NORM, Name: $1.Str, Rhs: $3.N}
   }
   | OBJKEY EQUAL value {
     log.Trace("grm", "Assignment Obj Key")
-    $$.N = &ast.Assignment{Line: log.LineNo, Name: $1.Str, Rhs: $3.N}
+    sp := strings.Split($1.Str, ".")
+    $$.N = &ast.Assignment{Line: log.LineNo, Type: ast.VAR_OBJECT, Name: sp[0], ObjChild: sp[1], Rhs: $3.N}
+  }
+  | IDENTIFIER LBRACKET expression RBRACKET EQUAL value {
+    log.Trace("grm", "Assignment to Array Index")
+    $$.N = &ast.Assignment{Line: log.LineNo, Type: ast.VAR_ARRAY, Name: $1.Str, Index: $3.N, Rhs: $6.N}
   }
 ;
 
@@ -291,10 +296,14 @@ variable_reference:
 	IDENTIFIER {
     // Create the reference object
     // We dont actually look up and store the value of the variable until execution
-    $$.N = &ast.Reference{Line: log.LineNo, Name: $1.Str}
+    $$.N = &ast.Reference{Line: log.LineNo, Type: ast.VAR_NORM, Name: $1.Str}
   }
   | OBJKEY {
-    $$.N = &ast.Reference{Line: log.LineNo, Name: $1.Str}
+    sp := strings.Split($1.Str, ".")
+    $$.N = &ast.Reference{Line: log.LineNo, Type: ast.VAR_OBJECT, Name: sp[0], ObjChild: sp[1]}
+  }
+  | IDENTIFIER LBRACKET expression RBRACKET {
+    $$.N = &ast.Reference{Line: log.LineNo, Type: ast.VAR_ARRAY, Name: $1.Str, Index: $3.N}
   }
 ;
 
@@ -400,9 +409,11 @@ if_tail:
 array_definition:
   LBRACKET array_list RBRACKET {
     $$.N = $2.N
+    log.ArrayIndexNo = 0
   }
   | LBRACKET newlines array_list RBRACKET {
     $$.N = $3.N
+    log.ArrayIndexNo = 0
   }
 ;
 
@@ -410,12 +421,12 @@ array_definition:
 array_list:
 	interim_array_list final_array_item {
     // Add the final array item to the list of all items
-    $1.N.(*ast.Object).Map[$2.N.(*ast.Field).FieldName] = $2.N.(*ast.Field).FieldValue
+    $1.N.(*ast.Array).Map[$2.N.(*ast.Field).FieldName] = $2.N.(*ast.Field).FieldValue
     $$.N = $1.N
   }
 	| {
     // Return an empty object
-    $$.N = &ast.Object{Line: log.LineNo, Map: make(map[string]ast.Node)}
+    $$.N = &ast.Array{Line: log.LineNo, Map: make(map[string]ast.Node)}
   }
 ;
 
@@ -424,12 +435,12 @@ array_list:
 interim_array_list:
 	interim_array_list interim_array_item {
     // Add the interim array item to the list of all iterim array items
-    $1.N.(*ast.Object).Map[$2.N.(*ast.Field).FieldName] = $2.N.(*ast.Field).FieldValue
+    $1.N.(*ast.Array).Map[$2.N.(*ast.Field).FieldName] = $2.N.(*ast.Field).FieldValue
     $$.N = $1.N
   }
 	| {
     // Return an empty list of interim array items
-    $$.N = &ast.Object{Line: log.LineNo, Map: make(map[string]ast.Node)}
+    $$.N = &ast.Array{Line: log.LineNo, Map: make(map[string]ast.Node)}
   }
 ;
 
