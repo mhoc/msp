@@ -20,8 +20,13 @@ type StatementList struct {
 
 func (s StatementList) Execute() interface{} {
   for _, child := range s.List {
-    child.Execute()
+    potentialJump := child.Execute()
     log.Stmt++
+
+    switch potentialJump.(type) {
+      case Break, Continue:
+        return potentialJump
+    }
   }
   return nil
 }

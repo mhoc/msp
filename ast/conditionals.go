@@ -20,8 +20,14 @@ func (i If) Execute() interface{} {
   log.Tracef("ast", "Executing if statement with %d branches", len(i.Branches))
 
   for _, branch := range i.Branches {
-    if branch.Execute().(bool) == true {
-      return nil
+    rVal := branch.Execute()
+    switch rVal.(type) {
+      case bool:
+        if rVal.(bool) {
+          return nil
+        }
+      case Break, Continue:
+        return rVal
     }
   }
 
@@ -70,7 +76,11 @@ func (b Branch) Execute() interface{} {
   }
 
   // If true, execute the statement list
-  b.IfTrue.Execute()
+  potentialJump := b.IfTrue.Execute()
+  switch potentialJump.(type) {
+    case Break, Continue:
+      return potentialJump
+  }
   return true
 
 }

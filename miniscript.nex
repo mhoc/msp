@@ -64,12 +64,14 @@
 /break/ {
   log.Token("BREAK ")
   log.Trace("lex", "Break clause")
+  lval.N = &ast.Break{Line: log.LineNo}
   return BREAK
 }
 
 /continue/ {
   log.Token("CONTINUE ")
   log.Trace("lex", "Continue clause")
+  lval.N = &ast.Continue{Line: log.LineNo}
   return CONTINUE
 }
 

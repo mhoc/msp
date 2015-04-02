@@ -110,6 +110,19 @@ program:
 // A single line in the program. A line can contain multiple statements through
 // the use of a semicolon
 line:
+  recursive_line
+  | if_statement {
+    $$.N = &ast.StatementList{Line: log.LineNo, List: []ast.Node{$1.N}}
+  }
+  | while_statement {
+    $$.N = &ast.StatementList{Line: log.LineNo, List: []ast.Node{$1.N}}
+  }
+  | do_while_statement {
+    $$.N = &ast.StatementList{Line: log.LineNo, List: []ast.Node{$1.N}}
+  }
+;
+
+recursive_line:
 	statement {
     log.Trace("grm", "Line: Creating a new single statement statementlist")
     $$.N = &ast.StatementList{Line: log.LineNo, List: []ast.Node{$1.N}}
@@ -118,7 +131,7 @@ line:
     log.Trace("grm", "Line Creating a new single statement statementlist;")
     $$.N = &ast.StatementList{Line: log.LineNo, List: []ast.Node{$1.N}}
   }
-	| statement SEMICOLON line {
+	| statement SEMICOLON recursive_line {
     // Prepend this statement to the list already created above
     // Because of the weird way the recursion is set up here, we have to prepend instead of append
     // This is the idiomatic way to prepend in go. Looks weird. It works.
@@ -133,7 +146,8 @@ statement:
 	declaration
 	| assignment
 	| definition
-  | if_statement
+  | BREAK
+  | CONTINUE
 	| DOCUMENT_WRITE LPAREN parameter_list RPAREN {
     $3.N.(*ast.FunctionCall).Name = "document.write"
     $$.N = $3.N
@@ -372,7 +386,6 @@ field:
 // If statement -> ast.If
 if_statement:
   IF LPAREN expression RPAREN LBRACE newlines program RBRACE if_tail {
-
     // Create a branch for this if statement
     fBranch := &ast.Branch{Conditional: $3.N, IfTrue: $7.N.(*ast.StatementList), Line: $3.N.LineNo()}
 
@@ -468,12 +481,35 @@ array_item:
   }
 ;
 
+// While statement -> Loop
+while_statement:
+  WHILE LPAREN expression RPAREN LBRACE newlines program RBRACE {
+    $$.N = &ast.Loop{Line: $3.N.LineNo(), Conditional: $3.N, Body: $7.N.(*ast.StatementList), PreCheck: true}
+  }
+;
+
+// Do-While -> Loop
+do_while_statement:
+  DO LBRACE newlines program RBRACE newline WHILE LPAREN expression RPAREN {
+    $$.N = &ast.Loop{Line: $9.N.LineNo(), Conditional: $9.N, Body: $4.N.(*ast.StatementList), PreCheck: false}
+  }
+  | DO LBRACE newlines program RBRACE newline WHILE LPAREN expression RPAREN SEMICOLON {
+    $$.N = &ast.Loop{Line: $9.N.LineNo(), Conditional: $9.N, Body: $4.N.(*ast.StatementList), PreCheck: false}
+  }
+;
+
 // New Lines -> Nothing
 // This is so weird and I hate it but it works
 // Previously I had '\n+' as NEWLINE in my lexer, but I wanted to be able to maintain
 // my own linenumber count so I changed it to '\n'. Then everything stopped
 // working if the user had more than 1 newline. So this is an emulation of
 // the \n+ behavior. Oh yes.
+newline:
+  NEWLINE {
+    log.LineNo++
+  }
+;
+
 newlines:
   NEWLINE {
     log.LineNo++

@@ -77,6 +77,12 @@ func SymGetObj(parent string, child string, lineno int) *Value {
     return value
   }
 
+  if value.Type != VALUE_OBJECT {
+    log.Error{Line: lineno, Type: log.TYPE_VIOLATION}.Report()
+    value = &Value{Type: VALUE_UNDEFINED, Line: lineno}
+    return value
+  }
+
   value, in = value.Value.(map[string]*Value)[child]
   if !in {
     log.Error{Line: lineno, Type: log.VALUE, Var: parent + "." + child}.Report()

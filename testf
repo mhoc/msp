@@ -1,4 +1,7 @@
 <script type="text/JavaScript">
-var x = {he: "hello"}
-document.write(x[0])
+do {
+    var x = 0
+    document.write("pass", "<br />")
+}
+while (x > 5)
 </script>
