@@ -1,10 +1,6 @@
 
 package ast
 
-import (
-  "fmt"
-  //"mhoc.co/msp/log"
-)
 
 // ===================
 // Array Type
@@ -30,8 +26,4 @@ func (a Array) Execute() interface{} {
 
 func (a Array) LineNo() int {
   return a.Line
-}
-
-func (a Array) Print(p string) {
-  fmt.Println(p + "Array")
 }

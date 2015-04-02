@@ -5,7 +5,6 @@
 package ast
 
 import (
-  "fmt"
   "mhoc.co/msp/log"
 )
 
@@ -33,11 +32,4 @@ func (s StatementList) Execute() interface{} {
 
 func (s StatementList) LineNo() int {
   return s.Line
-}
-
-func (s StatementList) Print(p string) {
-  for _, child := range s.List {
-    fmt.Println("Statement")
-    child.Print("| ")
-  }
 }

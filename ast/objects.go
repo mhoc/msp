@@ -7,8 +7,6 @@
 
 package ast
 
-import "fmt"
-
 // ====================
 // Object literals
 // When objects are statically typed into the source code, these are generated.
@@ -40,14 +38,6 @@ func (o Object) LineNo() int {
   return o.Line
 }
 
-func (o Object) Print(p string) {
-  fmt.Println(p + "Object Node")
-  for key, value := range o.Map {
-    fmt.Printf(p + "| %s\n", key)
-    value.Print(p + "| | ")
-  }
-}
-
 // ====================
 // Field literals
 // Ironically these are never actually stored in the AST
@@ -67,12 +57,4 @@ func (f Field) Execute() interface{} {
 
 func (f Field) LineNo() int {
   return f.Line
-}
-
-func (f Field) Print(p string) {
-  // Again, this will never be called because we don't put fields in the ast
-  // That being said, I'll include it just to be safe
-  fmt.Println(p + "Field")
-  fmt.Printf(p + "| %s\n", f.FieldName)
-  f.FieldValue.Print(p + "| ")
 }

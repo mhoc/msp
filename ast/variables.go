@@ -8,7 +8,6 @@
 package ast
 
 import (
-  "fmt"
   "mhoc.co/msp/log"
 )
 
@@ -36,11 +35,6 @@ func (d Declaration) LineNo() int {
   return d.Line
 }
 
-func (d Declaration) Print(p string) {
-  fmt.Println(p + "Declare")
-  fmt.Printf(p + "| %s\n", d.Name)
-}
-
 // ====================
 // Variable Definition:: [var a = 1]
 // Definitions are essentially just typedefed assignments in this language,
@@ -66,12 +60,6 @@ func (d Definition) Execute() interface{} {
 
 func (d Definition) LineNo() int {
   return d.Line
-}
-
-func (d Definition) Print(p string) {
-  fmt.Println(p + "Define")
-  d.Decl.Print(p + "| ")
-  d.Assign.Print(p + "| ")
 }
 
 // ====================
@@ -117,12 +105,6 @@ func (a Assignment) LineNo() int {
   return a.Line
 }
 
-func (a Assignment) Print(p string) {
-  fmt.Println(p + "Assign")
-  fmt.Printf(p + "| %s\n", a.Name)
-  a.Rhs.Print(p + "| ")
-}
-
 // ====================
 // Variable reference:: var something = [myvar];
 // ====================
@@ -156,8 +138,4 @@ func (vr Reference) Execute() interface{} {
 
 func (vr Reference) LineNo() int {
   return vr.Line
-}
-
-func (vr Reference) Print(p string) {
-  fmt.Printf(p + "Reference\n")
 }

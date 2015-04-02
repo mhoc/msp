@@ -13,7 +13,6 @@ func main() {
   // Parse debug flags
   flag.BoolVar(&log.LOG_TOKENS, "log-tokens", false, "Enable list of parsed tokens")
   flag.BoolVar(&log.LOG_TRACE, "log-trace", false, "Enable trace logging of debug output")
-  flag.BoolVar(&log.LOG_AST, "log-ast", false, "Enable output of the ast after it is parsed")
   flag.Parse()
 
   // Parse command line arguments

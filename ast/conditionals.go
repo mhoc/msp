@@ -2,7 +2,6 @@
 package ast
 
 import (
-  "fmt"
   "mhoc.co/msp/log"
 )
 
@@ -41,10 +40,6 @@ func (i If) Execute() interface{} {
 
 func (i If) LineNo() int {
   return i.Line
-}
-
-func (i If) Print(p string) {
-  fmt.Println("")
 }
 
 // ==================================
@@ -87,8 +82,4 @@ func (b Branch) Execute() interface{} {
 
 func (b Branch) LineNo() int {
   return b.Line
-}
-
-func (b Branch) Print(p string) {
-  fmt.Println("")
 }

@@ -74,10 +74,6 @@ func (l Loop) LineNo() int {
   return l.Line
 }
 
-func (l Loop) Print(p string) {
-  fmt.Println(p + "Loop")
-}
-
 // One of the statements in a while loop could be a break statement
 type Break struct {
   Line int

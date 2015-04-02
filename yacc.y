@@ -65,9 +65,6 @@ target:
   file {
     log.Trace("grm", "Target")
     fmt.Print("")
-    if log.LOG_AST {
-      $1.N.Print("")
-    }
     $1.N.Execute()
   }
 ;

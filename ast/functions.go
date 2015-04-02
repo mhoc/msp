@@ -59,11 +59,3 @@ func (f FunctionCall) Execute() interface{} {
 func (f FunctionCall) LineNo() int {
   return f.Line
 }
-
-func (f FunctionCall) Print(p string) {
-  fmt.Printf(p + "Call\n")
-  fmt.Printf(p + "| %s\n", f.Name)
-  for _, arg := range f.Args {
-    arg.Print(p + "| ")
-  }
-}

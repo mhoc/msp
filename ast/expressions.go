@@ -8,7 +8,6 @@
 package ast
 
 import (
-  "fmt"
   "mhoc.co/msp/log"
   "strings"
 )
@@ -40,10 +39,6 @@ func (ue UnaryExpression) Execute() interface{} {
 
 func (ue UnaryExpression) LineNo() int {
   return ue.Line
-}
-
-func (ue UnaryExpression) Print(p string) {
-  fmt.Print(p + "Unary")
 }
 
 func handleNot(v *Value, line int) *Value {
@@ -156,12 +151,6 @@ func (be BinaryExpression) Execute() interface{} {
 
 func (be BinaryExpression) LineNo() int {
   return be.Line
-}
-
-func (be BinaryExpression) Print(p string) {
-  fmt.Printf(p + "%s\n", be.Op)
-  be.Lhs.Print(p + "| ")
-  be.Rhs.Print(p + "| ")
 }
 
 // =====================================================
