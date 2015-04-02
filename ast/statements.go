@@ -1,11 +1,10 @@
-
 // Anything to do with single or groups of statements
 // STATEMENT LIST
 
 package ast
 
 import (
-  "mhoc.co/msp/log"
+	"mhoc.co/msp/log"
 )
 
 // ====================
@@ -13,23 +12,23 @@ import (
 // This is the type of the root Node, but also the type of things like if bodies
 // ====================
 type StatementList struct {
-  List []Node
-  Line int
+	List []Node
+	Line int
 }
 
 func (s StatementList) Execute() interface{} {
-  for _, child := range s.List {
-    potentialJump := child.Execute()
-    log.Stmt++
+	for _, child := range s.List {
+		potentialJump := child.Execute()
+		log.Stmt++
 
-    switch potentialJump.(type) {
-      case Break, Continue:
-        return potentialJump
-    }
-  }
-  return nil
+		switch potentialJump.(type) {
+		case Break, Continue:
+			return potentialJump
+		}
+	}
+	return nil
 }
 
 func (s StatementList) LineNo() int {
-  return s.Line
+	return s.Line
 }

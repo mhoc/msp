@@ -1,6 +1,4 @@
-
 package ast
-
 
 // ===================
 // Array Type
@@ -8,22 +6,22 @@ package ast
 // for the sake of execution
 // ===================
 type Array struct {
-  Map map[string]Node
-  Line int
+	Map  map[string]Node
+	Line int
 }
 
 func (a Array) Execute() interface{} {
 
-  // Build the new value
-  v := &Value{Type: VALUE_ARRAY, Value: make(map[string]*Value)}
-  for key, value := range a.Map {
-    v.Value.(map[string]*Value)[key] = value.Execute().(*Value)
-  }
+	// Build the new value
+	v := &Value{Type: VALUE_ARRAY, Value: make(map[string]*Value)}
+	for key, value := range a.Map {
+		v.Value.(map[string]*Value)[key] = value.Execute().(*Value)
+	}
 
-  return v
+	return v
 
 }
 
 func (a Array) LineNo() int {
-  return a.Line
+	return a.Line
 }

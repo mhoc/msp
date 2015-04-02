@@ -1,9 +1,8 @@
-
 package ast
 
 import (
-  "fmt"
-  "mhoc.co/msp/log"
+	"fmt"
+	"mhoc.co/msp/log"
 )
 
 // I. Hate. This.
@@ -19,93 +18,93 @@ var LoopDepth = 0
 // Do and While Loop
 // PreCheck is set to true if it is a while loop, and false if its a dowhile loop
 type Loop struct {
-  Conditional Node
-  Body *StatementList
-  PreCheck bool
-  Line int
+	Conditional Node
+	Body        *StatementList
+	PreCheck    bool
+	Line        int
 }
 
 func (l Loop) Execute() interface{} {
-  log.Trace("ast", "Executing loop")
+	log.Trace("ast", "Executing loop")
 
-  condition := &Value{Type: VALUE_BOOLEAN, Value: true}
-  for {
+	condition := &Value{Type: VALUE_BOOLEAN, Value: true}
+	for {
 
-    if l.PreCheck {
-      condition = l.Conditional.Execute().(*Value).ToBoolean()
-      if condition.Type != VALUE_BOOLEAN {
-        log.Error{Line: l.Line, Type: log.CONDITION}.Report()
-        return nil
-      }
-    }
+		if l.PreCheck {
+			condition = l.Conditional.Execute().(*Value).ToBoolean()
+			if condition.Type != VALUE_BOOLEAN {
+				log.Error{Line: l.Line, Type: log.CONDITION}.Report()
+				return nil
+			}
+		}
 
-    var breakMet = false
-    if condition.Value.(bool) {
-      LoopDepth++
-      jump := l.Body.Execute()
-      log.Stmt -= len(l.Body.List)
-      LoopDepth--
-      switch jump.(type) {
-        case Break:
-          breakMet = true
-      }
+		var breakMet = false
+		if condition.Value.(bool) {
+			LoopDepth++
+			jump := l.Body.Execute()
+			log.Stmt -= len(l.Body.List)
+			LoopDepth--
+			switch jump.(type) {
+			case Break:
+				breakMet = true
+			}
 
-    } else {
-      log.Stmt += len(l.Body.List)
-      break
-    }
+		} else {
+			log.Stmt += len(l.Body.List)
+			break
+		}
 
-    if breakMet {
-      break
-    }
+		if breakMet {
+			break
+		}
 
-    if !l.PreCheck {
-      condition = l.Conditional.Execute().(*Value).ToBoolean()
-      if condition.Type != VALUE_BOOLEAN {
-        log.Error{Line: l.Line, Type: log.CONDITION}.Report()
-        return nil
-      }
-    }
+		if !l.PreCheck {
+			condition = l.Conditional.Execute().(*Value).ToBoolean()
+			if condition.Type != VALUE_BOOLEAN {
+				log.Error{Line: l.Line, Type: log.CONDITION}.Report()
+				return nil
+			}
+		}
 
-  }
-  return nil
+	}
+	return nil
 
 }
 
 func (l Loop) LineNo() int {
-  return l.Line
+	return l.Line
 }
 
 // One of the statements in a while loop could be a break statement
 type Break struct {
-  Line int
+	Line int
 }
 
 func (b Break) Execute() interface{} {
-  return b
+	return b
 }
 
 func (b Break) LineNo() int {
-  return b.Line
+	return b.Line
 }
 
 func (b Break) Print(p string) {
-  fmt.Println(p + "Break")
+	fmt.Println(p + "Break")
 }
 
 // Another could be a continue
 type Continue struct {
-  Line int
+	Line int
 }
 
 func (c Continue) Execute() interface{} {
-  return c
+	return c
 }
 
 func (c Continue) LineNo() int {
-  return c.Line
+	return c.Line
 }
 
 func (c Continue) Print(p string) {
-  fmt.Println(p + "Continue")
+	fmt.Println(p + "Continue")
 }

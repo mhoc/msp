@@ -1,4 +1,3 @@
-
 // Objects are a bit strange
 // They could be thought of as primitive because they are directly typed
 // in the source code (not derived from semantic parsing), but simultaneously
@@ -16,26 +15,26 @@ package ast
 // generally leaves. They are nodes themselves with children which are values
 // ====================
 type Object struct {
-  Map map[string]Node
-  Line int
+	Map  map[string]Node
+	Line int
 }
 
 func (o Object) Execute() interface{} {
-  // Here, we traverse each value in the object and evaluate it
-  // then build a new map (stored in a Value) containing the evaluated values
+	// Here, we traverse each value in the object and evaluate it
+	// then build a new map (stored in a Value) containing the evaluated values
 
-  // Build the new value
-  v := &Value{Type: VALUE_OBJECT, Value: make(map[string]*Value)}
-  for key, value := range o.Map {
-    v.Value.(map[string]*Value)[key] = value.Execute().(*Value)
-  }
+	// Build the new value
+	v := &Value{Type: VALUE_OBJECT, Value: make(map[string]*Value)}
+	for key, value := range o.Map {
+		v.Value.(map[string]*Value)[key] = value.Execute().(*Value)
+	}
 
-  return v
+	return v
 
 }
 
 func (o Object) LineNo() int {
-  return o.Line
+	return o.Line
 }
 
 // ====================
@@ -45,16 +44,16 @@ func (o Object) LineNo() int {
 // which puts their information into the ast.Object.Map
 // ====================
 type Field struct {
-  FieldName string
-  FieldValue Node
-  Line int
+	FieldName  string
+	FieldValue Node
+	Line       int
 }
 
 func (f Field) Execute() interface{} {
-  // Doesnt have to do anything, but it does have to be an ast.Node
-  return nil
+	// Doesnt have to do anything, but it does have to be an ast.Node
+	return nil
 }
 
 func (f Field) LineNo() int {
-  return f.Line
+	return f.Line
 }

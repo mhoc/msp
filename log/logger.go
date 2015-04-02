@@ -1,10 +1,9 @@
-
 // Handles all of the informational logging functionality of the interpreter
 
 package log
 
 import (
-  "fmt"
+	"fmt"
 )
 
 // You can enable additional log levels by setting these to true
@@ -17,21 +16,21 @@ var LOG_TOKENS bool
 var LOG_TRACE bool
 
 func Token(s string) {
-  if LOG_TOKENS {
-    fmt.Printf(s)
-  }
+	if LOG_TOKENS {
+		fmt.Printf(s)
+	}
 }
 
 func Trace(tag string, msg string) {
-  if LOG_TRACE {
-    fmt.Printf("[%s] %s\n", tag, msg)
-  }
+	if LOG_TRACE {
+		fmt.Printf("[%s] %s\n", tag, msg)
+	}
 }
 
 func Tracef(tag string, msg string, f ...interface{}) {
-  if LOG_TRACE {
-    fmt.Printf("[%s] %s\n", tag, fmt.Sprintf(msg, f...))
-  }
+	if LOG_TRACE {
+		fmt.Printf("[%s] %s\n", tag, fmt.Sprintf(msg, f...))
+	}
 }
 
 // This is a hack
