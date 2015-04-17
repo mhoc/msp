@@ -60,7 +60,7 @@ func (b Branch) Execute() interface{} {
 
 	// If it is undefined, throw a condition error and nope out of here
 	if cond.Type == VALUE_UNDEFINED {
-		log.Error{Line: b.Line, Type: log.CONDITION}.Report()
+		log.ConditionError(b.Line)
 		return true
 	}
 

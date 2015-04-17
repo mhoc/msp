@@ -33,7 +33,7 @@ func (l Loop) Execute() interface{} {
 		if l.PreCheck {
 			condition = l.Conditional.Execute().(*Value).ToBoolean()
 			if condition.Type != VALUE_BOOLEAN {
-				log.Error{Line: l.Line, Type: log.CONDITION}.Report()
+				log.ConditionError(l.Line)
 				return nil
 			}
 		}
@@ -42,15 +42,12 @@ func (l Loop) Execute() interface{} {
 		if condition.Value.(bool) {
 			LoopDepth++
 			jump := l.Body.Execute()
-			log.Stmt -= len(l.Body.List)
 			LoopDepth--
 			switch jump.(type) {
 			case Break:
 				breakMet = true
 			}
-
 		} else {
-			log.Stmt += len(l.Body.List)
 			break
 		}
 
@@ -61,7 +58,7 @@ func (l Loop) Execute() interface{} {
 		if !l.PreCheck {
 			condition = l.Conditional.Execute().(*Value).ToBoolean()
 			if condition.Type != VALUE_BOOLEAN {
-				log.Error{Line: l.Line, Type: log.CONDITION}.Report()
+				log.ConditionError(l.Line)
 				return nil
 			}
 		}

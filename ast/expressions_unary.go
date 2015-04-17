@@ -62,7 +62,7 @@ func handleNot(v *Value, line int) *Value {
 		return v
 	}
 
-	log.Error{Line: line, Type: log.TYPE_VIOLATION}.Report()
+	log.TypeViolation(line)
 	v.Type = VALUE_UNDEFINED
 	return v
 

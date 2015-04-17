@@ -31,16 +31,15 @@ uclean:
 	@echo `tput smul``tput setaf 2` Cleaning nex intermediate files `tput sgr0`
 	rm -f nexb miniscript.nn.go
 	@echo `tput smul``tput setaf 2` Cleaning GOPATH temp structure `tput sgr0`
-	rm -rf src bin cs352-integration-test
+	rm -rf src bin
 
 clean: uclean
 	@echo `tput smul``tput setaf 2` Deleting parser binary `tput sgr0`
-	rm -f parser cs352-integration-test
+	rm -f parser
 
 test: parser
-	@echo `tput smul``tput setaf 2` Downloading test cases `tput sgr0`
-	rm -rf cs352-integration-test
-	git clone http://github.com/mhoc/cs352-integration-test.git
 	@echo `tput smul``tput setaf 2` Running test cases `tput sgr0`
-	@cd cs352-integration-test && go run main.go --exit-on-fail ../parser
+	@echo
+	@cd test && go run main.go ../parser
+	@echo
 	@$(MAKE) clean

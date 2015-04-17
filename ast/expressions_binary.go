@@ -28,7 +28,7 @@ func (be BinaryExpression) Execute() interface{} {
 
 	// If one side is undefined and unwritten, we report a type violation and return undefined
 	if (left.Type == VALUE_UNDEFINED && !left.Written) || (right.Type == VALUE_UNDEFINED && !right.Written) {
-		log.Error{Line: be.Line, Type: log.TYPE_VIOLATION}.Report()
+		log.TypeViolation(be.Line)
 		left.Type = VALUE_UNDEFINED
 		return left
 	}
@@ -42,7 +42,7 @@ func (be BinaryExpression) Execute() interface{} {
 	// If the types are simply not the same and none are undefined, we report a type violation and return undefined
 	// We also dont do this for && and || (truthy) operations b
 	if (left.Type != right.Type) && (!opIsCoersive(be.Op)) {
-		log.Error{Line: be.Line, Type: log.TYPE_VIOLATION}.Report()
+		log.TypeViolation(be.Line)
 		left.Type = VALUE_UNDEFINED
 		return left
 	}
@@ -102,7 +102,7 @@ func handlePlus(left *Value, right *Value, line int) *Value {
 		lStr := left.Value.(string)
 		rStr := right.Value.(string)
 		if strings.Contains(lStr, "<br />") || strings.Contains(rStr, "<br />") {
-			log.Error{Line: line, Type: log.TYPE_VIOLATION}.Report()
+			log.TypeViolation(line)
 			left.Type = VALUE_UNDEFINED
 			return left
 		}
@@ -110,7 +110,7 @@ func handlePlus(left *Value, right *Value, line int) *Value {
 		return left
 	}
 
-	log.Error{Line: line, Type: log.TYPE_VIOLATION}.Report()
+	log.TypeViolation(line)
 	left.Type = VALUE_UNDEFINED
 	return left
 
@@ -124,7 +124,7 @@ func handleMinus(left *Value, right *Value, line int) *Value {
 		return left
 	}
 
-	log.Error{Line: line, Type: log.TYPE_VIOLATION}.Report()
+	log.TypeViolation(line)
 	left.Type = VALUE_UNDEFINED
 	return left
 
@@ -138,7 +138,7 @@ func handleMult(left *Value, right *Value, line int) *Value {
 		return left
 	}
 
-	log.Error{Line: line, Type: log.TYPE_VIOLATION}.Report()
+	log.TypeViolation(line)
 	left.Type = VALUE_UNDEFINED
 	return left
 
@@ -152,7 +152,7 @@ func handleDivide(left *Value, right *Value, line int) *Value {
 		return left
 	}
 
-	log.Error{Line: line, Type: log.TYPE_VIOLATION}.Report()
+	log.TypeViolation(line)
 	left.Type = VALUE_UNDEFINED
 	return left
 
@@ -180,7 +180,7 @@ func handleEquiv(left *Value, right *Value, line int) *Value {
 		return left
 	}
 
-	log.Error{Line: line, Type: log.TYPE_VIOLATION}.Report()
+	log.TypeViolation(line)
 	left.Type = VALUE_UNDEFINED
 	return left
 
@@ -208,7 +208,7 @@ func handleNequiv(left *Value, right *Value, line int) *Value {
 		return left
 	}
 
-	log.Error{Line: line, Type: log.TYPE_VIOLATION}.Report()
+	log.TypeViolation(line)
 	left.Type = VALUE_UNDEFINED
 	return left
 
@@ -240,7 +240,7 @@ func handleAnd(left *Value, right *Value, line int) *Value {
 		return left
 	}
 
-	log.Error{Line: line, Type: log.TYPE_VIOLATION}.Report()
+	log.TypeViolation(line)
 	left.Type = VALUE_UNDEFINED
 	return left
 
@@ -272,7 +272,7 @@ func handleOr(left *Value, right *Value, line int) *Value {
 		return left
 	}
 
-	log.Error{Line: line, Type: log.TYPE_VIOLATION}.Report()
+	log.TypeViolation(line)
 	left.Type = VALUE_UNDEFINED
 	return left
 
@@ -287,7 +287,7 @@ func handleGt(left *Value, right *Value, line int) *Value {
 		return left
 	}
 
-	log.Error{Line: line, Type: log.TYPE_VIOLATION}.Report()
+	log.TypeViolation(line)
 	left.Type = VALUE_UNDEFINED
 	return left
 
@@ -302,7 +302,7 @@ func handleLt(left *Value, right *Value, line int) *Value {
 		return left
 	}
 
-	log.Error{Line: line, Type: log.TYPE_VIOLATION}.Report()
+	log.TypeViolation(line)
 	left.Type = VALUE_UNDEFINED
 	return left
 
@@ -317,7 +317,7 @@ func handleGte(left *Value, right *Value, line int) *Value {
 		return left
 	}
 
-	log.Error{Line: line, Type: log.TYPE_VIOLATION}.Report()
+	log.TypeViolation(line)
 	left.Type = VALUE_UNDEFINED
 	return left
 
@@ -332,7 +332,7 @@ func handleLte(left *Value, right *Value, line int) *Value {
 		return left
 	}
 
-	log.Error{Line: line, Type: log.TYPE_VIOLATION}.Report()
+	log.TypeViolation(line)
 	left.Type = VALUE_UNDEFINED
 	return left
 

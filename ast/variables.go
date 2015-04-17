@@ -92,7 +92,7 @@ func (a Assignment) Execute() interface{} {
 		// Check to ensure the index is an int: otherwise type error
 		index := a.Index.Execute().(*Value)
 		if index.Type != VALUE_INT {
-			log.Error{Type: log.TYPE_VIOLATION, Line: a.Line}.Report()
+			log.TypeViolation(a.Line)
 			return nil
 		}
 		SymAssignArr(a.Name, index.Value.(int), rightValue)
@@ -126,7 +126,7 @@ func (vr Reference) Execute() interface{} {
 		// Check to ensure the index is an int: otherwise type error
 		index := vr.Index.Execute().(*Value)
 		if index.Type != VALUE_INT {
-			log.Error{Type: log.TYPE_VIOLATION, Line: vr.Line}.Report()
+			log.TypeViolation(vr.Line)
 			return &Value{Type: VALUE_UNDEFINED, Line: vr.Line}
 		}
 		return SymGetArr(vr.Name, index.Value.(int), vr.LineNo())

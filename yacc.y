@@ -99,7 +99,7 @@ program:
   } newlines
   | {
     log.Trace("grm", "Program: Creating new statement list")
-    $$.N = &ast.StatementList{Line: log.LineNo, List: make([]ast.Node, 0, 0)}
+    $$.N = &ast.StatementList{Line: log.LineNo, List: make([]ast.Statement, 0, 0)}
   }
 ;
 
@@ -109,30 +109,32 @@ program:
 line:
   recursive_line
   | if_statement {
-    $$.N = &ast.StatementList{Line: log.LineNo, List: []ast.Node{$1.N}}
+    $$.N = &ast.StatementList{Line: log.LineNo, List: []ast.Statement{ast.Statement{N:$1.N, Line: log.LineNo}}}
   }
   | while_statement {
-    $$.N = &ast.StatementList{Line: log.LineNo, List: []ast.Node{$1.N}}
+    $$.N = &ast.StatementList{Line: log.LineNo, List: []ast.Statement{ast.Statement{N:$1.N, Line: log.LineNo}}}
   }
   | do_while_statement {
-    $$.N = &ast.StatementList{Line: log.LineNo, List: []ast.Node{$1.N}}
+    $$.N = &ast.StatementList{Line: log.LineNo, List: []ast.Statement{ast.Statement{N:$1.N, Line: log.LineNo}}}
   }
 ;
 
+// RecursiveLine -> StatementList
+// This is necessary to require if and loop statmenets to have their own line
 recursive_line:
 	statement {
     log.Trace("grm", "Line: Creating a new single statement statementlist")
-    $$.N = &ast.StatementList{Line: log.LineNo, List: []ast.Node{$1.N}}
+    $$.N = &ast.StatementList{Line: log.LineNo, List: []ast.Statement{ast.Statement{N:$1.N, Line: log.LineNo}}}
   }
 	| statement SEMICOLON {
     log.Trace("grm", "Line Creating a new single statement statementlist;")
-    $$.N = &ast.StatementList{Line: log.LineNo, List: []ast.Node{$1.N}}
+    $$.N = &ast.StatementList{Line: log.LineNo, List: []ast.Statement{ast.Statement{N:$1.N, Line: log.LineNo}}}
   }
 	| statement SEMICOLON recursive_line {
     // Prepend this statement to the list already created above
     // Because of the weird way the recursion is set up here, we have to prepend instead of append
     // This is the idiomatic way to prepend in go. Looks weird. It works.
-    $3.N.(*ast.StatementList).List = append([]ast.Node{$1.N}, $3.N.(*ast.StatementList).List...)
+    $3.N.(*ast.StatementList).List = append([]ast.Statement{ast.Statement{N:$1.N, Line: log.LineNo}}, $3.N.(*ast.StatementList).List...)
     $$.N = $3.N
   }
 ;
@@ -197,17 +199,17 @@ definition:
 parameter_list:
 	expression {
     // Create a new function call with a single argument
-    fc := &ast.FunctionCall{Line: log.LineNo, Args: []ast.Node{$1.N}}
+    fc := &ast.FunctionCall{Line: log.LineNo, Args: []ast.Statement{ast.Statement{N:$1.N}}}
     $$.N = fc
   }
 	| parameter_list COMMA expression {
     // Append this expression to our list of arguments from $1
-    $1.N.(*ast.FunctionCall).Args = append($1.N.(*ast.FunctionCall).Args, $3.N)
+    $1.N.(*ast.FunctionCall).Args = append($1.N.(*ast.FunctionCall).Args, ast.Statement{N:$3.N})
     $$.N = $1.N
   }
 	| {
     // Create an empty argument function call
-    $$.N = &ast.FunctionCall{Line: log.LineNo, Args: []ast.Node{}}
+    $$.N = &ast.FunctionCall{Line: log.LineNo, Args: []ast.Statement{}}
   }
 ;
 

@@ -29,7 +29,7 @@ import (
 
 type ErrorType int
 
-type Error struct {
+type ErrorT struct {
 	Type ErrorType
 	Var  string // Some error types also require a variable to be reported
 	Line int    // The line number the error occured on
@@ -52,13 +52,39 @@ const (
 // reasons).
 var LineNo int = 1
 
-// The current statement we are executing
-// This is incremented by the StatementLine's Execute() function call
-// It is used in error reporting, as we only report one error per line
-var Stmt int = 0
-var lastLogged int = -1
+// The error we need to report when it comes time to report an error
+var ErrorToReport = false
+var ErrorReport ErrorT
 
-func (er Error) Report() {
+func TypeViolation(line int) {
+	if !ErrorToReport {
+		ErrorToReport = true
+		ErrorReport = ErrorT{Type: TYPE_VIOLATION, Line: line}
+	}
+}
+
+func UndeclaredVariable(line int, varn string) {
+	if !ErrorToReport {
+		ErrorToReport = true
+		ErrorReport = ErrorT{Type: UNDECLARED_VAR, Line: line, Var: varn}
+	}
+}
+
+func ValueError(line int, varn string) {
+	if !ErrorToReport {
+		ErrorToReport = true
+		ErrorReport = ErrorT{Type: VALUE, Line: line, Var: varn}
+	}
+}
+
+func ConditionError(line int) {
+	if !ErrorToReport {
+		ErrorToReport = true
+		ErrorReport = ErrorT{Type: CONDITION, Line: line}
+	}
+}
+
+func (er ErrorT) Report() {
 	switch er.Type {
 	case GENERIC:
 		fmt.Fprintf(os.Stderr, "[%d] Generic Error\n", er.Line)
@@ -66,42 +92,17 @@ func (er Error) Report() {
 	case INTERNAL:
 		panic("Internal compiler error reported")
 	case TYPE_VIOLATION:
-		er.typeViolation()
+		fmt.Fprintf(os.Stderr, "Line %d, type violation\n", er.Line)
 		break
 	case UNDECLARED_VAR:
-		er.undeclaredVar()
+		fmt.Fprintf(os.Stderr, "Line %d, %s undeclared\n", er.Line, er.Var)
 		break
 	case VALUE:
-		er.value()
+		fmt.Fprintf(os.Stderr, "Line %d, %s has no value\n", er.Line, er.Var)
 		break
 	case CONDITION:
-		er.condition()
+		fmt.Fprintf(os.Stderr, "Line %d, condition unknown\n", er.Line)
 	default:
 		fmt.Fprintf(os.Stderr, "[%d] Error\n", er.Line)
-	}
-	lastLogged = Stmt
-}
-
-func (er Error) typeViolation() {
-	if lastLogged != Stmt {
-		fmt.Fprintf(os.Stderr, "Line %d, type violation\n", er.Line)
-	}
-}
-
-func (er Error) undeclaredVar() {
-	if lastLogged != Stmt {
-		fmt.Fprintf(os.Stderr, "Line %d, %s undeclared\n", er.Line, er.Var)
-	}
-}
-
-func (er Error) value() {
-	if lastLogged != Stmt {
-		fmt.Fprintf(os.Stderr, "Line %d, %s has no value\n", er.Line, er.Var)
-	}
-}
-
-func (er Error) condition() {
-	if lastLogged != Stmt {
-		fmt.Fprintf(os.Stderr, "Line %d, condition unknown\n", er.Line)
 	}
 }

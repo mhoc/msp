@@ -14,7 +14,7 @@ import (
 // ====================
 type FunctionCall struct {
 	Name string
-	Args []Node
+	Args []Statement
 	Line int
 }
 
@@ -26,7 +26,6 @@ func (f FunctionCall) Execute() interface{} {
 	}
 	for _, arg := range f.Args {
 		argv := arg.Execute().(*Value)
-		log.Stmt++
 		switch argv.Type {
 		case VALUE_UNDEFINED:
 			fmt.Printf("undefined")
@@ -48,7 +47,7 @@ func (f FunctionCall) Execute() interface{} {
 			}
 			break
 		default:
-			log.Error{Line: f.Line, Type: log.TYPE_VIOLATION}.Report()
+			log.TypeViolation(f.Line)
 			fmt.Print("undefined")
 		}
 	}

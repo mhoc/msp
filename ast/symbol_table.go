@@ -23,7 +23,7 @@ func SymAssignVar(name string, value *Value) {
 
 	// Check to ensure the variable is declared
 	if _, in := SymbolTable[name]; !in {
-		log.Error{Line: value.LineNo(), Type: log.UNDECLARED_VAR, Var: name}.Report()
+		log.UndeclaredVariable(value.LineNo(), name)
 	}
 
 	SymbolTable[name] = &Value{Type: value.Type, Value: value.Value, Line: value.Line, Written: true}
@@ -34,7 +34,7 @@ func SymAssignObj(name string, child string, value *Value) {
 
 	obj := SymGetVar(name, value.LineNo())
 	if obj.Type != VALUE_OBJECT && obj.Type != VALUE_ARRAY {
-		log.Error{Line: value.LineNo(), Type: log.TYPE_VIOLATION}.Report()
+		log.TypeViolation(value.LineNo())
 		return
 	}
 	obj.Value.(map[string]*Value)[child] = value
@@ -50,13 +50,13 @@ func SymGetVar(name string, lineno int) *Value {
 
 	value, in := SymbolTable[name]
 	if !in {
-		log.Error{Line: lineno, Type: log.TYPE_VIOLATION}.Report()
+		log.TypeViolation(lineno)
 		value = &Value{Written: false, Type: VALUE_UNDEFINED, Line: lineno}
 		return value
 	}
 
 	if value.Type == VALUE_UNDEFINED && !value.Written {
-		log.Error{Line: lineno, Type: log.VALUE, Var: name}.Report()
+		log.ValueError(lineno, name)
 	}
 
 	log.Tracef("tbl", "Value was: %v", value.Value)
@@ -71,20 +71,20 @@ func SymGetObj(parent string, child string, lineno int) *Value {
 
 	value, in := SymbolTable[parent]
 	if !in {
-		log.Error{Line: lineno, Type: log.TYPE_VIOLATION}.Report()
+		log.TypeViolation(lineno)
 		value = &Value{Type: VALUE_UNDEFINED, Line: lineno}
 		return value
 	}
 
 	if value.Type != VALUE_OBJECT {
-		log.Error{Line: lineno, Type: log.TYPE_VIOLATION}.Report()
+		log.TypeViolation(lineno)
 		value = &Value{Type: VALUE_UNDEFINED, Line: lineno}
 		return value
 	}
 
 	value, in = value.Value.(map[string]*Value)[child]
 	if !in {
-		log.Error{Line: lineno, Type: log.VALUE, Var: parent + "." + child}.Report()
+		log.ValueError(lineno, parent + "." + child)
 		value = &Value{Type: VALUE_UNDEFINED, Line: lineno}
 		return value
 	}
@@ -98,20 +98,20 @@ func SymGetArr(parent string, index int, lineno int) *Value {
 
 	value, in := SymbolTable[parent]
 	if !in {
-		log.Error{Line: lineno, Type: log.TYPE_VIOLATION}.Report()
+		log.TypeViolation(lineno)
 		value = &Value{Type: VALUE_UNDEFINED, Line: lineno}
 		return value
 	}
 
 	if value.Type != VALUE_ARRAY {
-		log.Error{Line: lineno, Type: log.TYPE_VIOLATION}.Report()
+		log.TypeViolation(lineno)
 		value = &Value{Type: VALUE_UNDEFINED, Line: lineno}
 		return value
 	}
 
 	value, in = value.Value.(map[string]*Value)[string(index)]
 	if !in {
-		log.Error{Line: lineno, Type: log.VALUE, Var: fmt.Sprintf("%s[%d]", parent, index)}.Report()
+		log.ValueError(lineno, fmt.Sprintf("%s[%d]", parent, index))
 		value = &Value{Type: VALUE_UNDEFINED, Line: lineno}
 		return value
 	}

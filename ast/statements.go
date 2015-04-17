@@ -12,15 +12,13 @@ import (
 // This is the type of the root Node, but also the type of things like if bodies
 // ====================
 type StatementList struct {
-	List []Node
+	List []Statement
 	Line int
 }
 
 func (s StatementList) Execute() interface{} {
 	for _, child := range s.List {
 		potentialJump := child.Execute()
-		log.Stmt++
-
 		switch potentialJump.(type) {
 		case Break, Continue:
 			return potentialJump
@@ -30,5 +28,29 @@ func (s StatementList) Execute() interface{} {
 }
 
 func (s StatementList) LineNo() int {
+	return s.Line
+}
+
+// ====================
+// A single statement in a statement list
+// This is broken out into its own
+// ====================
+type Statement struct {
+	N Node
+	ErrorHasBeenReported bool
+	Line int
+}
+
+func (s Statement) Execute() interface{} {
+	v := s.N.Execute()
+	if log.ErrorToReport && !s.ErrorHasBeenReported {
+		s.ErrorHasBeenReported = true
+		log.ErrorReport.Report()
+		log.ErrorToReport = false
+	}
+	return v
+}
+
+func (s Statement) LineNo() int {
 	return s.Line
 }
