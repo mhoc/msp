@@ -12,7 +12,7 @@ import (
 // This is the type of the root Node, but also the type of things like if bodies
 // ====================
 type StatementList struct {
-	List []Statement
+	List []*Statement
 	Line int
 }
 
@@ -41,13 +41,13 @@ type Statement struct {
 	Line int
 }
 
-func (s Statement) Execute() interface{} {
+func (s *Statement) Execute() interface{} {
 	v := s.N.Execute()
 	if log.ErrorToReport && !s.ErrorHasBeenReported {
 		s.ErrorHasBeenReported = true
 		log.ErrorReport.Report()
-		log.ErrorToReport = false
 	}
+	log.ErrorToReport = false
 	return v
 }
 

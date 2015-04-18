@@ -99,7 +99,7 @@ program:
   } newlines
   | {
     log.Trace("grm", "Program: Creating new statement list")
-    $$.N = &ast.StatementList{Line: log.LineNo, List: make([]ast.Statement, 0, 0)}
+    $$.N = &ast.StatementList{Line: log.LineNo, List: make([]*ast.Statement, 0, 0)}
   }
 ;
 
@@ -109,13 +109,13 @@ program:
 line:
   recursive_line
   | if_statement {
-    $$.N = &ast.StatementList{Line: log.LineNo, List: []ast.Statement{ast.Statement{N:$1.N, Line: log.LineNo}}}
+    $$.N = &ast.StatementList{Line: log.LineNo, List: []*ast.Statement{&ast.Statement{N:$1.N, Line: log.LineNo}}}
   }
   | while_statement {
-    $$.N = &ast.StatementList{Line: log.LineNo, List: []ast.Statement{ast.Statement{N:$1.N, Line: log.LineNo}}}
+    $$.N = &ast.StatementList{Line: log.LineNo, List: []*ast.Statement{&ast.Statement{N:$1.N, Line: log.LineNo}}}
   }
   | do_while_statement {
-    $$.N = &ast.StatementList{Line: log.LineNo, List: []ast.Statement{ast.Statement{N:$1.N, Line: log.LineNo}}}
+    $$.N = &ast.StatementList{Line: log.LineNo, List: []*ast.Statement{&ast.Statement{N:$1.N, Line: log.LineNo}}}
   }
 ;
 
@@ -124,17 +124,17 @@ line:
 recursive_line:
 	statement {
     log.Trace("grm", "Line: Creating a new single statement statementlist")
-    $$.N = &ast.StatementList{Line: log.LineNo, List: []ast.Statement{ast.Statement{N:$1.N, Line: log.LineNo}}}
+    $$.N = &ast.StatementList{Line: log.LineNo, List: []*ast.Statement{&ast.Statement{N:$1.N, Line: log.LineNo}}}
   }
 	| statement SEMICOLON {
     log.Trace("grm", "Line Creating a new single statement statementlist;")
-    $$.N = &ast.StatementList{Line: log.LineNo, List: []ast.Statement{ast.Statement{N:$1.N, Line: log.LineNo}}}
+    $$.N = &ast.StatementList{Line: log.LineNo, List: []*ast.Statement{&ast.Statement{N:$1.N, Line: log.LineNo}}}
   }
 	| statement SEMICOLON recursive_line {
     // Prepend this statement to the list already created above
     // Because of the weird way the recursion is set up here, we have to prepend instead of append
     // This is the idiomatic way to prepend in go. Looks weird. It works.
-    $3.N.(*ast.StatementList).List = append([]ast.Statement{ast.Statement{N:$1.N, Line: log.LineNo}}, $3.N.(*ast.StatementList).List...)
+    $3.N.(*ast.StatementList).List = append([]*ast.Statement{&ast.Statement{N:$1.N, Line: log.LineNo}}, $3.N.(*ast.StatementList).List...)
     $$.N = $3.N
   }
 ;
@@ -184,11 +184,11 @@ assignment:
 definition:
 	VARDEF IDENTIFIER EQUAL value {
     // Create the declaration
-    decl := &ast.Declaration{Name: $2.Str}
+    decl := &ast.Declaration{Name: $2.Str, Line: log.LineNo}
     // Create the assignment
-    assign := &ast.Assignment{Name: $2.Str, Rhs: $4.N}
+    assign := &ast.Assignment{Name: $2.Str, Rhs: $4.N, Line: log.LineNo}
     // Combine them into a definition
-    def := &ast.Definition{Decl: decl, Assign: assign}
+    def := &ast.Definition{Decl: decl, Assign: assign, Line: log.LineNo}
     $$.N = def
   }
 ;
@@ -199,12 +199,12 @@ definition:
 parameter_list:
 	expression {
     // Create a new function call with a single argument
-    fc := &ast.FunctionCall{Line: log.LineNo, Args: []ast.Statement{ast.Statement{N:$1.N}}}
+    fc := &ast.FunctionCall{Line: log.LineNo, Args: []ast.Statement{ast.Statement{N:$1.N, Line: log.LineNo}}}
     $$.N = fc
   }
 	| parameter_list COMMA expression {
     // Append this expression to our list of arguments from $1
-    $1.N.(*ast.FunctionCall).Args = append($1.N.(*ast.FunctionCall).Args, ast.Statement{N:$3.N})
+    $1.N.(*ast.FunctionCall).Args = append($1.N.(*ast.FunctionCall).Args, ast.Statement{N:$3.N, Line: log.LineNo})
     $$.N = $1.N
   }
 	| {
@@ -391,7 +391,6 @@ if_statement:
     // Prepend this if statement to the list of if statements in iftail
     iff := $9.N.(*ast.If)
     iff.Branches = append([]*ast.Branch{fBranch}, iff.Branches...)
-
     $$.N = iff
   }
 
@@ -405,11 +404,11 @@ if_tail:
   }
   | ELSE LBRACE newlines program RBRACE {
     // Create the if statement with an else
-    $$.N = &ast.If{Branches: make([]*ast.Branch, 0, 0), HasElse: true, Else: $4.N.(*ast.StatementList)}
+    $$.N = &ast.If{Branches: make([]*ast.Branch, 0, 0), HasElse: true, Else: $4.N.(*ast.StatementList), Line: log.LineNo}
   }
   | {
     // Create the if statement with no else
-    $$.N = &ast.If{Branches: make([]*ast.Branch, 0, 0), HasElse: false}
+    $$.N = &ast.If{Branches: make([]*ast.Branch, 0, 0), HasElse: false, Line: log.LineNo}
   }
 ;
 

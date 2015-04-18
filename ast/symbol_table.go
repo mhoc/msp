@@ -18,31 +18,58 @@ func SymDeclare(name string) {
 	SymbolTable[name] = &Value{Type: VALUE_UNDEFINED, Written: false}
 }
 
-func SymAssignVar(name string, value *Value) {
+func SymAssignVar(name string, value *Value, lineno int) {
 	log.Tracef("tbl", "Assigning value %v to variable %s", value.Value, name)
 
 	// Check to ensure the variable is declared
 	if _, in := SymbolTable[name]; !in {
-		log.UndeclaredVariable(value.LineNo(), name)
+		log.UndeclaredVariable(lineno, name)
 	}
 
 	SymbolTable[name] = &Value{Type: value.Type, Value: value.Value, Line: value.Line, Written: true}
 }
 
-func SymAssignObj(name string, child string, value *Value) {
+func SymAssignObj(name string, child string, value *Value, lineno int) {
 	log.Tracef("tbl", "Assigning value %v to key %v on object %v", value.Value, child, name)
 
-	obj := SymGetVar(name, value.LineNo())
-	if obj.Type != VALUE_OBJECT && obj.Type != VALUE_ARRAY {
-		log.TypeViolation(value.LineNo())
+	if _, in := SymbolTable[name]; !in {
+		log.UndeclaredVariable(lineno, name)
+	}
+
+	obj := SymGetVar(name, lineno)
+	if obj.Type != VALUE_OBJECT {
+		log.TypeViolation(lineno)
 		return
 	}
+
+	if value.Type == VALUE_OBJECT || value.Type == VALUE_ARRAY {
+		log.TypeViolation(lineno)
+		return
+	}
+
 	obj.Value.(map[string]*Value)[child] = value
 }
 
-func SymAssignArr(name string, index int, value *Value) {
+func SymAssignArr(name string, index int, value *Value, lineno int) {
 	log.Tracef("tbl", "Assigning value %v to %v[%v]", value.Value, name, index)
-	SymAssignObj(name, string(index), value)
+
+	// Check if the array is in the table
+	if _, in := SymbolTable[name]; !in {
+		log.UndeclaredVariable(lineno, name)
+	}
+
+	arr := SymGetVar(name, lineno)
+	if arr.Type != VALUE_ARRAY {
+		log.TypeViolation(lineno)
+		return
+	}
+
+	if value.Type == VALUE_OBJECT || value.Type == VALUE_ARRAY {
+		log.TypeViolation(lineno)
+		return
+	}
+
+	arr.Value.(map[string]*Value)[string(index)] = value
 }
 
 func SymGetVar(name string, lineno int) *Value {
@@ -50,7 +77,7 @@ func SymGetVar(name string, lineno int) *Value {
 
 	value, in := SymbolTable[name]
 	if !in {
-		log.TypeViolation(lineno)
+		log.ValueError(lineno, name)
 		value = &Value{Written: false, Type: VALUE_UNDEFINED, Line: lineno}
 		return value
 	}
@@ -71,9 +98,13 @@ func SymGetObj(parent string, child string, lineno int) *Value {
 
 	value, in := SymbolTable[parent]
 	if !in {
-		log.TypeViolation(lineno)
+		log.ValueError(lineno, parent)
 		value = &Value{Type: VALUE_UNDEFINED, Line: lineno}
 		return value
+	}
+
+	if value.Type == VALUE_UNDEFINED {
+		log.ValueError(lineno, parent)
 	}
 
 	if value.Type != VALUE_OBJECT {
@@ -89,6 +120,7 @@ func SymGetObj(parent string, child string, lineno int) *Value {
 		return value
 	}
 
+	log.Tracef("tbl", "Value was: %v", value.Value)
 	return value
 
 }
@@ -98,9 +130,13 @@ func SymGetArr(parent string, index int, lineno int) *Value {
 
 	value, in := SymbolTable[parent]
 	if !in {
-		log.TypeViolation(lineno)
+		log.ValueError(lineno, parent)
 		value = &Value{Type: VALUE_UNDEFINED, Line: lineno}
 		return value
+	}
+
+	if value.Type == VALUE_UNDEFINED {
+		log.ValueError(lineno, parent)
 	}
 
 	if value.Type != VALUE_ARRAY {
@@ -116,6 +152,7 @@ func SymGetArr(parent string, index int, lineno int) *Value {
 		return value
 	}
 
+	log.Tracef("tbl", "Value was: %v", value.Value)
 	return value
 
 }

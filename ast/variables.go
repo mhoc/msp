@@ -85,9 +85,9 @@ func (a Assignment) Execute() interface{} {
 
 	switch a.Type {
 	case VAR_NORM:
-		SymAssignVar(a.Name, rightValue)
+		SymAssignVar(a.Name, rightValue, a.Line)
 	case VAR_OBJECT:
-		SymAssignObj(a.Name, a.ObjChild, rightValue)
+		SymAssignObj(a.Name, a.ObjChild, rightValue, a.Line)
 	case VAR_ARRAY:
 		// Check to ensure the index is an int: otherwise type error
 		index := a.Index.Execute().(*Value)
@@ -95,7 +95,7 @@ func (a Assignment) Execute() interface{} {
 			log.TypeViolation(a.Line)
 			return nil
 		}
-		SymAssignArr(a.Name, index.Value.(int), rightValue)
+		SymAssignArr(a.Name, index.Value.(int), rightValue, a.Line)
 	}
 
 	return nil
