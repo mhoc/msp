@@ -14,6 +14,7 @@ import (
 
 var LOG_TOKENS bool
 var LOG_TRACE bool
+var EXTENSIONS bool
 
 func Token(s string) {
 	if LOG_TOKENS {

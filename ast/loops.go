@@ -1,7 +1,6 @@
 package ast
 
 import (
-	"fmt"
 	"mhoc.co/msp/log"
 )
 
@@ -85,10 +84,6 @@ func (b Break) LineNo() int {
 	return b.Line
 }
 
-func (b Break) Print(p string) {
-	fmt.Println(p + "Break")
-}
-
 // Another could be a continue
 type Continue struct {
 	Line int
@@ -100,8 +95,4 @@ func (c Continue) Execute() interface{} {
 
 func (c Continue) LineNo() int {
 	return c.Line
-}
-
-func (c Continue) Print(p string) {
-	fmt.Println(p + "Continue")
 }

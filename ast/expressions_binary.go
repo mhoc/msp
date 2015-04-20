@@ -19,7 +19,7 @@ type BinaryExpression struct {
 	Line int
 }
 
-func (be BinaryExpression) Execute() interface{} {
+func (be *BinaryExpression) Execute() interface{} {
 	log.Tracef("ast", "Executing binary expression %s", be.Op)
 
 	// Execute both sides

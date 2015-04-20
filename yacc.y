@@ -5,6 +5,7 @@ package main
 
 import (
   "fmt"
+  "strconv"
   "strings"
   "mhoc.co/msp/ast"
   "mhoc.co/msp/log"
@@ -473,7 +474,7 @@ final_array_item:
 array_item:
   expression {
     // Create the field
-    f := &ast.Field{Line: log.LineNo, FieldName: string(log.ArrayIndexNo), FieldValue: $1.N}
+    f := &ast.Field{Line: log.LineNo, FieldName: strconv.Itoa(log.ArrayIndexNo), FieldValue: $1.N}
     log.ArrayIndexNo++
     $$.N = f
   }

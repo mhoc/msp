@@ -28,8 +28,27 @@ in mind.
 
 `./parser` will parse from stdin
 
-`./parser {input file}` to provide a file to parse
+`./parser [input file]` to provide a file to parse
 
 ## Cleaning
 
 `make clean`
+
+## Extensions
+
+The parser can be provided an additional flag `./parser -extensions {input file}` to enable
+the optional parser extensions. With these enabled, additional functionality is enabled
+which could cause it to fail the official test cases, but which is overall very handy
+for debugging and general usage. An outline of these additional features is provided
+below:
+
+* Enables printing of arrays and objects inside document.write() instead of throwing
+an error and printing undefined.
+
+Example: `document.write([1,2,3,4])` Prints `[1,2,3,4]`
+
+* Enables use of function `len(v) -> int`
+
+This function provides the length of both strings and arrays. Attempting to use any
+other types on it will throw a type violation and return undefined. Attempting to
+redefine this function will succeed.

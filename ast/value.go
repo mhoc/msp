@@ -4,6 +4,13 @@
 
 package ast
 
+import (
+	"fmt"
+	"sort"
+	"strconv"
+	"mhoc.co/msp/log"
+)
+
 // ===================
 // Value
 // Represents a binding between a go primitive type and a ms
@@ -52,4 +59,63 @@ func (v Value) ToBoolean() *Value {
 		nv.Type = VALUE_UNDEFINED
 	}
 	return nv
+}
+
+// Converts a value to a string
+// The result of this function can be passed directly into
+// fmt.Print() for document.write().
+// It does not handle errors, however.
+func (v Value) ToString() string {
+	switch v.Type {
+		case VALUE_UNDEFINED:
+			return "undefined"
+		case VALUE_INT:
+			return fmt.Sprintf("%v", v.Value.(int))
+		case VALUE_STRING:
+			if v.Value.(string) == "<br />" {
+				return "\n"
+			}
+			return fmt.Sprintf("%v", v.Value.(string))
+		case VALUE_BOOLEAN:
+			if v.Value.(bool) {
+				return "true"
+			} else {
+				return "false"
+			}
+		case VALUE_OBJECT:
+			if log.EXTENSIONS {
+				return v.ObjToString()
+			} else {
+				return "undefined"
+			}
+		case VALUE_ARRAY:
+			if log.EXTENSIONS {
+				return v.ArrayToString()
+			} else {
+				return "undefined"
+			}
+		default:
+			return "undefined"
+	}
+}
+
+func (v Value) ObjToString() string {
+	return "obj fill in here"
+}
+
+func (v Value) ArrayToString() string {
+	keys := []int{}
+	ar := v.Value.(map[string]*Value)
+	for key, _ := range ar {
+		keyindex, _ := strconv.Atoi(key)
+		keys = append(keys, keyindex)
+	}
+	sort.Ints(keys)
+	res := "["
+	for _, key := range keys {
+		res += ar[strconv.Itoa(key)].ToString()
+		res += ", "
+	}
+	res += "\b\b]"
+	return res
 }

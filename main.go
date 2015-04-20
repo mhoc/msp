@@ -2,8 +2,9 @@ package main
 
 import (
 	"flag"
-	"mhoc.co/msp/log"
 	"os"
+
+	"mhoc.co/msp/log"
 )
 
 func main() {
@@ -12,6 +13,7 @@ func main() {
 	// Parse debug flags
 	flag.BoolVar(&log.LOG_TOKENS, "log-tokens", false, "Enable list of parsed tokens")
 	flag.BoolVar(&log.LOG_TRACE, "log-trace", false, "Enable trace logging of debug output")
+	flag.BoolVar(&log.EXTENSIONS, "extensions", false, "Enables parser extensions for additional features. See README for a list of these.")
 	flag.Parse()
 
 	// Parse command line arguments

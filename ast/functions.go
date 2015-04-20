@@ -26,29 +26,16 @@ func (f FunctionCall) Execute() interface{} {
 	}
 	for _, arg := range f.Args {
 		argv := arg.Execute().(*Value)
+		fmt.Print(argv.ToString())
 		switch argv.Type {
-		case VALUE_UNDEFINED:
-			fmt.Printf("undefined")
-			break
-		case VALUE_INT:
-			fmt.Printf("%d", argv.Value)
-			break
-		case VALUE_STRING:
-			if argv.Value.(string) == "<br />" {
-				argv.Value = "\n"
-			}
-			fmt.Printf("%s", argv.Value)
-			break
-		case VALUE_BOOLEAN:
-			if argv.Value.(bool) {
-				fmt.Printf("true")
-			} else {
-				fmt.Printf("false")
-			}
-			break
-		default:
-			log.TypeViolation(f.Line)
-			fmt.Print("undefined")
+			case VALUE_OBJECT:
+				if !log.EXTENSIONS {
+					log.TypeViolation(f.LineNo())
+				}
+			case VALUE_ARRAY:
+				if !log.EXTENSIONS {
+					log.TypeViolation(f.LineNo())
+				}
 		}
 	}
 	return nil
