@@ -22,19 +22,42 @@ type BinaryExpression struct {
 func (be *BinaryExpression) Execute() interface{} {
 	log.Tracef("ast", "Executing binary expression %s", be.Op)
 
-	// Execute both sides
+	// Execute the left side
 	left := be.Lhs.Execute().(*Value)
-	right := be.Rhs.Execute().(*Value)
 
-	// If one side is undefined and unwritten, we report a type violation and return undefined
-	if (left.Type == VALUE_UNDEFINED && !left.Written) || (right.Type == VALUE_UNDEFINED && !right.Written) {
+	// Error check the response from the left side
+	if left.Type == VALUE_UNDEFINED && !left.Written {
+		log.TypeViolation(be.Line)
+		left.Type = VALUE_UNDEFINED
+		return left
+	}
+
+	//
+	if left.Type == VALUE_UNDEFINED {
+		left.Type = VALUE_UNDEFINED
+		return left
+	}
+
+	// Short circuit the right side
+	var right *Value
+	leftBool := left.ToBoolean()
+	if be.Op == "||" && leftBool.Value.(bool) {
+		right = &Value{Type: VALUE_BOOLEAN, Value: true, Line: left.LineNo(), Written: left.Written}
+	} else if be.Op == "&&" && !leftBool.Value.(bool) {
+		right = &Value{Type: VALUE_BOOLEAN, Value: false, Line: left.LineNo(), Written: left.Written}
+	} else {
+		right = be.Rhs.Execute().(*Value)
+	}
+
+	// Error check the right side now
+	if right.Type == VALUE_UNDEFINED && !right.Written {
 		log.TypeViolation(be.Line)
 		left.Type = VALUE_UNDEFINED
 		return left
 	}
 
 	// If one side is undefined and written, we just return undefined
-	if left.Type == VALUE_UNDEFINED || right.Type == VALUE_UNDEFINED {
+	if right.Type == VALUE_UNDEFINED {
 		left.Type = VALUE_UNDEFINED
 		return left
 	}
