@@ -32,6 +32,8 @@ uclean:
 	rm -f nexb miniscript.nn.go
 	@echo `tput smul``tput setaf 2` Cleaning GOPATH temp structure `tput sgr0`
 	rm -rf src bin
+	@echo `tput smul``tput setaf 2` Cleaning testing directories `tput sgr0`
+	rm -rf cs352-test
 
 clean: uclean
 	@echo `tput smul``tput setaf 2` Deleting parser binary `tput sgr0`
@@ -40,6 +42,6 @@ clean: uclean
 test: parser
 	@echo `tput smul``tput setaf 2` Running test cases `tput sgr0`
 	@echo
-	@cd test && go run main.go ../parser
-	@echo
+	@git clone http://github.com/mhoc/cs352-test
+	@cd cs352-test && python main.py ../parser
 	@$(MAKE) clean

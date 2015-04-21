@@ -48,7 +48,8 @@ func SymAssignObj(name string, child string, value *Value, lineno int) {
 		return
 	}
 
-	obj.Value.(map[string]*Value)[child] = value
+	obj.Value.(map[string]*Value)[child] =
+		&Value{Type: value.Type, Value: value.Value, Line: value.Line, Written: true}
 }
 
 func SymAssignArr(name string, index int, value *Value, lineno int) {
@@ -70,7 +71,8 @@ func SymAssignArr(name string, index int, value *Value, lineno int) {
 		return
 	}
 
-	arr.Value.(map[string]*Value)[strconv.Itoa(index)] = value
+	arr.Value.(map[string]*Value)[strconv.Itoa(index)] =
+		&Value{Type: value.Type, Value: value.Value, Line: value.Line, Written: true}
 }
 
 func SymGetVar(name string, lineno int) *Value {
@@ -122,7 +124,8 @@ func SymGetObj(parent string, child string, lineno int) *Value {
 	}
 
 	log.Tracef("tbl", "Value was: %v", value.ToString())
-	return value
+	nVal := &Value{Type: value.Type, Value: value.Value, Written: value.Written, Line: value.Line}
+	return nVal
 
 }
 
@@ -154,6 +157,7 @@ func SymGetArr(parent string, index int, lineno int) *Value {
 	}
 
 	log.Tracef("tbl", "Value was: %v", value.ToString())
-	return value
+	nVal := &Value{Type: value.Type, Value: value.Value, Written: value.Written, Line: value.Line}
+	return nVal
 
 }
