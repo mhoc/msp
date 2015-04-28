@@ -55,6 +55,13 @@ func (b Branch) Execute() interface{} {
 
 	// Execute the conditional node
 	cond := b.Conditional.Execute().(*Value)
+
+	// If type is unsupported we throw a type error
+	if cond.Type == VALUE_OBJECT || cond.Type == VALUE_ARRAY {
+		log.TypeViolation(b.Line)
+		return true
+	}
+
 	// Convert it to a boolean
 	cond = cond.ToBoolean()
 
