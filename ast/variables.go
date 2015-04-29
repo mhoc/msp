@@ -27,7 +27,7 @@ type Declaration struct {
 }
 
 func (d Declaration) Execute() interface{} {
-	SymDeclare(d.Name)
+	Declare(d.Name)
 	return nil
 }
 
@@ -85,9 +85,9 @@ func (a Assignment) Execute() interface{} {
 
 	switch a.Type {
 	case VAR_NORM:
-		SymAssignVar(a.Name, rightValue, a.Line)
+		AssignToVariable(a.Name, rightValue, a.Line)
 	case VAR_OBJECT:
-		SymAssignObj(a.Name, a.ObjChild, rightValue, a.Line)
+		AssignToObjectKey(a.Name, a.ObjChild, rightValue, a.Line)
 	case VAR_ARRAY:
 		// Check to ensure the index is an int: otherwise type error
 		index := a.Index.Execute().(*Value)
@@ -95,7 +95,7 @@ func (a Assignment) Execute() interface{} {
 			log.TypeViolation(a.Line)
 			return nil
 		}
-		SymAssignArr(a.Name, index.Value.(int), rightValue, a.Line)
+		AssignToArrayIndex(a.Name, index.Value.(int), rightValue, a.Line)
 	}
 
 	return nil
@@ -119,9 +119,9 @@ type Reference struct {
 func (vr Reference) Execute() interface{} {
 	switch vr.Type {
 	case VAR_NORM:
-		return SymGetVar(vr.Name, vr.LineNo())
+		return GetVariable(vr.Name, vr.LineNo())
 	case VAR_OBJECT:
-		return SymGetObj(vr.Name, vr.ObjChild, vr.LineNo())
+		return GetObjectMember(vr.Name, vr.ObjChild, vr.LineNo())
 	case VAR_ARRAY:
 		// Check to ensure the index is an int: otherwise type error
 		index := vr.Index.Execute().(*Value)
@@ -129,7 +129,7 @@ func (vr Reference) Execute() interface{} {
 			log.TypeViolation(vr.Line)
 			return &Value{Type: VALUE_UNDEFINED, Line: vr.Line}
 		}
-		return SymGetArr(vr.Name, index.Value.(int), vr.LineNo())
+		return GetArrayMember(vr.Name, index.Value.(int), vr.LineNo())
 	default:
 		panic("Bad variable reference type")
 	}
