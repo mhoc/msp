@@ -1,9 +1,6 @@
 <script type="text/JavaScript">
-var x = [0, 1]
-var count = 2
-while(count < 4) {
-  x[count] = x[count-1] + x[count-2]
-  count = count + 1
+function f() {
+	document.write("hi");
 }
-document.write(x)
+f()
 </script>

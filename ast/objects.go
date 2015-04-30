@@ -24,9 +24,9 @@ func (o Object) Execute() interface{} {
 	// then build a new map (stored in a Value) containing the evaluated values
 
 	// Build the new value
-	v := &Value{Type: VALUE_OBJECT, Value: make(map[string]*Value)}
+	v := &Value{Type: VALUE_OBJECT, Value: make(map[string]Value)}
 	for key, value := range o.Map {
-		v.Value.(map[string]*Value)[key] = value.Execute().(*Value)
+		v.Value.(map[string]Value)[key] = *value.Execute().(*Value)
 	}
 
 	return v

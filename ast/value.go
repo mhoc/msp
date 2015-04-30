@@ -16,6 +16,9 @@ import (
 // Represents a binding between a go primitive type and a ms
 // primitive type. Also represents undefined types
 // Values have types which are defined by an enum
+// We also store functions in values so they can be put in the symbol table,
+// as per the definition that function names and var names will never
+// overlap
 // ===================
 type ValueType int
 
@@ -23,9 +26,10 @@ const (
 	VALUE_UNDEFINED ValueType = iota // Disregard value of Value
 	VALUE_INT       ValueType = iota // type(Value) == int
 	VALUE_STRING    ValueType = iota // type(Value) == string
-	VALUE_OBJECT    ValueType = iota // type(Value) == map[string]*Value
+	VALUE_OBJECT    ValueType = iota // type(Value) == map[string]Value
 	VALUE_BOOLEAN   ValueType = iota // type(Value) == bool
-	VALUE_ARRAY     ValueType = iota // type(Value) == map[string]*Value
+	VALUE_ARRAY     ValueType = iota // type(Value) == map[string]Value
+	VALUE_FUNCTION 	ValueType = iota // type(Value) == FunctionDef
 )
 
 type Value struct {
@@ -38,7 +42,7 @@ type Value struct {
 func (v Value) Execute() interface{} {
 	// We just return the value itself, not the containing interface
 	// because we need information about its type in parent ast nodes
-	return &v
+	return v
 }
 
 func (v Value) LineNo() int {
@@ -91,6 +95,21 @@ func (v Value) ToString() string {
 		case VALUE_ARRAY:
 			if log.EXTENSIONS {
 				return v.ArrayToString()
+			} else {
+				return "undefined"
+			}
+		case VALUE_FUNCTION:
+			if log.EXTENSIONS {
+				vf := v.Value.(FunctionDef)
+				sp := vf.Name + "("
+				for i, argn := range vf.ArgNames {
+					sp += argn
+					if i != len(vf.ArgNames)-1 {
+						sp += ","
+					}
+				}
+				sp += "){}"
+				return sp
 			} else {
 				return "undefined"
 			}

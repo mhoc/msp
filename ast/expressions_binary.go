@@ -23,7 +23,7 @@ func (be *BinaryExpression) Execute() interface{} {
 	log.Tracef("ast", "Executing binary expression %s", be.Op)
 
 	// Execute the left side
-	left := be.Lhs.Execute().(*Value)
+	left := be.Lhs.Execute().(Value)
 
 	// Error check the response from the left side
 	if left.Type == VALUE_UNDEFINED && !left.Written {
@@ -39,14 +39,14 @@ func (be *BinaryExpression) Execute() interface{} {
 	}
 
 	// Short circuit the right side
-	var right *Value
+	var right Value
 	leftBool := left.ToBoolean()
 	if be.Op == "||" && leftBool.Value.(bool) {
-		right = &Value{Type: VALUE_BOOLEAN, Value: true, Line: left.LineNo(), Written: left.Written}
+		right = Value{Type: VALUE_BOOLEAN, Value: true, Line: left.LineNo(), Written: left.Written}
 	} else if be.Op == "&&" && !leftBool.Value.(bool) {
-		right = &Value{Type: VALUE_BOOLEAN, Value: false, Line: left.LineNo(), Written: left.Written}
+		right = Value{Type: VALUE_BOOLEAN, Value: false, Line: left.LineNo(), Written: left.Written}
 	} else {
-		right = be.Rhs.Execute().(*Value)
+		right = be.Rhs.Execute().(Value)
 	}
 
 	// Error check the right side now

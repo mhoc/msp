@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"os"
-
+	"mhoc.co/msp/ast"
 	"mhoc.co/msp/log"
 )
 
@@ -15,6 +15,9 @@ func main() {
 	flag.BoolVar(&log.LOG_TRACE, "log-trace", false, "Enable trace logging of debug output")
 	flag.BoolVar(&log.EXTENSIONS, "extensions", false, "Enables parser extensions for additional features. See README for a list of these.")
 	flag.Parse()
+
+	// Init builtin functions
+	ast.InitBuiltins()
 
 	// Parse command line arguments
 	var file *os.File

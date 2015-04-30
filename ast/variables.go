@@ -81,7 +81,7 @@ func (a Assignment) Execute() interface{} {
 	// The type of the right side should always be a Value
 	// This line is included just to throw an error if it ever isn't, which is
 	// mainly for debugging
-	rightValue := rhsResult.(*Value)
+	rightValue := rhsResult.(Value)
 
 	switch a.Type {
 	case VAR_NORM:
@@ -90,7 +90,7 @@ func (a Assignment) Execute() interface{} {
 		AssignToObjectKey(a.Name, a.ObjChild, rightValue, a.Line)
 	case VAR_ARRAY:
 		// Check to ensure the index is an int: otherwise type error
-		index := a.Index.Execute().(*Value)
+		index := a.Index.Execute().(Value)
 		if index.Type != VALUE_INT {
 			log.TypeViolation(a.Line)
 			return nil
@@ -124,7 +124,7 @@ func (vr Reference) Execute() interface{} {
 		return GetObjectMember(vr.Name, vr.ObjChild, vr.LineNo())
 	case VAR_ARRAY:
 		// Check to ensure the index is an int: otherwise type error
-		index := vr.Index.Execute().(*Value)
+		index := vr.Index.Execute().(Value)
 		if index.Type != VALUE_INT {
 			log.TypeViolation(vr.Line)
 			return &Value{Type: VALUE_UNDEFINED, Line: vr.Line}

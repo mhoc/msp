@@ -23,6 +23,24 @@
   return DOCUMENT_WRITE
 }
 
+/assert/ {
+  log.Token("ASSERT ")
+  log.Trace("lex", "Assert ")
+  return ASSERT
+}
+
+/function/ {
+  log.Token("FUNCTION ")
+  log.Trace("lex", "Function def ")
+  return FUNCTION
+}
+
+/return/ {
+  log.Token("RETURN ")
+  log.Trace("lex", "Return ")
+  return RETURN
+}
+
 /true/ {
   log.Token("TRUE ")
   log.Trace("lex", "True ")

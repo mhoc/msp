@@ -7,6 +7,7 @@ import (
   "fmt"
   "strconv"
   "strings"
+  "os"
   "mhoc.co/msp/ast"
   "mhoc.co/msp/log"
 )
@@ -25,6 +26,9 @@ import (
 }
 
 %token
+  ASSERT
+  RETURN
+  FUNCTION
 	SCRIPT_TAG_START
 	SCRIPT_TAG_END
 	VARDEF
@@ -118,6 +122,9 @@ line:
   | do_while_statement {
     $$.N = &ast.StatementList{Line: log.LineNo, List: []*ast.Statement{&ast.Statement{N:$1.N, Line: log.LineNo}}}
   }
+  | function_definition {
+    $$.N = &ast.StatementList{Line: log.LineNo, List: []*ast.Statement{&ast.Statement{N:$1.N, Line: log.LineNo}}}
+  }
 ;
 
 // RecursiveLine -> StatementList
@@ -146,6 +153,7 @@ statement:
 	declaration
 	| assignment
 	| definition
+  | function_call
   | BREAK
   | CONTINUE
 	| DOCUMENT_WRITE LPAREN parameter_list RPAREN {
@@ -299,6 +307,10 @@ primary_expression:
   | TRUE
   | FALSE
 	| variable_reference
+  | IDENTIFIER LPAREN parameter_list RPAREN {
+    $3.N.(*ast.FunctionCall).Name = $1.Str
+    $$.N = $3.N
+  }
 	| LPAREN expression RPAREN {
     $$.N = $2.N
   }
@@ -494,6 +506,34 @@ do_while_statement:
   }
   | DO LBRACE newlines program RBRACE newline WHILE LPAREN expression RPAREN SEMICOLON {
     $$.N = &ast.Loop{Line: $9.N.LineNo(), Conditional: $9.N, Body: $4.N.(*ast.StatementList), PreCheck: false}
+  }
+;
+
+// Function definition -> FunctionDef
+function_definition:
+  FUNCTION IDENTIFIER LPAREN parameter_list RPAREN LBRACE newlines program RBRACE {
+    // Get the list of argument names
+    // the Parameter_list thinks that each item is actually a variable reference (hacky lol)
+    varStatementList := $4.N.(*ast.FunctionCall).Args
+    varNames := []string{}
+    for _, varStatement := range varStatementList {
+      switch varStatement.N.(type) {
+        case *ast.Reference:
+          varNames = append(varNames, varStatement.N.(*ast.Reference).Name)
+        default:
+          fmt.Fprintf(os.Stderr, "syntax error\n")
+          os.Exit(1)
+      }
+    }
+    $$.N = &ast.FunctionDef{Line: $4.N.LineNo(), Name: $2.Str, ArgNames: varNames, ExecMiniscript:true, MSBody:*$8.N.(*ast.StatementList)}
+  }
+;
+
+// Function call -> FunctionCall
+function_call:
+  IDENTIFIER LPAREN parameter_list RPAREN {
+    $3.N.(*ast.FunctionCall).Name = $1.Str
+    $$.N = $3.N
   }
 ;
 

@@ -4,9 +4,35 @@
 package ast
 
 import (
-	"fmt"
 	"mhoc.co/msp/log"
 )
+
+// ====================
+// Function Definitions
+// ====================
+type FunctionDef struct {
+	Name string
+	ArbitraryArgs bool
+	ArgNames []string
+	ExecMiniscript bool
+	MSBody StatementList
+	GoBody func(FunctionCall) interface{}
+	Line int
+}
+
+func (fd FunctionDef) Execute() interface{} {
+	log.Trace("ast", "Defining function " + fd.Name)
+
+	// Store this function in the symbol table
+	value := Value{Type: VALUE_FUNCTION, Value: fd, Line: fd.Line, Written: true}
+	Declare(fd.Name)
+	AssignToVariable(fd.Name, value, fd.Line)
+	return nil
+}
+
+func (fd FunctionDef) LineNo() int {
+	return fd.Line
+}
 
 // ====================
 // Any function call
@@ -15,30 +41,46 @@ import (
 type FunctionCall struct {
 	Name string
 	Args []Statement
+	LocalScope map[string]Value
+	ReturnVal Value
 	Line int
 }
 
 func (f FunctionCall) Execute() interface{} {
-	// For now, assume all function calls are document.write
-	// this will be improved later with a function lookup table
-	if f.Name != "document.write" {
-		panic("Error: Attempting to call function that is not document.write")
+	log.Trace("ast", "Executing function " + f.Name)
+
+	// Create the local stack and return val
+	f.LocalScope = make(map[string]Value)
+	f.ReturnVal = Value{Type: VALUE_UNDEFINED, Line: f.Line}
+	// Retrieve the function definition
+	funVal := GetVariable(f.Name, f.Line)
+	if funVal.Type != VALUE_FUNCTION {
+		log.TypeViolation(f.Line)
+		return f.ReturnVal
 	}
-	for _, arg := range f.Args {
-		argv := arg.Execute().(*Value)
-		fmt.Print(argv.ToString())
-		switch argv.Type {
-			case VALUE_OBJECT:
-				if !log.EXTENSIONS {
-					log.TypeViolation(f.LineNo())
-				}
-			case VALUE_ARRAY:
-				if !log.EXTENSIONS {
-					log.TypeViolation(f.LineNo())
-				}
+	funDef := funVal.Value.(FunctionDef)
+	// Check number of arguments
+	if !funDef.ArbitraryArgs && len(f.Args) != len(funDef.ArgNames) {
+		log.TypeViolation(f.Line)
+		return f.ReturnVal
+	}
+	if funDef.ExecMiniscript {
+		// Load the arguments into the local stack
+		for i, name := range funDef.ArgNames {
+			f.LocalScope[name] = *f.Args[i].Execute().(*Value)
 		}
+		// Save the old scope and set this local as its own scope
+		oldScope := Scope
+		Scope = f.LocalScope
+		// Execute the function
+		retVal := funDef.MSBody.Execute()
+		// Restore the old scope
+		Scope = oldScope
+		return retVal
+	} else {
+		funDef.GoBody(f)
+		return nil
 	}
-	return nil
 }
 
 func (f FunctionCall) LineNo() int {
