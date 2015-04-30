@@ -156,6 +156,9 @@ statement:
   | function_call
   | BREAK
   | CONTINUE
+  | RETURN expression {
+    $$.N = &ast.Return{Line: log.LineNo, Value: $2.N}
+  }
 	| DOCUMENT_WRITE LPAREN parameter_list RPAREN {
     $3.N.(*ast.FunctionCall).Name = "document.write"
     $$.N = $3.N

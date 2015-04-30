@@ -22,6 +22,8 @@ func (s StatementList) Execute() interface{} {
 		switch potentialJump.(type) {
 		case Break, Continue:
 			return potentialJump
+		case Return:
+			return potentialJump.(Return).Value.Execute().(Value)
 		}
 	}
 	return nil

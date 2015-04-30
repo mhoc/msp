@@ -86,3 +86,20 @@ func (f FunctionCall) Execute() interface{} {
 func (f FunctionCall) LineNo() int {
 	return f.Line
 }
+
+// ========================
+// Return statement
+// ========================
+type Return struct {
+	Line int
+	Value Node
+}
+
+func (r Return) Execute() interface{} {
+	// Just directly return the return statement
+	return r
+}
+
+func (r Return) LineNo() int {
+	return r.Line
+}
