@@ -17,7 +17,7 @@ func (ue UnaryExpression) Execute() interface{} {
 	log.Tracef("ast", "Executing binary expression %s", ue.Op)
 
 	// Execute the value
-	value := ue.Value.Execute().(*Value)
+	value := ue.Value.Execute().(Value)
 
 	// Switch on the operator
 	switch ue.Op {
@@ -33,7 +33,7 @@ func (ue UnaryExpression) LineNo() int {
 	return ue.Line
 }
 
-func handleNot(v *Value, line int) *Value {
+func handleNot(v Value, line int) Value {
 
 	if v.Type == VALUE_BOOLEAN {
 		v.Value = !v.Value.(bool)

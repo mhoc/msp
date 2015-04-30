@@ -67,7 +67,7 @@ func (f FunctionCall) Execute() interface{} {
 	if funDef.ExecMiniscript {
 		// Load the arguments into the local stack
 		for i, name := range funDef.ArgNames {
-			f.LocalScope[name] = *f.Args[i].Execute().(*Value)
+			f.LocalScope[name] = f.Args[i].Execute().(Value)
 		}
 		// Save the old scope and set this local as its own scope
 		oldScope := Scope

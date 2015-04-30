@@ -50,8 +50,8 @@ func (v Value) LineNo() int {
 }
 
 // Commits type coercion on a value to convert it to an msp boolean value
-func (v Value) ToBoolean() *Value {
-	nv := &Value{Type: VALUE_BOOLEAN, Line: v.Line}
+func (v Value) ToBoolean() Value {
+	nv := Value{Type: VALUE_BOOLEAN, Line: v.Line}
 	switch v.Type {
 	case VALUE_BOOLEAN:
 		nv.Value = v.Value.(bool)

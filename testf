@@ -1,6 +1,3 @@
 <script type="text/JavaScript">
-function f() {
-	document.write("hi");
-}
-f()
+var b = a["hello"]
 </script>

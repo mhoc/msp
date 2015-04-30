@@ -26,11 +26,11 @@ type Loop struct {
 func (l Loop) Execute() interface{} {
 	log.Trace("ast", "Executing loop")
 
-	condition := &Value{Type: VALUE_BOOLEAN, Value: true}
+	condition := Value{Type: VALUE_BOOLEAN, Value: true}
 	for {
 
 		if l.PreCheck {
-			condition = l.Conditional.Execute().(*Value).ToBoolean()
+			condition = l.Conditional.Execute().(Value).ToBoolean()
 			if condition.Type != VALUE_BOOLEAN {
 				log.ConditionError(l.Line)
 				return nil
@@ -55,7 +55,7 @@ func (l Loop) Execute() interface{} {
 		}
 
 		if !l.PreCheck {
-			condition = l.Conditional.Execute().(*Value).ToBoolean()
+			condition = l.Conditional.Execute().(Value).ToBoolean()
 			if condition.Type != VALUE_BOOLEAN {
 				log.ConditionError(l.Line)
 				return nil

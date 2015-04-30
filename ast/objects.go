@@ -22,15 +22,12 @@ type Object struct {
 func (o Object) Execute() interface{} {
 	// Here, we traverse each value in the object and evaluate it
 	// then build a new map (stored in a Value) containing the evaluated values
-
 	// Build the new value
-	v := &Value{Type: VALUE_OBJECT, Value: make(map[string]Value)}
+	v := Value{Type: VALUE_OBJECT, Value: make(map[string]Value)}
 	for key, value := range o.Map {
-		v.Value.(map[string]Value)[key] = *value.Execute().(*Value)
+		v.Value.(map[string]Value)[key] = value.Execute().(Value)
 	}
-
 	return v
-
 }
 
 func (o Object) LineNo() int {

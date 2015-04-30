@@ -112,7 +112,7 @@ func (be BinaryExpression) LineNo() int {
 // in handling execution of different operators
 // =====================================================
 
-func handlePlus(left *Value, right *Value, line int) *Value {
+func handlePlus(left Value, right Value, line int) Value {
 
 	// Integers
 	if left.Type == VALUE_INT && right.Type == VALUE_INT {
@@ -139,7 +139,7 @@ func handlePlus(left *Value, right *Value, line int) *Value {
 
 }
 
-func handleMinus(left *Value, right *Value, line int) *Value {
+func handleMinus(left Value, right Value, line int) Value {
 
 	// Integers
 	if left.Type == VALUE_INT && right.Type == VALUE_INT {
@@ -153,7 +153,7 @@ func handleMinus(left *Value, right *Value, line int) *Value {
 
 }
 
-func handleMult(left *Value, right *Value, line int) *Value {
+func handleMult(left Value, right Value, line int) Value {
 
 	// Integers
 	if left.Type == VALUE_INT && right.Type == VALUE_INT {
@@ -167,7 +167,7 @@ func handleMult(left *Value, right *Value, line int) *Value {
 
 }
 
-func handleDivide(left *Value, right *Value, line int) *Value {
+func handleDivide(left Value, right Value, line int) Value {
 
 	// Integers
 	if left.Type == VALUE_INT && right.Type == VALUE_INT {
@@ -181,7 +181,7 @@ func handleDivide(left *Value, right *Value, line int) *Value {
 
 }
 
-func handleEquiv(left *Value, right *Value, line int) *Value {
+func handleEquiv(left Value, right Value, line int) Value {
 
 	// Integers
 	if left.Type == VALUE_INT && right.Type == VALUE_INT {
@@ -209,7 +209,7 @@ func handleEquiv(left *Value, right *Value, line int) *Value {
 
 }
 
-func handleNequiv(left *Value, right *Value, line int) *Value {
+func handleNequiv(left Value, right Value, line int) Value {
 
 	// Integers
 	if left.Type == VALUE_INT && right.Type == VALUE_INT {
@@ -237,7 +237,7 @@ func handleNequiv(left *Value, right *Value, line int) *Value {
 
 }
 
-func handleAnd(left *Value, right *Value, line int) *Value {
+func handleAnd(left Value, right Value, line int) Value {
 
 	// Convert the type of the left and right side if they arent boolean
 	if left.Type == VALUE_INT {
@@ -269,7 +269,7 @@ func handleAnd(left *Value, right *Value, line int) *Value {
 
 }
 
-func handleOr(left *Value, right *Value, line int) *Value {
+func handleOr(left Value, right Value, line int) Value {
 
 	// Convert the type of the left and right side if they arent boolean
 	if left.Type == VALUE_INT {
@@ -301,7 +301,7 @@ func handleOr(left *Value, right *Value, line int) *Value {
 
 }
 
-func handleGt(left *Value, right *Value, line int) *Value {
+func handleGt(left Value, right Value, line int) Value {
 
 	// Integers
 	if left.Type == VALUE_INT && right.Type == VALUE_INT {
@@ -316,7 +316,7 @@ func handleGt(left *Value, right *Value, line int) *Value {
 
 }
 
-func handleLt(left *Value, right *Value, line int) *Value {
+func handleLt(left Value, right Value, line int) Value {
 
 	// Integers
 	if left.Type == VALUE_INT && right.Type == VALUE_INT {
@@ -331,7 +331,7 @@ func handleLt(left *Value, right *Value, line int) *Value {
 
 }
 
-func handleGte(left *Value, right *Value, line int) *Value {
+func handleGte(left Value, right Value, line int) Value {
 
 	// Integers
 	if left.Type == VALUE_INT && right.Type == VALUE_INT {
@@ -346,7 +346,7 @@ func handleGte(left *Value, right *Value, line int) *Value {
 
 }
 
-func handleLte(left *Value, right *Value, line int) *Value {
+func handleLte(left Value, right Value, line int) Value {
 
 	// Integers
 	if left.Type == VALUE_INT && right.Type == VALUE_INT {

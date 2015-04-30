@@ -127,7 +127,7 @@ func (vr Reference) Execute() interface{} {
 		index := vr.Index.Execute().(Value)
 		if index.Type != VALUE_INT {
 			log.TypeViolation(vr.Line)
-			return &Value{Type: VALUE_UNDEFINED, Line: vr.Line}
+			return Value{Type: VALUE_UNDEFINED, Line: vr.Line}
 		}
 		return GetArrayMember(vr.Name, index.Value.(int), vr.LineNo())
 	default:

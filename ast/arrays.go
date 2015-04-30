@@ -11,15 +11,12 @@ type Array struct {
 }
 
 func (a Array) Execute() interface{} {
-
 	// Build the new value
-	v := &Value{Type: VALUE_ARRAY, Value: make(map[string]Value)}
+	v := Value{Type: VALUE_ARRAY, Value: make(map[string]Value)}
 	for key, value := range a.Map {
 		v.Value.(map[string]Value)[key] = value.Execute().(Value)
 	}
-
 	return v
-
 }
 
 func (a Array) LineNo() int {

@@ -24,7 +24,7 @@ func InitBuiltins() {
 
 func DocumentWrite(fc FunctionCall) interface{} {
   for _, arg := range fc.Args {
-    argv := arg.Execute().(*Value)
+    argv := arg.Execute().(Value)
     fmt.Print(argv.ToString())
     switch argv.Type {
       case VALUE_OBJECT:
