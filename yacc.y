@@ -159,6 +159,9 @@ statement:
   | RETURN expression {
     $$.N = &ast.Return{Line: log.LineNo, Value: $2.N}
   }
+  | ASSERT LPAREN expression RPAREN {
+    $$.N = &ast.Assert{Line: log.LineNo, Value: $3.N}
+  }
 	| DOCUMENT_WRITE LPAREN parameter_list RPAREN {
     $3.N.(*ast.FunctionCall).Name = "document.write"
     $$.N = $3.N

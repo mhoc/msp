@@ -20,13 +20,11 @@ func (s StatementList) Execute() interface{} {
 	for _, child := range s.List {
 		potentialJump := child.Execute()
 		switch potentialJump.(type) {
-		case Break, Continue:
+		case Break, Continue, Return:
 			return potentialJump
-		case Return:
-			return potentialJump.(Return).Value.Execute().(Value)
 		}
 	}
-	return nil
+	return Value{Line: s.Line, Type: VALUE_UNDEFINED}
 }
 
 func (s StatementList) LineNo() int {

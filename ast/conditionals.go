@@ -24,7 +24,7 @@ func (i If) Execute() interface{} {
 			if rVal.(bool) {
 				return nil
 			}
-		case Break, Continue:
+		case Break, Continue, Return:
 			return rVal
 		}
 	}
@@ -79,7 +79,7 @@ func (b Branch) Execute() interface{} {
 	// If true, execute the statement list
 	potentialJump := b.IfTrue.Execute()
 	switch potentialJump.(type) {
-	case Break, Continue:
+	case Break, Continue, Return:
 		return potentialJump
 	}
 	return true

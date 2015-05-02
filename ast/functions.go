@@ -74,9 +74,16 @@ func (f FunctionCall) Execute() interface{} {
 		Scope = f.LocalScope
 		// Execute the function
 		retVal := funDef.MSBody.Execute()
+		var nRetVal Value
+		switch retVal.(type) {
+			case Return:
+				nRetVal = retVal.(Return).Value.Execute().(Value)
+			case Value:
+				nRetVal = retVal.(Value)
+		}
 		// Restore the old scope
 		Scope = oldScope
-		return retVal
+		return nRetVal
 	} else {
 		funDef.GoBody(f)
 		return nil
